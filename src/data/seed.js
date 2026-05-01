@@ -60,6 +60,20 @@ export const SEED_ENGAGEMENTS = [
       scoring: 'Complete',
       'use-cases': 'In Progress',
     },
+    outputs: [
+      {
+        id: 'seed-1-out-1',
+        documentType: 'executive-summary',
+        filename: 'Maria_Torres_AI_Readiness_Assessment_Executive_Summary_2026-04-14.md',
+        generatedAt: '2026-04-14T11:00:00.000Z',
+      },
+      {
+        id: 'seed-1-out-2',
+        documentType: 'readiness-report',
+        filename: 'Maria_Torres_AI_Readiness_Assessment_Readiness_Report_2026-04-14.md',
+        generatedAt: '2026-04-14T11:00:00.000Z',
+      },
+    ],
     notesLog: [
       {
         id: 'seed-1-note-1',
@@ -178,8 +192,38 @@ export const SEED_ENGAGEMENTS = [
     status: 'Active',
     workflow: makeSteps('ai-pilot', 4),
     createdAt: '2026-04-10T08:30:00.000Z',
-    forms: {},
-    templateStatuses: {},
+    forms: {
+      charter: {
+        problemStatement: 'High patient no-show rate of 22% is causing revenue loss and reducing care quality at Redlands Family Clinic. The clinic needs a proactive AI-driven scheduling assistant to reduce no-shows by at least 20% within 30 days.',
+        pilotScope: 'In scope: AI scheduling assistant for automated appointment reminders and rescheduling prompts via SMS/email.\nOut of scope: new patient onboarding flows, billing integration, and production EHR changes during the pilot period.',
+        toolsUsed: 'AI scheduling assistant (pilot build), Redlands EHR test environment API',
+        teamMembers: 'Sandra Lee, COO — Executive Sponsor\nJaime Reyes, Front Desk Lead — Pilot Champion\nFrank (Barinhall) — Implementation Lead',
+        executiveSponsor: 'Sandra Lee, COO',
+        pilotStartDate: '2026-04-10',
+        pilotEndDate: '2026-05-10',
+      },
+      metrics: {
+        primaryMetric: 'Patient no-show rate',
+        primaryBaseline: '22%',
+        primaryTarget: '≤17.6% (20% reduction)',
+        secondaryMetric1: 'Front desk staff time spent on manual reminder calls (hrs/week)',
+        secondaryMetric2: 'Patient satisfaction scores (post-appointment survey, 1–5)',
+        measurementFrequency: 'Weekly',
+        qualitativeGoals: 'Front desk staff find the tool easy to use and report reduced manual reminder workload. Patients respond positively to automated reminders. The clinic IT team is confident in the data handling approach.',
+      },
+    },
+    templateStatuses: {
+      charter: 'Complete',
+      metrics: 'In Progress',
+    },
+    outputs: [
+      {
+        id: 'seed-3-out-1',
+        documentType: 'pilot-charter',
+        filename: 'Sandra_Lee_AI_Pilot_Pilot_Charter_2026-04-10.md',
+        generatedAt: '2026-04-10T09:00:00.000Z',
+      },
+    ],
     notesLog: [
       {
         id: 'seed-3-note-1',

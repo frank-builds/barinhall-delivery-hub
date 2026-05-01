@@ -11,6 +11,7 @@ import { PreviewPage } from './pages/PreviewPage.jsx';
 import { Templates } from './pages/Templates.jsx';
 import { NotFound } from './pages/NotFound.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
+import { OutputCenter } from './pages/OutputCenter.jsx';
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -32,6 +33,7 @@ function AppShell() {
           <Route path="/"                                      element={<Dashboard />} />
           <Route path="/engagements/new"                       element={<NewEngagement />} />
           <Route path="/engagements/:id"                       element={<EngagementDetail />} />
+          <Route path="/engagements/:id/outputs"               element={<OutputCenter />} />
           <Route path="/engagements/:id/forms/:formKey"        element={<FormPage />} />
           <Route path="/engagements/:id/preview/:formKey"      element={<PreviewPage />} />
           <Route path="/templates"                             element={<Templates />} />

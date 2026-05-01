@@ -94,7 +94,15 @@ export function EngagementDetail() {
       {/* ── Forms & Templates (Phase 2A) ── */}
       {formDefs.length > 0 && (
         <section className="mb-2">
-          <h2 className="font-semibold text-gray-800 mb-3">Forms & Templates</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-800">Forms & Templates</h2>
+            <Link
+              to={`/engagements/${engagement.id}/outputs`}
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+            >
+              Output Center →
+            </Link>
+          </div>
           <div className="space-y-2">
             {formDefs.map(form => {
               const status = engagement.templateStatuses?.[form.key] ?? 'Not Started';

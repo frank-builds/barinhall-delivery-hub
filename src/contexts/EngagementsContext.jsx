@@ -178,6 +178,19 @@ export function EngagementsProvider({ children }) {
     }));
   }
 
+  // ── Outputs (Phase 4) ────────────────────────────────────────────────────
+
+  // Upserts an output record by documentType (replaces if same type already exists)
+  function saveOutput(engagementId, outputMeta) {
+    applyAndSave(engagementId, eng => ({
+      ...eng,
+      outputs: [
+        ...(eng.outputs ?? []).filter(o => o.documentType !== outputMeta.documentType),
+        outputMeta,
+      ],
+    }));
+  }
+
   // ── Read ─────────────────────────────────────────────────────────────────
 
   function getEngagement(id) {
@@ -198,6 +211,7 @@ export function EngagementsProvider({ children }) {
       updateDecision,
       addRisk,
       updateRisk,
+      saveOutput,
       getEngagement,
     }}>
       {children}

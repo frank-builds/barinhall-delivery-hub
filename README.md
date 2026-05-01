@@ -4,7 +4,20 @@ Internal client engagement and delivery management tool for Barinhall LLC.
 
 ---
 
-## Phase 3 Features (current)
+## Phase 4 Features (current)
+
+- **Output Center** — per-engagement page listing all document types for the service, generation status, and per-document timestamps
+- **Document generation** — composite markdown documents generated from saved form data (executive summary, full readiness report, roadmap summary, pilot charter, governance findings summary, training action plan, monthly ops review)
+- **Completion validation** — required fields are checked before generation; missing fields are listed inline with the document row
+- **Inline preview** — generated document content viewable directly in the Output Center before downloading
+- **Individual download** — each generated document downloadable as a `.md` file
+- **Zip export** — "Export Zip" button downloads a structured package: `[ClientName]_[Service]_[Date].zip` containing an `outputs/` folder and `MANIFEST.json`
+- **Output naming convention** — all files follow `[ClientName]_[Service]_[DocType]_[YYYY-MM-DD].md`; filesystem-safe (spaces→underscores, special chars stripped)
+- **Per-engagement output manifest** — lists all generated outputs with filenames and timestamps; shown in Output Center and included in zip exports
+- **Seeded sample outputs** — seed-1 (Maria Torres) has 2 pre-generated outputs; seed-3 (Sandra Lee) has charter/metrics forms added and 1 pre-generated output
+- **Output Center link** — accessible from the Forms & Templates section of every engagement detail page
+
+## Phase 3 Features
 
 - **Supabase auth** — email/password sign-in and sign-up; session persists across devices
 - **Cloud storage** — all engagement data stored in Supabase Postgres (JSONB) with Row Level Security
@@ -113,6 +126,7 @@ All data is stored in Supabase Postgres in the `engagements` table as JSONB. Eac
 | `/engagements/:id` | Engagement Detail |
 | `/engagements/:id/forms/:formKey` | Structured Form Entry |
 | `/engagements/:id/preview/:formKey` | Markdown Preview |
+| `/engagements/:id/outputs` | Output Center |
 | `/templates` | Template Library |
 
 ---
@@ -140,10 +154,14 @@ src/
   lib/
     supabase.js              — Supabase client singleton
     engagementsApi.js        — fetchEngagements / saveEngagement / deleteEngagement
+    outputGenerators.js      — document-level markdown generators (executive summary, reports, etc.)
+    outputNaming.js          — toFsSafe, makeFilename, makeFolderName
+    zipExport.js             — JSZip-based zip builder and download trigger
   contexts/
     AuthContext.jsx           — user, loading, signIn, signUp, signOut
     EngagementsContext.jsx    — shared engagement state + all CRUD, backed by Supabase
   data/
+    outputDefinitions.js     — document type configs per service (required fields, filename labels)
     services.js             — service type keys and labels
     workflows.js            — default step definitions per service
     formDefinitions.js      — structured form field definitions for all 6 services
@@ -173,6 +191,7 @@ src/
     Templates.jsx             — /templates
     NotFound.jsx              — *
     LoginPage.jsx             — /login (email/password sign-in + sign-up)
+    OutputCenter.jsx          — /engagements/:id/outputs (generate, preview, download, export)
 ```
 
 ---
@@ -185,4 +204,6 @@ src/
 - Notes, decisions, and risks are append-only and sorted by creation order (no reordering)
 - Markdown preview renders raw text, not styled HTML
 - No search or filter on Dashboard
-- No document export or download
+- ~~No document export or download~~ — resolved in Phase 4 via Output Center zip export
+- Generated output content is always regenerated from current form data; generation timestamps record when you last generated, not when forms were last saved
+- No real-time sync between tabs/devices — reload to see changes made elsewhere

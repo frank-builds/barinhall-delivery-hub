@@ -1,13 +1,14 @@
 {
   "name": "Barinhall Delivery Hub",
-  "version": "1.3.0",
-  "phase": 3,
+  "version": "1.4.0",
+  "phase": 4,
   "description": "Internal client engagement and delivery management tool for Barinhall LLC.",
   "phases": {
     "1":  "Dashboard, new engagement form, workflow checklist, template library, localStorage persistence",
     "2A": "Structured service forms, template status tracking, markdown preview generation",
     "2B": "Notes log, decision log, risk/blocker register per engagement with create and edit",
-    "3":  "Supabase auth + cloud storage; multi-device access; Netlify hosting; localStorage migration"
+    "3":  "Supabase auth + cloud storage; multi-device access; Netlify hosting; localStorage migration",
+    "4":  "Output Center; document generation; zip export; completion validation; output manifest; naming convention"
   },
   "services": [
     "AI Readiness Assessment",
