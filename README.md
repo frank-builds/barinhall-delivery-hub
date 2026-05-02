@@ -1,11 +1,37 @@
 # Barinhall Delivery Hub
 
-Internal client engagement and delivery management tool for Barinhall LLC.
+Barinhall Delivery Hub is an internal client engagement and delivery management platform built for Barinhall LLC. It is designed to support structured service delivery, cloud-backed engagement data, and exportable outputs across AI consulting workflows.
+
+This project reflects a practical product-building approach: start with a real operating problem, structure the workflow, and ship a usable internal system quickly with AI-assisted development.
 
 ---
 
-## Phase 3 Features (current)
+## Why this exists
 
+Early-stage service businesses often manage delivery through scattered notes, manual documents, inconsistent templates, and disconnected workflows. Barinhall Delivery Hub was created to bring that work into a more structured internal platform.
+
+The goal is to make engagement delivery more repeatable, easier to manage, and easier to scale over time.
+
+## Product goals
+
+- Reduce manual delivery overhead
+- Improve consistency across engagements and outputs
+- Create a reusable internal platform for service operations
+- Support future export, automation, and client-facing delivery capabilities
+
+## What this repository demonstrates
+
+- Product scoping and phased execution
+- Internal tool design for service operations
+- AI-assisted software delivery
+- Workflow design, cloud persistence, and export logic
+- A PM-led build moving from concept to shipped functionality
+
+---
+
+## Current capabilities
+
+### Phase 3 Features
 - **Supabase auth** — email/password sign-in and sign-up; session persists across devices
 - **Cloud storage** — all engagement data stored in Supabase Postgres (JSONB) with Row Level Security
 - **Multi-device access** — any device signed into the same account sees the same data in real time
@@ -13,22 +39,19 @@ Internal client engagement and delivery management tool for Barinhall LLC.
 - **Netlify deployment** — `netlify.toml` configured for SPA routing; deploy directly from repo
 - **Auto-seed** — new accounts receive the 3 sample engagements on first sign-in (once per account)
 
-## Phase 2B Features
-
+### Phase 2B Features
 - **Notes log** — per-engagement log of freeform notes with author and date; create and edit
 - **Decision log** — per-engagement log of decisions with rationale and owner; create and edit
 - **Risk/blocker register** — per-engagement register with severity (Low/Medium/High/Critical), status (Open/Monitoring/Resolved), and owner; create and edit
 - **Seeded operational records** — all 3 seed engagements include sample notes, decisions, and risks/blockers
 
-## Phase 2A Features
-
+### Phase 2A Features
 - **Structured service forms** — each service type has dedicated form groups for all key inputs
 - **Form data persistence** — form responses save to the engagement record in localStorage
 - **Template status tracking** — each form can be marked Not Started / In Progress / Complete
 - **Markdown preview** — generated markdown document from saved form data, with copy button
 
-## Phase 1 Features
-
+### Phase 1 Features
 - **Dashboard** — active engagements as cards with status badge, service, owner, start date, and workflow progress bar
 - **New Engagement Form** — 9-field form with validation
 - **Default Workflow Generation** — service type drives auto-generated workflow checklist
@@ -67,8 +90,7 @@ Internal client engagement and delivery management tool for Barinhall LLC.
 
 ```bash
 cp .env.example .env
-# Fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
-```
+
 
 ## Install & Run
 
@@ -117,12 +139,12 @@ All data is stored in Supabase Postgres in the `engagements` table as JSONB. Eac
 
 ---
 
-## Engagement Detail Sections (top to bottom)
+## Engagement Detail Sections
 
 1. Header (client name, company, status badge)
 2. Field grid (service, owner, start date, status, contact, email)
 3. Target Outcome
-4. Notes (Phase 1 plain-text field from creation form)
+4. Notes
 5. Workflow Checklist
 6. Forms & Templates
 7. Notes Log
@@ -133,56 +155,56 @@ All data is stored in Supabase Postgres in the `engagements` table as JSONB. Eac
 
 ## Project Structure
 
-```
+```text
 supabase/
-  schema.sql                 — CREATE TABLE + RLS policy (run once in Supabase SQL Editor)
+  schema.sql
 src/
   lib/
-    supabase.js              — Supabase client singleton
-    engagementsApi.js        — fetchEngagements / saveEngagement / deleteEngagement
+    supabase.js
+    engagementsApi.js
   contexts/
-    AuthContext.jsx           — user, loading, signIn, signUp, signOut
-    EngagementsContext.jsx    — shared engagement state + all CRUD, backed by Supabase
+    AuthContext.jsx
+    EngagementsContext.jsx
   data/
-    services.js             — service type keys and labels
-    workflows.js            — default step definitions per service
-    formDefinitions.js      — structured form field definitions for all 6 services
-    templateMappings.js     — markdown generators per form key
-    seed.js                 — 3 sample engagements with forms, notes, decisions, risks
+    services.js
+    workflows.js
+    formDefinitions.js
+    templateMappings.js
+    seed.js
   hooks/
-    useLocalStorage.js        — generic localStorage read/write hook
-    useEngagements.js         — all CRUD operations for engagements and sub-records
+    useLocalStorage.js
+    useEngagements.js
   components/
-    Layout.jsx                — page wrapper with nav
-    NavBar.jsx                — top navigation
-    EngagementCard.jsx        — dashboard card
-    StatusBadge.jsx           — engagement status pill
-    TemplateBadge.jsx         — form/template status pill
-    WorkflowChecklist.jsx     — interactive step checklist
-    ServiceWorkflowCard.jsx   — read-only template card
-    FormFieldInput.jsx        — renders text / textarea / select form fields
-    NotesLog.jsx              — notes log section with inline create/edit
-    DecisionsLog.jsx          — decisions log section with inline create/edit
-    RisksLog.jsx              — risks/blockers register with inline create/edit
+    Layout.jsx
+    NavBar.jsx
+    EngagementCard.jsx
+    StatusBadge.jsx
+    TemplateBadge.jsx
+    WorkflowChecklist.jsx
+    ServiceWorkflowCard.jsx
+    FormFieldInput.jsx
+    NotesLog.jsx
+    DecisionsLog.jsx
+    RisksLog.jsx
   pages/
-    Dashboard.jsx             — /
-    NewEngagement.jsx         — /engagements/new
-    EngagementDetail.jsx      — /engagements/:id
-    FormPage.jsx              — /engagements/:id/forms/:formKey
-    PreviewPage.jsx           — /engagements/:id/preview/:formKey
-    Templates.jsx             — /templates
-    NotFound.jsx              — *
-    LoginPage.jsx             — /login (email/password sign-in + sign-up)
+    Dashboard.jsx
+    NewEngagement.jsx
+    EngagementDetail.jsx
+    FormPage.jsx
+    PreviewPage.jsx
+    Templates.jsx
+    NotFound.jsx
+    LoginPage.jsx
 ```
 
 ---
 
 ## Known Limitations
 
-- No delete for notes, decisions, or risks (out of scope per Phase 2B spec)
+- No delete for notes, decisions, or risks
 - No edit of top-level engagement fields after creation
 - Navigating away from an unsaved structured form loses in-progress changes
-- Notes, decisions, and risks are append-only and sorted by creation order (no reordering)
+- Notes, decisions, and risks are append-only and sorted by creation order
 - Markdown preview renders raw text, not styled HTML
 - No search or filter on Dashboard
-- No document export or download
+- No branded document export yet
