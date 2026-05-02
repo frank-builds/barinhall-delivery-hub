@@ -1,3 +1,17 @@
+## Screenshots
+
+<p align="center">
+  <img src="Dashboard Screenshot.png" alt="Barinhall Delivery Hub Dashboard" width="900">
+</p>
+
+<p align="center">
+  <img src="Engagement Screenshot.png" alt="Engagement View" width="900">
+</p>
+
+<p align="center">
+  <img src="Workflow Screenshot.png" alt="Workflow View" width="900">
+</p>
+
 # Barinhall Delivery Hub
 
 Barinhall Delivery Hub is an internal client engagement and delivery management platform built for Barinhall LLC. It is designed to support structured service delivery, cloud-backed engagement data, and exportable outputs across AI consulting workflows.
