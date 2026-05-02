@@ -1,3 +1,11 @@
+# Barinhall Delivery Hub
+
+Barinhall Delivery Hub is an internal client engagement and delivery management platform built for Barinhall LLC. It is designed to support structured service delivery, cloud-backed engagement data, and exportable outputs across AI consulting workflows.
+
+This project reflects a practical product-building approach: start with a real operating problem, structure the workflow, and ship a usable internal system quickly with AI-assisted development.
+
+---
+
 ## Screenshots
 
 <p align="center">
@@ -12,12 +20,6 @@
   <img src="Workflow Screenshot.png" alt="Workflow View" width="900">
 </p>
 
-# Barinhall Delivery Hub
-
-Barinhall Delivery Hub is an internal client engagement and delivery management platform built for Barinhall LLC. It is designed to support structured service delivery, cloud-backed engagement data, and exportable outputs across AI consulting workflows.
-
-This project reflects a practical product-building approach: start with a real operating problem, structure the workflow, and ship a usable internal system quickly with AI-assisted development.
-
 ---
 
 ## Why this exists
@@ -25,6 +27,14 @@ This project reflects a practical product-building approach: start with a real o
 Early-stage service businesses often manage delivery through scattered notes, manual documents, inconsistent templates, and disconnected workflows. Barinhall Delivery Hub was created to bring that work into a more structured internal platform.
 
 The goal is to make engagement delivery more repeatable, easier to manage, and easier to scale over time.
+
+---
+
+## Tech Stack
+
+React, Vite, Supabase, PostgreSQL (JSONB), Row Level Security (RLS), Netlify, and JSZip.
+
+---
 
 ## Product goals
 
