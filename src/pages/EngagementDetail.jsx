@@ -59,7 +59,7 @@ export function EngagementDetail() {
       </div>
 
       {/* ── Field grid ── */}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-8">
         <DetailRow label="Service"         value={service?.label ?? engagement.serviceType} />
         <DetailRow label="Owner"           value={engagement.owner} />
         <DetailRow label="Start Date"      value={engagement.startDate} />
@@ -109,7 +109,7 @@ export function EngagementDetail() {
               return (
                 <div
                   key={form.key}
-                  className="border border-gray-200 rounded-lg px-4 py-3 bg-white flex items-center justify-between gap-4"
+                  className="border border-gray-200 rounded-lg px-4 py-3 bg-white flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-sm font-medium text-gray-800 truncate">{form.label}</span>

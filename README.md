@@ -55,7 +55,16 @@ React, Vite, Supabase, PostgreSQL (JSONB), Row Level Security (RLS), Netlify, an
 
 ## Current capabilities
 
-### Phase 5 Features (current)
+### Phase 6 Features (current)
+- **Dashboard search** — real-time text search across client name, company, and owner
+- **Status filter chips** — filter by All / Draft / Active / On Hold / Completed
+- **Service filter** — dropdown filter by service type
+- **Stat bar** — per-status counts always visible at the top of the Dashboard
+- **Kanban board view** — toggle between grid and kanban; kanban groups all engagements by status in scrollable columns; preference persisted in localStorage
+- **Mobile NavBar** — hamburger menu for screens below `md` breakpoint; desktop layout unchanged
+- **Responsive engagement detail** — field grid and form action rows reflow correctly on narrow screens
+
+### Phase 5 Features
 - **Integration contracts** — JSON Schema for the engagement object + 4 webhook event type definitions (`docs/integrations/contracts/`)
 - **Sample payloads** — 4 realistic payloads drawn from seeded engagement data, matching the live app schema (`docs/integrations/sample-payloads/`)
 - **Importable n8n workflows** — 4 structurally valid n8n v1 workflow JSONs ready to import (`n8n/`): new engagement created, stale task reminder, document export ready, weekly founder summary
@@ -272,5 +281,5 @@ src/
 - Navigating away from an unsaved structured form loses in-progress changes
 - Notes, decisions, and risks are append-only and sorted by creation order
 - Markdown preview renders raw text, not styled HTML
-- No search or filter on Dashboard
+- No edit of engagement status after creation from the detail page (status changes require the kanban view is read-only; inline status edit not yet supported)
 - No branded document export yet
