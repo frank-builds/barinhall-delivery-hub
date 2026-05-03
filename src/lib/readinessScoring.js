@@ -61,6 +61,21 @@ export const USE_CASE_CRITERIA = [
   { key: 'adoptionEase', label: 'Adoption Ease'             },
 ];
 
+/**
+ * Weights for use case prioritization scoring.
+ * Must sum to 1.0. Impact and feasibility carry the most decision weight;
+ * adoption ease is the softest signal.
+ * When only a subset of criteria are answered, weights are renormalized
+ * to the answered set so partial scores remain meaningful.
+ */
+export const USE_CASE_WEIGHTS = {
+  impact:       0.30,
+  feasibility:  0.25,
+  dataReady:    0.20,
+  timeToValue:  0.15,
+  adoptionEase: 0.10,
+};
+
 // ── Score bands ───────────────────────────────────────────────────────────────
 
 export const SCORE_BANDS = [
@@ -107,11 +122,40 @@ export function computeCategoryScore(formData, subKeys) {
 }
 
 /**
- * Computes the prioritization score for use case at ucIndex (1 | 2 | 3).
+ * Computes the weighted prioritization score for use case at ucIndex (1 | 2 | 3).
+ * Weights are defined in USE_CASE_WEIGHTS. When only a subset of criteria
+ * are answered the weights are renormalized to the answered subset, so a
+ * partially filled form still shows an accurate per-answered-question average.
+ * Returns { score: string | null, answeredCount, totalCount }.
  */
 export function computeUseCaseScore(formData, ucIndex) {
-  const subKeys = USE_CASE_CRITERIA.map(c => `uc${ucIndex}_${c.key}`);
-  return computeCategoryScore(formData, subKeys);
+  const answered = [];
+  let totalWeight = 0;
+
+  for (const criterion of USE_CASE_CRITERIA) {
+    const key = `uc${ucIndex}_${criterion.key}`;
+    const score = parseScore(formData?.[key]);
+    if (score !== null) {
+      const weight = USE_CASE_WEIGHTS[criterion.key] ?? 0;
+      answered.push({ score, weight });
+      totalWeight += weight;
+    }
+  }
+
+  if (answered.length === 0) {
+    return { score: null, answeredCount: 0, totalCount: USE_CASE_CRITERIA.length };
+  }
+
+  const weightedSum = answered.reduce(
+    (sum, { score, weight }) => sum + score * (weight / totalWeight),
+    0
+  );
+
+  return {
+    score: weightedSum.toFixed(1),
+    answeredCount: answered.length,
+    totalCount: USE_CASE_CRITERIA.length,
+  };
 }
 
 /**

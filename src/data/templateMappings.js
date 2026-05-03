@@ -5,8 +5,10 @@
 import {
   SCORING_CATEGORIES,
   USE_CASE_CRITERIA,
+  USE_CASE_WEIGHTS,
   computeCategoryScore,
   computeOverallScore,
+  computeUseCaseScore,
   formatScoreDisplay,
 } from '../lib/readinessScoring.js';
 
@@ -212,15 +214,15 @@ ${v('scoringNotes')}
       const notes = v(`uc${n}_notes`);
 
       const criteriaRows = USE_CASE_CRITERIA
-        .map(c => `| ${c.label} | ${v(`uc${n}_${c.key}`)} |`)
+        .map(c => {
+          const pct = `${Math.round((USE_CASE_WEIGHTS[c.key] ?? 0) * 100)}%`;
+          return `| ${c.label} | ${pct} | ${v(`uc${n}_${c.key}`)} |`;
+        })
         .join('\n');
 
-      const { score, answeredCount, totalCount } = computeCategoryScore(
-        f,
-        USE_CASE_CRITERIA.map(c => `uc${n}_${c.key}`)
-      );
-      const scoreDisplay = score
-        ? formatScoreDisplay({ score, answeredCount, totalCount })
+      const result = computeUseCaseScore(f, n);
+      const scoreDisplay = result.score
+        ? formatScoreDisplay(result)
         : '— (no criteria answered yet)';
 
       return `## Use Case #${n}: ${name === '—' ? '(not yet named)' : name}
@@ -229,10 +231,10 @@ ${v('scoringNotes')}
 
 ${problem}
 
-### Evaluation Criteria
+### Evaluation Criteria *(weighted average)*
 
-| Criterion | Rating |
-|---|---|
+| Criterion | Weight | Rating |
+|---|---|---|
 ${criteriaRows}
 
 **Prioritization Score: ${scoreDisplay}**

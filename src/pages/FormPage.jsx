@@ -14,17 +14,28 @@ import {
 } from '../lib/readinessScoring.js';
 
 // ── Derived value computation ─────────────────────────────────────────────────
+// Returns { display: string, summary: string } so FormFieldInput can render
+// both the numeric score line and the plain-language band interpretation.
 
 function computeDerivedValue(field, formState) {
+  let result;
   if (field.categoryKey) {
     const cat = SCORING_CATEGORIES.find(c => c.key === field.categoryKey);
-    if (!cat) return '';
-    return formatScoreDisplay(computeCategoryScore(formState, cat.subKeys));
+    if (!cat) return { display: '', summary: '' };
+    result = computeCategoryScore(formState, cat.subKeys);
+  } else if (field.ucIndex != null) {
+    result = computeUseCaseScore(formState, field.ucIndex);
+  } else {
+    return { display: '', summary: '' };
   }
-  if (field.ucIndex != null) {
-    return formatScoreDisplay(computeUseCaseScore(formState, field.ucIndex));
-  }
-  return '';
+
+  if (!result.score) return { display: '', summary: '' };
+
+  const band = getScoreBand(result.score);
+  return {
+    display: formatScoreDisplay(result),
+    summary: band?.summary ?? '',
+  };
 }
 
 export function FormPage() {

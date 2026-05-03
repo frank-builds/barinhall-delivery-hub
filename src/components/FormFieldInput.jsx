@@ -19,7 +19,14 @@ export function FormFieldInput({ field, value, onChange }) {
 
   // ── Derived score — computed read-only display, no input ──────────────────
   if (field.type === 'derived') {
-    if (!value) {
+    // value is { display: string, summary: string } when answered, '' when not
+    const display = typeof value === 'object' ? value.display : value;
+    const summary = typeof value === 'object' ? value.summary : '';
+    const subtitle = field.ucIndex != null
+      ? 'weighted prioritization score'
+      : 'derived from sub-questions above';
+
+    if (!display) {
       return (
         <div className="rounded-md border border-dashed border-gray-200 px-3 py-2 text-sm text-gray-400 italic">
           Answer the sub-questions above to see the derived score
@@ -27,9 +34,14 @@ export function FormFieldInput({ field, value, onChange }) {
       );
     }
     return (
-      <div className="rounded-md bg-indigo-50 border border-indigo-200 px-3 py-2 flex items-center gap-2">
-        <span className="text-sm font-semibold text-indigo-800">{value}</span>
-        <span className="text-xs text-gray-400">· derived from sub-questions above</span>
+      <div className="rounded-md bg-indigo-50 border border-indigo-200 px-3 py-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-semibold text-indigo-800">{display}</span>
+          <span className="text-xs text-gray-400">· {subtitle}</span>
+        </div>
+        {summary && (
+          <p className="text-xs text-indigo-600 mt-1 italic">{summary}</p>
+        )}
       </div>
     );
   }

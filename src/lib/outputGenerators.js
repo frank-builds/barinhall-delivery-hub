@@ -6,7 +6,9 @@ import { generateMarkdown } from '../data/templateMappings.js';
 import {
   SCORING_CATEGORIES,
   USE_CASE_CRITERIA,
+  USE_CASE_WEIGHTS,
   computeCategoryScore,
+  computeUseCaseScore,
   computeOverallScore,
   formatScoreDisplay,
   getScoreBand,
@@ -50,11 +52,11 @@ const DOCUMENT_GENERATORS = {
       return `| ${cat.label} | ${scoreStr} |`;
     }).join('\n');
 
-    // Use case summary table
+    // Use case summary table (weighted scores)
     const ucRows = [1, 2, 3].map(n => {
-      const ucSubKeys = USE_CASE_CRITERIA.map(c => `uc${n}_${c.key}`);
-      const r = computeCategoryScore(useCases, ucSubKeys);
-      const score = r.score ? `${r.score} / 5.0` : '—';
+      const r = computeUseCaseScore(useCases, n);
+      const bandLabel = r.score ? (getScoreBand(r.score)?.label ?? '') : '';
+      const score = r.score ? `${r.score} / 5.0${bandLabel ? ` — ${bandLabel}` : ''}` : '—';
       return `| ${n} | ${vu(`uc${n}_name`)} | ${score} |`;
     }).join('\n');
 
@@ -133,21 +135,24 @@ ${vu('topRecommendation')}
 
     // Per-use-case detail sections
     const ucSections = [1, 2, 3].map(n => {
-      const ucSubKeys = USE_CASE_CRITERIA.map(c => `uc${n}_${c.key}`);
-      const r = computeCategoryScore(useCases, ucSubKeys);
+      const r = computeUseCaseScore(useCases, n);
       const scoreDisplay = r.score ? formatScoreDisplay(r) : '— (unanswered)';
+      const bandSummary = r.score ? (getScoreBand(r.score)?.summary ?? '') : '';
       const criteriaRows = USE_CASE_CRITERIA
-        .map(c => `| ${c.label} | ${vu(`uc${n}_${c.key}`)} |`)
+        .map(c => {
+          const pct = `${Math.round((USE_CASE_WEIGHTS[c.key] ?? 0) * 100)}%`;
+          return `| ${c.label} | ${pct} | ${vu(`uc${n}_${c.key}`)} |`;
+        })
         .join('\n');
       return `#### Use Case #${n}: ${vu(`uc${n}_name`)}
 
 **Problem:** ${vu(`uc${n}_problem`)}
 
-| Criterion | Rating |
-|---|---|
+| Criterion | Weight | Rating |
+|---|---|---|
 ${criteriaRows}
 
-**Prioritization Score: ${scoreDisplay}**
+**Prioritization Score: ${scoreDisplay}**${bandSummary ? `\n\n> ${bandSummary}` : ''}
 
 **Notes:** ${vu(`uc${n}_notes`)}`;
     }).join('\n\n---\n\n');
