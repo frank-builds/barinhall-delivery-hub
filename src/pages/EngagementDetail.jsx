@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useEngagements } from '../hooks/useEngagements.js';
 import { StatusBadge } from '../components/StatusBadge.jsx';
@@ -48,12 +49,112 @@ function StatusControl({ engagement, onChange }) {
   );
 }
 
+// ── Inline service-type editor ────────────────────────────────────────────────
+function ServiceTypeEditor({ svcKeys, onSave }) {
+  const [editing,  setEditing]  = useState(false);
+  const [selected, setSelected] = useState([]);
+
+  function open() {
+    setSelected(svcKeys);
+    setEditing(true);
+  }
+
+  function toggle(key) {
+    setSelected(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  }
+
+  function handleSave() {
+    if (selected.length === 0) return;
+    onSave(selected);
+    setEditing(false);
+  }
+
+  if (!editing) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+            Service{svcKeys.length !== 1 ? 's' : ''}
+          </p>
+          <button
+            onClick={open}
+            className="text-xs text-gray-400 hover:text-indigo-600 underline leading-none"
+          >
+            Edit
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {svcKeys.length > 0
+            ? svcKeys.map(k => (
+                <span
+                  key={k}
+                  className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2.5 py-0.5"
+                >
+                  {SERVICES.find(s => s.key === k)?.label ?? k}
+                </span>
+              ))
+            : <span className="text-sm text-gray-400">—</span>
+          }
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="col-span-full">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Service(s)</p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        {SERVICES.map(s => {
+          const on = selected.includes(s.key);
+          return (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => toggle(s.key)}
+              className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                on
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'border-gray-300 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+              }`}
+            >
+              {s.label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={selected.length === 0}
+          className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-md hover:bg-indigo-700 disabled:opacity-40 transition-colors"
+        >
+          Save
+        </button>
+        <button
+          type="button"
+          onClick={() => setEditing(false)}
+          className="text-xs text-gray-500 hover:text-gray-700 underline"
+        >
+          Cancel
+        </button>
+        {selected.length === 0 && (
+          <span className="text-xs text-red-500">Select at least one</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function EngagementDetail() {
   const { id } = useParams();
   const {
     getEngagement,
     updateWorkflowStep,
     updateTemplateStatus,
+    updateEngagementFields,
     setStatusOverride,
     addNote, updateNote,
     addDecision, updateDecision,
@@ -91,24 +192,10 @@ export function EngagementDetail() {
 
       {/* ── Field grid ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-8">
-        <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
-            Service{svcKeys.length !== 1 ? 's' : ''}
-          </p>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            {svcKeys.length > 0
-              ? svcKeys.map(k => (
-                  <span
-                    key={k}
-                    className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2.5 py-0.5"
-                  >
-                    {SERVICES.find(s => s.key === k)?.label ?? k}
-                  </span>
-                ))
-              : <span className="text-sm text-gray-400">—</span>
-            }
-          </div>
-        </div>
+        <ServiceTypeEditor
+          svcKeys={svcKeys}
+          onSave={newKeys => updateEngagementFields(engagement.id, { serviceTypes: newKeys })}
+        />
         <DetailRow label="Owner"           value={engagement.owner} />
         <DetailRow label="Start Date"      value={engagement.startDate} />
         <StatusControl

@@ -181,6 +181,12 @@ export function EngagementsProvider({ children }) {
     }));
   }
 
+  // ── Engagement field updates ─────────────────────────────────────────────
+
+  function updateEngagementFields(engagementId, fields) {
+    applyAndSave(engagementId, eng => ({ ...eng, ...fields }));
+  }
+
   // ── Status override (Phase 6) ────────────────────────────────────────────
 
   // override: 'Draft' | 'Active' | 'On Hold' | 'Completed' | null (null = Auto)
@@ -226,6 +232,7 @@ export function EngagementsProvider({ children }) {
       updateRisk,
       saveOutput,
       setStatusOverride,
+      updateEngagementFields,
       getEngagement,
     }}>
       {children}
