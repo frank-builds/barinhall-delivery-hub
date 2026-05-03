@@ -178,6 +178,16 @@ export function EngagementsProvider({ children }) {
     }));
   }
 
+  // ── Status override (Phase 6) ────────────────────────────────────────────
+
+  // override: 'Draft' | 'Active' | 'On Hold' | 'Completed' | null (null = Auto)
+  function setStatusOverride(engagementId, override) {
+    applyAndSave(engagementId, eng => ({
+      ...eng,
+      statusOverride: override ?? null,
+    }));
+  }
+
   // ── Outputs (Phase 4) ────────────────────────────────────────────────────
 
   // Upserts an output record by documentType (replaces if same type already exists)
@@ -212,6 +222,7 @@ export function EngagementsProvider({ children }) {
       addRisk,
       updateRisk,
       saveOutput,
+      setStatusOverride,
       getEngagement,
     }}>
       {children}

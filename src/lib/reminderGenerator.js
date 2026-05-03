@@ -3,6 +3,8 @@
 // or null if no reminder is needed.
 // Used directly by the app and referenced as logic in n8n workflow code nodes.
 
+import { effectiveStatus } from './statusUtils.js';
+
 const STALE_DAYS = 7;
 
 function daysSince(isoString) {
@@ -35,7 +37,7 @@ export function generateStaleEngagementReminder(engagement) {
     company:         engagement.company,
     serviceType:     engagement.serviceType,
     owner:           engagement.owner,
-    status:          engagement.status,
+    status:          effectiveStatus(engagement),
     daysSinceActivity:             days === Infinity ? null : days,
     lastActivityDate:              last ?? null,
     incompleteWorkflowSteps:       incompleteSteps,
@@ -106,7 +108,7 @@ export function generateMissingFormsReminder(engagement, formDefs) {
 export function generateAllReminders(engagement, formDefs = []) {
   const reminders = [];
 
-  if (engagement.status === 'Active') {
+  if (effectiveStatus(engagement) === 'Active') {
     const stale = generateStaleEngagementReminder(engagement);
     if (stale) reminders.push(stale);
 

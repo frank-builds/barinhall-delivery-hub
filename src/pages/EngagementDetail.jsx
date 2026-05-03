@@ -8,6 +8,7 @@ import { DecisionsLog } from '../components/DecisionsLog.jsx';
 import { RisksLog } from '../components/RisksLog.jsx';
 import { SERVICES } from '../data/services.js';
 import { getFormDefs, TEMPLATE_STATUSES } from '../data/formDefinitions.js';
+import { computeStatus, effectiveStatus } from '../lib/statusUtils.js';
 
 function DetailRow({ label, value }) {
   return (
@@ -18,12 +19,42 @@ function DetailRow({ label, value }) {
   );
 }
 
+const STATUS_OPTIONS = ['Draft', 'Active', 'On Hold', 'Completed'];
+
+function StatusControl({ engagement, onChange }) {
+  const isAuto    = engagement.statusOverride == null;
+  const computed  = computeStatus(engagement.workflow);
+  const selectVal = isAuto ? 'auto' : engagement.statusOverride;
+
+  return (
+    <div>
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Status</p>
+      <div className="flex items-center gap-2 flex-wrap">
+        <select
+          value={selectVal}
+          onChange={e => onChange(e.target.value === 'auto' ? null : e.target.value)}
+          className="text-sm border border-gray-200 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        >
+          <option value="auto">Auto</option>
+          {STATUS_OPTIONS.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        {isAuto && (
+          <span className="text-xs text-gray-400">→ {computed}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function EngagementDetail() {
   const { id } = useParams();
   const {
     getEngagement,
     updateWorkflowStep,
     updateTemplateStatus,
+    setStatusOverride,
     addNote, updateNote,
     addDecision, updateDecision,
     addRisk, updateRisk,
@@ -55,7 +86,7 @@ export function EngagementDetail() {
           <h1 className="text-2xl font-bold text-gray-900">{engagement.clientName}</h1>
           <p className="text-gray-500">{engagement.company}</p>
         </div>
-        <StatusBadge status={engagement.status} />
+        <StatusBadge status={effectiveStatus(engagement)} />
       </div>
 
       {/* ── Field grid ── */}
@@ -63,7 +94,10 @@ export function EngagementDetail() {
         <DetailRow label="Service"         value={service?.label ?? engagement.serviceType} />
         <DetailRow label="Owner"           value={engagement.owner} />
         <DetailRow label="Start Date"      value={engagement.startDate} />
-        <DetailRow label="Status"          value={engagement.status} />
+        <StatusControl
+          engagement={engagement}
+          onChange={override => setStatusOverride(engagement.id, override)}
+        />
         <DetailRow label="Primary Contact" value={engagement.primaryContact} />
         <DetailRow label="Email"           value={engagement.email} />
       </div>

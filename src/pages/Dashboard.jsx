@@ -6,6 +6,7 @@ import { saveEngagement } from '../lib/engagementsApi.js';
 import { EngagementCard } from '../components/EngagementCard.jsx';
 import { KanbanBoard } from '../components/KanbanBoard.jsx';
 import { SERVICES } from '../data/services.js';
+import { effectiveStatus } from '../lib/statusUtils.js';
 
 const LOCAL_KEY      = 'barinhall_engagements';
 const VIEW_KEY       = 'barinhall_dashboard_view';
@@ -15,7 +16,7 @@ const ALL_STATUSES   = ['Draft', 'Active', 'On Hold', 'Completed'];
 function StatBar({ engagements }) {
   const counts = ALL_STATUSES.map(s => ({
     label: s,
-    count: engagements.filter(e => e.status === s).length,
+    count: engagements.filter(e => effectiveStatus(e) === s).length,
   }));
   return (
     <div className="flex flex-wrap gap-3 mb-5">
@@ -115,8 +116,8 @@ export function Dashboard() {
     return engagements.filter(e => {
       const matchesQuery = !q || [e.clientName, e.company, e.owner]
         .some(f => f?.toLowerCase().includes(q));
-      const matchesStatus  = statusFilter  === 'All' || e.status      === statusFilter;
-      const matchesService = serviceFilter === 'All' || e.serviceType === serviceFilter;
+      const matchesStatus  = statusFilter  === 'All' || effectiveStatus(e) === statusFilter;
+      const matchesService = serviceFilter === 'All' || e.serviceType  === serviceFilter;
       return matchesQuery && matchesStatus && matchesService;
     });
   }, [engagements, query, statusFilter, serviceFilter]);

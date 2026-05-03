@@ -2,6 +2,8 @@
 // Pure function — takes the engagements array and returns a markdown string.
 // Used by DigestPage.jsx and referenced as logic in the n8n weekly-founder-summary workflow.
 
+import { effectiveStatus } from './statusUtils.js';
+
 const STALE_DAYS  = 7;
 const RECENT_DAYS = 7;
 
@@ -33,10 +35,10 @@ function lastActivityDate(engagement) {
 }
 
 export function generateWeeklyDigest(engagements, asOf = new Date().toISOString()) {
-  const active    = engagements.filter(e => e.status === 'Active');
-  const draft     = engagements.filter(e => e.status === 'Draft');
-  const onHold    = engagements.filter(e => e.status === 'On Hold');
-  const completed = engagements.filter(e => e.status === 'Completed');
+  const active    = engagements.filter(e => effectiveStatus(e) === 'Active');
+  const draft     = engagements.filter(e => effectiveStatus(e) === 'Draft');
+  const onHold    = engagements.filter(e => effectiveStatus(e) === 'On Hold');
+  const completed = engagements.filter(e => effectiveStatus(e) === 'Completed');
 
   // Stale active engagements
   const staleActive = active.filter(eng => isStale(lastActivityDate(eng)));

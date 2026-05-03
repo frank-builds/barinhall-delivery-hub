@@ -1,4 +1,5 @@
 import { EngagementCard } from './EngagementCard.jsx';
+import { effectiveStatus } from '../lib/statusUtils.js';
 
 const COLUMNS = [
   { status: 'Draft',     color: 'bg-gray-100  border-gray-200',  label: 'Draft'     },
@@ -12,7 +13,7 @@ export function KanbanBoard({ engagements }) {
     <div className="overflow-x-auto pb-2">
       <div className="flex gap-4 min-w-max">
         {COLUMNS.map(col => {
-          const cards = engagements.filter(e => e.status === col.status);
+          const cards = engagements.filter(e => effectiveStatus(e) === col.status);
           return (
             <div
               key={col.status}

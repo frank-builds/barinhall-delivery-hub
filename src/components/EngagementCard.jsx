@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { StatusBadge } from './StatusBadge.jsx';
 import { SERVICES } from '../data/services.js';
+import { effectiveStatus } from '../lib/statusUtils.js';
 
 export function EngagementCard({ engagement }) {
   const service = SERVICES.find(s => s.key === engagement.serviceType);
@@ -18,7 +19,7 @@ export function EngagementCard({ engagement }) {
           <p className="font-semibold text-gray-900">{engagement.clientName}</p>
           <p className="text-sm text-gray-500">{engagement.company}</p>
         </div>
-        <StatusBadge status={engagement.status} />
+        <StatusBadge status={effectiveStatus(engagement)} />
       </div>
 
       <p className="text-sm text-indigo-600 mt-2 mb-3">{service?.label ?? engagement.serviceType}</p>
