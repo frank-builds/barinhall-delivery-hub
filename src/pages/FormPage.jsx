@@ -5,6 +5,27 @@ import { getFormDef } from '../data/formDefinitions.js';
 import { FormFieldInput } from '../components/FormFieldInput.jsx';
 import { TemplateBadge } from '../components/TemplateBadge.jsx';
 import { TEMPLATE_STATUSES } from '../data/formDefinitions.js';
+import {
+  SCORING_CATEGORIES,
+  computeCategoryScore,
+  computeUseCaseScore,
+  getScoreBand,
+  formatScoreDisplay,
+} from '../lib/readinessScoring.js';
+
+// ── Derived value computation ─────────────────────────────────────────────────
+
+function computeDerivedValue(field, formState) {
+  if (field.categoryKey) {
+    const cat = SCORING_CATEGORIES.find(c => c.key === field.categoryKey);
+    if (!cat) return '';
+    return formatScoreDisplay(computeCategoryScore(formState, cat.subKeys));
+  }
+  if (field.ucIndex != null) {
+    return formatScoreDisplay(computeUseCaseScore(formState, field.ucIndex));
+  }
+  return '';
+}
 
 export function FormPage() {
   const { id, formKey } = useParams();
@@ -18,7 +39,6 @@ export function FormPage() {
     return engagement?.forms?.[formKey] ?? {};
   });
 
-  // Keep formState in sync if engagement changes externally (e.g. navigating back and forward)
   useEffect(() => {
     setFormState(engagement?.forms?.[formKey] ?? {});
   }, [id, formKey]);
@@ -90,18 +110,50 @@ export function FormPage() {
       </div>
 
       <div className="space-y-5">
-        {formDef.fields.map(field => (
-          <div key={field.key}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {field.label}
-            </label>
-            <FormFieldInput
-              field={field}
-              value={formState[field.key] ?? ''}
-              onChange={handleFieldChange}
-            />
-          </div>
-        ))}
+        {formDef.fields.map((field, idx) => {
+
+          // Section header — no label wrapper, no input
+          if (field.type === 'section') {
+            return (
+              <FormFieldInput
+                key={`_section_${idx}`}
+                field={field}
+                value=""
+                onChange={() => {}}
+              />
+            );
+          }
+
+          // Derived score — computed value, no user input
+          if (field.type === 'derived') {
+            return (
+              <div key={`_derived_${idx}`}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {field.label}
+                </label>
+                <FormFieldInput
+                  field={field}
+                  value={computeDerivedValue(field, formState)}
+                  onChange={() => {}}
+                />
+              </div>
+            );
+          }
+
+          // Standard input field
+          return (
+            <div key={field.key}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {field.label}
+              </label>
+              <FormFieldInput
+                field={field}
+                value={formState[field.key] ?? ''}
+                onChange={handleFieldChange}
+              />
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-4 mt-8 pt-6 border-t border-gray-100">

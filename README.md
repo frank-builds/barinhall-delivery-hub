@@ -55,7 +55,16 @@ React, Vite, Supabase, PostgreSQL (JSONB), Row Level Security (RLS), Netlify, an
 
 ## Current capabilities
 
-### Phase 6 Features (current)
+### Phase 7 Features (current)
+- **7-category readiness scoring framework** — AI Readiness Assessment Scoring Worksheet restructured around Data Availability, Data Quality, Technical Infrastructure, Team Adoption Readiness, Business Process Maturity, Business Value Potential, and Risk & Governance Readiness
+- **21 sub-question fields** — each category contains 3 observable sub-questions with fully anchor-labeled 1–5 options (e.g. "1 – Mostly paper or verbal, not digitally captured" through "5 – Fully digital and consistently structured")
+- **Live derived scoring** — category and use case scores compute in real time as sub-questions are answered; displayed inline in the form as a read-only derived field with score, band label, and answered count
+- **Systematic use case prioritization** — each of 3 use cases is evaluated across 5 criteria (Business Impact Potential, Data & Process Readiness, Time to Value, Technical Feasibility, Adoption Ease) with a derived composite prioritization score
+- **Score bands** — five qualitative tiers (Strong, Good, Moderate, Low, Very Low) applied consistently across all category and use case scores
+- **Consulting-grade intake questionnaire** — expanded from 8 fields to 27 fields across 11 structured sections covering company profile, operating model, current technology, AI history, process under review, pain points, data landscape, stakeholders, constraints, budget, and desired outcomes
+- **Upgraded document outputs** — Executive Summary and Full Readiness Report generators updated to use computed category scores, overall composite readiness score, and new use case evaluation structure
+
+### Phase 6 Features
 - **Dashboard search** — real-time text search across client name, company, and owner
 - **Status filter chips** — filter by All / Draft / Active / On Hold / Completed
 - **Service filter** — dropdown filter by service type

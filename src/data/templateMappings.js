@@ -2,6 +2,39 @@
 // Each generator takes an engagement object and reads from engagement.forms?.[formKey].
 // Returns a complete markdown string. Missing values render as '—'.
 
+import {
+  SCORING_CATEGORIES,
+  USE_CASE_CRITERIA,
+  computeCategoryScore,
+  computeOverallScore,
+  formatScoreDisplay,
+} from '../lib/readinessScoring.js';
+
+// Sub-question readable labels for scoring worksheet markdown output
+const SUB_LABELS = {
+  da_capture:    'Digital Data Capture',
+  da_access:     'Data Accessibility & Retrieval',
+  da_history:    'Historical Data Depth',
+  dq_consistency:'Data Consistency',
+  dq_completeness:'Data Completeness',
+  dq_freshness:  'Data Freshness / Timeliness',
+  ti_cloud:      'Cloud & Hosting Readiness',
+  ti_api:        'API & System Integration',
+  ti_it:         'Internal IT Capacity',
+  ta_leadership: 'Leadership Sponsorship',
+  ta_staff:      'Staff Openness to Change',
+  ta_change:     'Change Management Capability',
+  pm_documented: 'Process Documentation',
+  pm_consistent: 'Process Consistency',
+  pm_measured:   'Performance Measurement',
+  bv_urgency:    'Problem Urgency',
+  bv_scale:      'Breadth of Impact',
+  bv_roi:        'ROI Clarity',
+  rg_compliance: 'Compliance & Regulatory Barriers',
+  rg_privacy:    'Data Privacy Posture',
+  rg_oversight:  'AI Oversight Capability',
+};
+
 function header(eng, title) {
   return `# ${title}
 
@@ -23,51 +56,146 @@ const GENERATORS = {
     const f = eng.forms?.intake ?? {};
     const v = k => f[k] || '—';
     return `${header(eng, 'AI Readiness Assessment – Intake Questionnaire')}
-## Client Profile
+## Company Profile
 
 | Field | Response |
 |---|---|
 | Industry | ${v('industry')} |
+| Company Stage | ${v('companyStage')} |
 | Employees | ${v('employeeCount')} |
-| AI / Automation Experience | ${v('aiExperience')} |
-| Decision-Maker | ${v('decisionMaker')} |
-| Budget Range | ${v('budget')} |
-| Desired Timeline | ${v('timeline')} |
+| Annual Revenue | ${v('annualRevenue')} |
 
-## Current Tools & Software
+## Operating Model
+
+**Primary Business Function**
+
+${v('primaryFunction')}
+
+**Team Structure**
+
+${v('teamStructure')}
+
+## Current Technology
+
+**Current Tools & Software**
 
 ${v('currentTools')}
 
-## Top Operational Pain Points
+**Technology Stack**
+
+${v('techStack')}
+
+**Integration Maturity:** ${v('integrationMaturity')}
+
+## AI & Automation History
+
+**Prior AI / Automation Experience:** ${v('aiExperience')}
+
+**Previous Initiatives**
+
+${v('previousInitiatives')}
+
+## Process Under Review
+
+| Field | Response |
+|---|---|
+| Primary Process | ${v('primaryProcess')} |
+| Process Volume | ${v('processVolume')} |
+| Process Owner | ${v('processOwner')} |
+
+## Pain Points
+
+**Top Operational Pain Points**
 
 ${v('painPoints')}
+
+**Estimated Time / Cost Impact**
+
+${v('estimatedTimeImpact')}
+
+## Data & Analytics
+
+**Data Landscape**
+
+${v('dataLandscape')}
+
+**Reporting Capability:** ${v('reportingCapability')}
+
+## Stakeholders
+
+| Field | Response |
+|---|---|
+| Decision-Maker | ${v('decisionMaker')} |
+| Project Champions | ${v('projectChampions')} |
+| Potential Resistors | ${v('potentialResistors')} |
+
+## Constraints
+
+**Compliance / Regulatory Requirements**
+
+${v('complianceRequirements')}
+
+**Other Constraints**
+
+${v('constraints')}
+
+## Budget & Timeline
+
+| Field | Response |
+|---|---|
+| Budget Range | ${v('budget')} |
+| Desired Timeline | ${v('timeline')} |
+
+## Desired Outcomes
+
+**Desired Outcome**
+
+${v('desiredOutcome')}
+
+**Success Metrics**
+
+${v('successMetrics')}
 `;
   },
 
   'scoring': (eng) => {
     const f = eng.forms?.scoring ?? {};
     const v = k => f[k] || '—';
-    const scores = [
-      ['Data Availability',             v('dataAvailability')],
-      ['Data Quality',                  v('dataQuality')],
-      ['Technical Infrastructure',      v('technicalReadiness')],
-      ['Team Change Adoption',          v('teamAdoption')],
-      ['Business Process Maturity',     v('processMaturity')],
-    ];
-    const total = scores.reduce((sum, [, s]) => sum + (parseInt(s) || 0), 0);
-    const avg = scores.every(([, s]) => s !== '—')
-      ? (total / scores.length).toFixed(1)
-      : '—';
+
+    // Build per-category sections
+    const categorySections = SCORING_CATEGORIES.map(cat => {
+      const result = computeCategoryScore(f, cat.subKeys);
+      const scoreDisplay = result.score ? formatScoreDisplay(result) : '— (no answers yet)';
+      const subRows = cat.subKeys
+        .map(key => `| ${SUB_LABELS[key] ?? key} | ${v(key)} |`)
+        .join('\n');
+      return `### ${cat.label}
+
+| Sub-Question | Response |
+|---|---|
+${subRows}
+
+**Category Score: ${scoreDisplay}**`;
+    }).join('\n\n');
+
+    // Overall composite
+    const overall = computeOverallScore(f);
+    const overallDisplay = overall.score
+      ? `${formatScoreDisplay(overall)}  (${overall.scoredCategories}/${overall.totalCategories} categories scored)`
+      : '— (answer sub-questions to compute)';
 
     return `${header(eng, 'AI Readiness Assessment – Scoring Worksheet')}
-## Readiness Scores
+## Category Readiness Scores
 
-| Dimension | Score (1–5) |
-|---|---|
-${scores.map(([label, score]) => `| ${label} | ${score} |`).join('\n')}
-| **Average** | **${avg}** |
+${categorySections}
 
-## Scoring Rationale & Observations
+---
+
+## Overall Composite Readiness Score
+
+**${overallDisplay}**
+
+## Analyst Notes & Observations
 
 ${v('scoringNotes')}
 `;
@@ -76,16 +204,48 @@ ${v('scoringNotes')}
   'use-cases': (eng) => {
     const f = eng.forms?.['use-cases'] ?? {};
     const v = k => f[k] || '—';
+
+    // Build per-use-case sections
+    const ucSections = [1, 2, 3].map(n => {
+      const name = v(`uc${n}_name`);
+      const problem = v(`uc${n}_problem`);
+      const notes = v(`uc${n}_notes`);
+
+      const criteriaRows = USE_CASE_CRITERIA
+        .map(c => `| ${c.label} | ${v(`uc${n}_${c.key}`)} |`)
+        .join('\n');
+
+      const { score, answeredCount, totalCount } = computeCategoryScore(
+        f,
+        USE_CASE_CRITERIA.map(c => `uc${n}_${c.key}`)
+      );
+      const scoreDisplay = score
+        ? formatScoreDisplay({ score, answeredCount, totalCount })
+        : '— (no criteria answered yet)';
+
+      return `## Use Case #${n}: ${name === '—' ? '(not yet named)' : name}
+
+**Problem Statement**
+
+${problem}
+
+### Evaluation Criteria
+
+| Criterion | Rating |
+|---|---|
+${criteriaRows}
+
+**Prioritization Score: ${scoreDisplay}**
+
+**Analyst Notes:** ${notes}`;
+    }).join('\n\n---\n\n');
+
     return `${header(eng, 'AI Readiness Assessment – Use Case Prioritization')}
-## Use Case Matrix
+${ucSections}
 
-| # | Use Case | Impact | Effort |
-|---|---|---|---|
-| 1 | ${v('useCase1')} | ${v('useCase1Impact')} | ${v('useCase1Effort')} |
-| 2 | ${v('useCase2')} | ${v('useCase2Impact')} | ${v('useCase2Effort')} |
-| 3 | ${v('useCase3')} | ${v('useCase3Impact')} | ${v('useCase3Effort')} |
+---
 
-## Top Recommendation
+## Overall Recommendation
 
 ${v('topRecommendation')}
 `;

@@ -3,6 +3,14 @@
 // Delegates to existing form-key generators where appropriate.
 
 import { generateMarkdown } from '../data/templateMappings.js';
+import {
+  SCORING_CATEGORIES,
+  USE_CASE_CRITERIA,
+  computeCategoryScore,
+  computeOverallScore,
+  formatScoreDisplay,
+  getScoreBand,
+} from './readinessScoring.js';
 
 function header(eng, title) {
   return `# ${title}
@@ -28,17 +36,27 @@ const DOCUMENT_GENERATORS = {
     const vs = k => scoring[k]  || '—';
     const vu = k => useCases[k] || '—';
 
-    const scoreDims = [
-      ['Data Availability',             vs('dataAvailability')],
-      ['Data Quality',                  vs('dataQuality')],
-      ['Technical Infrastructure',      vs('technicalReadiness')],
-      ['Team Change Adoption',          vs('teamAdoption')],
-      ['Business Process Maturity',     vs('processMaturity')],
-    ];
-    const nums = scoreDims.map(([, s]) => parseInt(s)).filter(n => !isNaN(n));
-    const avg = nums.length > 0
-      ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1)
-      : '—';
+    // Composite readiness score
+    const overall = computeOverallScore(scoring);
+    const overallDisplay = overall.score
+      ? `**${overall.score} / 5.0${getScoreBand(overall.score) ? ` — ${getScoreBand(overall.score).label}` : ''}**  (${overall.scoredCategories}/${overall.totalCategories} categories)`
+      : '— *(scoring worksheet not yet complete)*';
+
+    // Category score summary table
+    const catRows = SCORING_CATEGORIES.map(cat => {
+      const r = computeCategoryScore(scoring, cat.subKeys);
+      const bandLabel = r.score ? (getScoreBand(r.score)?.label ?? '') : '';
+      const scoreStr  = r.score ? `${r.score} / 5.0${bandLabel ? ` — ${bandLabel}` : ''}` : '—';
+      return `| ${cat.label} | ${scoreStr} |`;
+    }).join('\n');
+
+    // Use case summary table
+    const ucRows = [1, 2, 3].map(n => {
+      const ucSubKeys = USE_CASE_CRITERIA.map(c => `uc${n}_${c.key}`);
+      const r = computeCategoryScore(useCases, ucSubKeys);
+      const score = r.score ? `${r.score} / 5.0` : '—';
+      return `| ${n} | ${vu(`uc${n}_name`)} | ${score} |`;
+    }).join('\n');
 
     return `${header(eng, 'AI Readiness Assessment – Executive Summary')}
 
@@ -49,18 +67,20 @@ ${eng.company} engaged Barinhall LLC to assess its AI readiness and identify hig
 | Field | Value |
 |---|---|
 | Industry | ${vi('industry')} |
+| Company Stage | ${vi('companyStage')} |
+| Employees | ${vi('employeeCount')} |
 | Primary Decision-Maker | ${vi('decisionMaker')} |
-| Current AI / Automation Experience | ${vi('aiExperience')} |
+| Prior AI / Automation Experience | ${vi('aiExperience')} |
 | Estimated Budget | ${vi('budget')} |
 | Target Timeline | ${vi('timeline')} |
 
-## AI Readiness Score
+## Composite AI Readiness Score
 
-**Composite Readiness Score: ${avg} / 5.0**
+${overallDisplay}
 
-| Dimension | Score (1–5) |
+| Readiness Dimension | Score |
 |---|---|
-${scoreDims.map(([label, score]) => `| ${label} | ${score} |`).join('\n')}
+${catRows}
 
 ## Key Operational Pain Points
 
@@ -70,13 +90,11 @@ ${vi('painPoints')}
 
 ${vs('scoringNotes')}
 
-## Recommended Use Cases
+## Prioritized Use Cases
 
-| # | Use Case | Impact | Effort |
-|---|---|---|---|
-| 1 | ${vu('useCase1')} | ${vu('useCase1Impact')} | ${vu('useCase1Effort')} |
-| 2 | ${vu('useCase2')} | ${vu('useCase2Impact')} | ${vu('useCase2Effort')} |
-| 3 | ${vu('useCase3')} | ${vu('useCase3Impact')} | ${vu('useCase3Effort')} |
+| # | Use Case | Prioritization Score |
+|---|---|---|
+${ucRows}
 
 ## Top Recommended Next Step
 
@@ -95,17 +113,44 @@ ${vu('topRecommendation')}
     const vs = k => scoring[k]  || '—';
     const vu = k => useCases[k] || '—';
 
-    const scoreDims = [
-      ['Data Availability',         vs('dataAvailability')],
-      ['Data Quality',              vs('dataQuality')],
-      ['Technical Infrastructure',  vs('technicalReadiness')],
-      ['Team Change Adoption',      vs('teamAdoption')],
-      ['Business Process Maturity', vs('processMaturity')],
-    ];
-    const nums = scoreDims.map(([, s]) => parseInt(s)).filter(n => !isNaN(n));
-    const avg = nums.length > 0
-      ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1)
-      : '—';
+    // Composite score
+    const overall = computeOverallScore(scoring);
+    const overallDisplay = overall.score
+      ? `${overall.score} / 5.0${getScoreBand(overall.score) ? ` — ${getScoreBand(overall.score).label}` : ''}  (${overall.scoredCategories}/${overall.totalCategories} categories scored)`
+      : '— (scoring worksheet not yet complete)';
+
+    // Per-category detail sections
+    const catSections = SCORING_CATEGORIES.map(cat => {
+      const r = computeCategoryScore(scoring, cat.subKeys);
+      const scoreDisplay = r.score ? formatScoreDisplay(r) : '— (unanswered)';
+      const bandSummary = r.score ? (getScoreBand(r.score)?.summary ?? '') : '';
+      return `#### ${cat.label}
+
+*${cat.description}*
+
+**Score: ${scoreDisplay}**${bandSummary ? `\n\n> ${bandSummary}` : ''}`;
+    }).join('\n\n');
+
+    // Per-use-case detail sections
+    const ucSections = [1, 2, 3].map(n => {
+      const ucSubKeys = USE_CASE_CRITERIA.map(c => `uc${n}_${c.key}`);
+      const r = computeCategoryScore(useCases, ucSubKeys);
+      const scoreDisplay = r.score ? formatScoreDisplay(r) : '— (unanswered)';
+      const criteriaRows = USE_CASE_CRITERIA
+        .map(c => `| ${c.label} | ${vu(`uc${n}_${c.key}`)} |`)
+        .join('\n');
+      return `#### Use Case #${n}: ${vu(`uc${n}_name`)}
+
+**Problem:** ${vu(`uc${n}_problem`)}
+
+| Criterion | Rating |
+|---|---|
+${criteriaRows}
+
+**Prioritization Score: ${scoreDisplay}**
+
+**Notes:** ${vu(`uc${n}_notes`)}`;
+    }).join('\n\n---\n\n');
 
     return `${header(eng, 'AI Readiness Assessment – Full Report')}
 
@@ -114,31 +159,50 @@ ${vu('topRecommendation')}
 | Field | Response |
 |---|---|
 | Industry | ${vi('industry')} |
+| Company Stage | ${vi('companyStage')} |
 | Employees | ${vi('employeeCount')} |
+| Annual Revenue | ${vi('annualRevenue')} |
 | AI / Automation Experience | ${vi('aiExperience')} |
 | Decision-Maker | ${vi('decisionMaker')} |
+| Project Champions | ${vi('projectChampions')} |
 | Budget Range | ${vi('budget')} |
 | Desired Timeline | ${vi('timeline')} |
 
-### Current Tools & Software
+### Process Under Review
+
+**${vi('primaryProcess')}** · Volume: ${vi('processVolume')} · Owner: ${vi('processOwner')}
+
+### Current Tools & Technology
 
 ${vi('currentTools')}
 
-### Top Operational Pain Points
+**Integration Maturity:** ${vi('integrationMaturity')}
+
+### Pain Points
 
 ${vi('painPoints')}
+
+**Estimated Impact:** ${vi('estimatedTimeImpact')}
+
+### Desired Outcomes
+
+${vi('desiredOutcome')}
+
+**Success Metrics:** ${vi('successMetrics')}
 
 ---
 
 ## Part 2 — Readiness Scoring
 
-**Composite Readiness Score: ${avg} / 5.0**
+### Composite Score
 
-| Dimension | Score (1–5) |
-|---|---|
-${scoreDims.map(([label, score]) => `| ${label} | ${score} |`).join('\n')}
+**${overallDisplay}**
 
-### Scoring Rationale & Observations
+### Category Scores
+
+${catSections}
+
+### Analyst Notes & Observations
 
 ${vs('scoringNotes')}
 
@@ -146,15 +210,11 @@ ${vs('scoringNotes')}
 
 ## Part 3 — Use Case Prioritization
 
-### Use Case Matrix
+${ucSections}
 
-| # | Use Case | Impact | Effort |
-|---|---|---|---|
-| 1 | ${vu('useCase1')} | ${vu('useCase1Impact')} | ${vu('useCase1Effort')} |
-| 2 | ${vu('useCase2')} | ${vu('useCase2Impact')} | ${vu('useCase2Effort')} |
-| 3 | ${vu('useCase3')} | ${vu('useCase3Impact')} | ${vu('useCase3Effort')} |
+---
 
-### Top Recommendation
+### Overall Recommendation
 
 ${vu('topRecommendation')}
 
