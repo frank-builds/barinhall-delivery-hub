@@ -1,5 +1,6 @@
 import { EngagementCard } from './EngagementCard.jsx';
 import { effectiveStatus } from '../lib/statusUtils.js';
+import { useEngagements } from '../hooks/useEngagements.js';
 
 const COLUMNS = [
   { status: 'Draft',     color: 'bg-gray-100  border-gray-200',  label: 'Draft'     },
@@ -8,7 +9,11 @@ const COLUMNS = [
   { status: 'Completed', color: 'bg-blue-50   border-blue-200',  label: 'Completed' },
 ];
 
+const ALL_STATUSES = COLUMNS.map(c => c.status);
+
 export function KanbanBoard({ engagements }) {
+  const { setStatusOverride } = useEngagements();
+
   return (
     <div className="overflow-x-auto pb-2">
       <div className="flex gap-4 min-w-max">
@@ -28,7 +33,25 @@ export function KanbanBoard({ engagements }) {
               {/* Cards */}
               <div className="space-y-3">
                 {cards.map(e => (
-                  <EngagementCard key={e.id} engagement={e} />
+                  // Wrapper groups the card + move control without nesting inside the <Link>
+                  <div key={e.id}>
+                    <EngagementCard engagement={e} />
+                    <div className="mt-1 px-0.5">
+                      <select
+                        value=""
+                        onChange={ev => {
+                          ev.stopPropagation();
+                          setStatusOverride(e.id, ev.target.value);
+                        }}
+                        className="w-full text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-400 bg-white hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 cursor-pointer"
+                      >
+                        <option value="" disabled>Move to…</option>
+                        {ALL_STATUSES.filter(s => s !== col.status).map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 ))}
                 {cards.length === 0 && (
                   <p className="text-xs text-gray-400 text-center py-6">No engagements</p>
