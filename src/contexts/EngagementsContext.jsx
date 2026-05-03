@@ -51,11 +51,14 @@ export function EngagementsProvider({ children }) {
   // ── Engagement creation ──────────────────────────────────────────────────
 
   function addEngagement(fields) {
-    const steps = (DEFAULT_WORKFLOWS[fields.serviceType] ?? []).map(label => ({
-      id: crypto.randomUUID(),
-      label,
-      done: false,
-    }));
+    const svcKeys = fields.serviceTypes ?? (fields.serviceType ? [fields.serviceType] : []);
+    const steps = svcKeys.flatMap(svcKey =>
+      (DEFAULT_WORKFLOWS[svcKey] ?? []).map(label => ({
+        id: crypto.randomUUID(),
+        label,
+        done: false,
+      }))
+    );
 
     const engagement = {
       id: crypto.randomUUID(),

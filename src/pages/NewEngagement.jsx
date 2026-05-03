@@ -3,14 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useEngagements } from '../hooks/useEngagements.js';
 import { SERVICES } from '../data/services.js';
 
-const REQUIRED = ['clientName', 'company', 'primaryContact', 'email', 'serviceType', 'startDate', 'owner', 'targetOutcome'];
+const REQUIRED = ['clientName', 'company', 'primaryContact', 'email', 'startDate', 'owner', 'targetOutcome'];
 
 const INITIAL_FORM = {
   clientName: '',
   company: '',
   primaryContact: '',
   email: '',
-  serviceType: '',
+  serviceTypes: [],
   startDate: '',
   owner: '',
   targetOutcome: '',
@@ -31,6 +31,9 @@ export function NewEngagement() {
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       errs.email = 'Enter a valid email address';
     }
+    if (form.serviceTypes.length === 0) {
+      errs.serviceTypes = 'Select at least one service';
+    }
     return errs;
   }
 
@@ -38,6 +41,16 @@ export function NewEngagement() {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
+  }
+
+  function toggleService(key) {
+    setForm(prev => {
+      const next = prev.serviceTypes.includes(key)
+        ? prev.serviceTypes.filter(k => k !== key)
+        : [...prev.serviceTypes, key];
+      return { ...prev, serviceTypes: next };
+    });
+    if (errors.serviceTypes) setErrors(prev => ({ ...prev, serviceTypes: undefined }));
   }
 
   function handleSubmit(e) {
@@ -62,7 +75,7 @@ export function NewEngagement() {
 
   function Label({ htmlFor, text, required }) {
     return (
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={htmlFor ?? undefined} className="block text-sm font-medium text-gray-700 mb-1">
         {text}{required && <span className="text-red-500 ml-1">*</span>}
       </label>
     );
@@ -101,20 +114,27 @@ export function NewEngagement() {
         </div>
 
         <div>
-          <Label htmlFor="serviceType" text="Service Type" required />
-          <select
-            id="serviceType"
-            name="serviceType"
-            value={form.serviceType}
-            onChange={handleChange}
-            className={inputClass('serviceType')}
-          >
-            <option value="">Select a service…</option>
-            {SERVICES.map(s => (
-              <option key={s.key} value={s.key}>{s.label}</option>
-            ))}
-          </select>
-          <FieldError name="serviceType" />
+          <Label text="Service Type(s)" required />
+          <div className={`flex flex-wrap gap-2 mt-1 rounded-md p-2 border ${errors.serviceTypes ? 'border-red-400' : 'border-gray-300'}`}>
+            {SERVICES.map(s => {
+              const selected = form.serviceTypes.includes(s.key);
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => toggleService(s.key)}
+                  className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
+                    selected
+                      ? 'bg-indigo-600 border-indigo-600 text-white'
+                      : 'border-gray-300 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+          {errors.serviceTypes && <p className="text-xs text-red-500 mt-1">{errors.serviceTypes}</p>}
         </div>
 
         <div>

@@ -117,7 +117,8 @@ export function Dashboard() {
       const matchesQuery = !q || [e.clientName, e.company, e.owner]
         .some(f => f?.toLowerCase().includes(q));
       const matchesStatus  = statusFilter  === 'All' || effectiveStatus(e) === statusFilter;
-      const matchesService = serviceFilter === 'All' || e.serviceType  === serviceFilter;
+      const svcKeys = e.serviceTypes ?? (e.serviceType ? [e.serviceType] : []);
+      const matchesService = serviceFilter === 'All' || svcKeys.includes(serviceFilter);
       return matchesQuery && matchesStatus && matchesService;
     });
   }, [engagements, query, statusFilter, serviceFilter]);

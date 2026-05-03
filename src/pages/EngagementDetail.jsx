@@ -71,8 +71,8 @@ export function EngagementDetail() {
     );
   }
 
-  const service  = SERVICES.find(s => s.key === engagement.serviceType);
-  const formDefs = getFormDefs(engagement.serviceType);
+  const svcKeys  = engagement.serviceTypes ?? (engagement.serviceType ? [engagement.serviceType] : []);
+  const formDefs = svcKeys.flatMap(k => getFormDefs(k));
 
   return (
     <div className="max-w-3xl">
@@ -91,7 +91,24 @@ export function EngagementDetail() {
 
       {/* ── Field grid ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-8">
-        <DetailRow label="Service"         value={service?.label ?? engagement.serviceType} />
+        <div>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+            Service{svcKeys.length !== 1 ? 's' : ''}
+          </p>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {svcKeys.length > 0
+              ? svcKeys.map(k => (
+                  <span
+                    key={k}
+                    className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2.5 py-0.5"
+                  >
+                    {SERVICES.find(s => s.key === k)?.label ?? k}
+                  </span>
+                ))
+              : <span className="text-sm text-gray-400">—</span>
+            }
+          </div>
+        </div>
         <DetailRow label="Owner"           value={engagement.owner} />
         <DetailRow label="Start Date"      value={engagement.startDate} />
         <StatusControl

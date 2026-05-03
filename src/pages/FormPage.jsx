@@ -44,7 +44,11 @@ export function FormPage() {
   const { getEngagement, updateFormData, updateTemplateStatus } = useEngagements();
   const engagement = getEngagement(id);
 
-  const formDef = engagement ? getFormDef(engagement.serviceType, formKey) : null;
+  const formDef = engagement
+    ? (engagement.serviceTypes ?? (engagement.serviceType ? [engagement.serviceType] : []))
+        .map(k => getFormDef(k, formKey))
+        .find(Boolean) ?? null
+    : null;
 
   const [formState, setFormState] = useState(() => {
     return engagement?.forms?.[formKey] ?? {};

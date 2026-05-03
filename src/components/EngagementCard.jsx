@@ -4,7 +4,10 @@ import { SERVICES } from '../data/services.js';
 import { effectiveStatus } from '../lib/statusUtils.js';
 
 export function EngagementCard({ engagement }) {
-  const service = SERVICES.find(s => s.key === engagement.serviceType);
+  const svcKeys = engagement.serviceTypes ?? (engagement.serviceType ? [engagement.serviceType] : []);
+  const serviceLabel = svcKeys
+    .map(k => SERVICES.find(s => s.key === k)?.label ?? k)
+    .join(', ');
   const done = engagement.workflow.filter(s => s.done).length;
   const total = engagement.workflow.length;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -22,7 +25,7 @@ export function EngagementCard({ engagement }) {
         <StatusBadge status={effectiveStatus(engagement)} />
       </div>
 
-      <p className="text-sm text-indigo-600 mt-2 mb-3">{service?.label ?? engagement.serviceType}</p>
+      <p className="text-sm text-indigo-600 mt-2 mb-3">{serviceLabel || '—'}</p>
 
       <div className="flex justify-between text-xs text-gray-400 mb-3">
         <span>Owner: {engagement.owner}</span>
