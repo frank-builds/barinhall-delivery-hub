@@ -55,6 +55,23 @@ React, Vite, Supabase, PostgreSQL (JSONB), Row Level Security (RLS), Netlify, an
 
 ## Current capabilities
 
+### Phase 5 Features (current)
+- **Integration contracts** — JSON Schema for the engagement object + 4 webhook event type definitions (`docs/integrations/contracts/`)
+- **Sample payloads** — 4 realistic payloads drawn from seeded engagement data, matching the live app schema (`docs/integrations/sample-payloads/`)
+- **Importable n8n workflows** — 4 structurally valid n8n v1 workflow JSONs ready to import (`n8n/`): new engagement created, stale task reminder, document export ready, weekly founder summary
+- **Digest generator** — pure function that generates a weekly founder digest markdown from live engagement data (`src/lib/digestGenerator.js`)
+- **Reminder generator** — pure functions for stale engagement, open risk, and missing forms reminders (`src/lib/reminderGenerator.js`)
+- **Digest page** — live digest preview at `/digest` with active reminder panel, generated from current engagement data
+- **Integration guide** — full setup notes, workflow intent, credential requirements, and assumptions (`docs/integrations/README.md`)
+
+### Phase 4 Features
+- **Output Center** — per-engagement page listing document types, generation status, and timestamps
+- **Document generation** — 7 composite markdown documents from saved form data (executive summary, readiness report, roadmap summary, pilot charter, governance findings, training action plan, monthly ops review)
+- **Completion validation** — missing required fields block generation; listed inline
+- **Zip export** — structured package with `outputs/` folder and `MANIFEST.json`
+- **Output naming convention** — `ClientName_Service_DocType_YYYY-MM-DD.md`
+- **Per-engagement output manifest** — shown in Output Center and included in zip
+
 ### Phase 3 Features
 - **Supabase auth** — email/password sign-in and sign-up; session persists across devices
 - **Cloud storage** — all engagement data stored in Supabase Postgres (JSONB) with Row Level Security
@@ -159,7 +176,9 @@ All data is stored in Supabase Postgres in the `engagements` table as JSONB. Eac
 | `/engagements/:id` | Engagement Detail |
 | `/engagements/:id/forms/:formKey` | Structured Form Entry |
 | `/engagements/:id/preview/:formKey` | Markdown Preview |
+| `/engagements/:id/outputs` | Output Center |
 | `/templates` | Template Library |
+| `/digest` | Weekly Digest |
 
 ---
 
@@ -182,10 +201,31 @@ All data is stored in Supabase Postgres in the `engagements` table as JSONB. Eac
 ```text
 supabase/
   schema.sql
+docs/
+  integrations/
+    README.md                    — Integration guide (setup, workflows, assumptions)
+    contracts/
+      engagement-schema.json     — JSON Schema for the full engagement object
+      webhook-events.json        — 4 event definitions with payload shapes
+    sample-payloads/
+      new-engagement-created.json
+      stale-task-reminder.json
+      document-export-ready.json
+      weekly-founder-summary.json
+n8n/
+  new-engagement-created.json    — Importable n8n workflow
+  stale-task-reminder.json       — Importable n8n workflow
+  document-export-ready.json     — Importable n8n workflow
+  weekly-founder-summary.json    — Importable n8n workflow
 src/
   lib/
     supabase.js
     engagementsApi.js
+    outputGenerators.js          — 7 composite markdown document generators
+    outputNaming.js              — toFsSafe, makeFilename, makeFolderName helpers
+    zipExport.js                 — JSZip-based zip builder and download trigger
+    digestGenerator.js           — weekly founder digest from engagement data array
+    reminderGenerator.js         — stale / risk / missing-forms reminder generators
   contexts/
     AuthContext.jsx
     EngagementsContext.jsx
@@ -216,7 +256,9 @@ src/
     EngagementDetail.jsx
     FormPage.jsx
     PreviewPage.jsx
+    OutputCenter.jsx
     Templates.jsx
+    DigestPage.jsx
     NotFound.jsx
     LoginPage.jsx
 ```

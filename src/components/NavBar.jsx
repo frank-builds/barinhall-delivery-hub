@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 const NAV_LINKS = [
   { to: '/',          label: 'Dashboard' },
   { to: '/templates', label: 'Templates' },
+  { to: '/digest',    label: 'Digest' },
 ];
 
 export function NavBar() {

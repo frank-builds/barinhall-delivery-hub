@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://barinhall.com/schemas/engagement/v1",
+  "title": "Engagement",
+  "description": "A Barinhall Delivery Hub engagement record. Stored as a JSONB blob in Supabase (table: engagements, column: data). This schema describes the full object structure.",
+  "type": "object",
+  "required": ["id", "clientName", "company", "serviceType", "startDate", "owner", "status", "createdAt"],
+  "properties": {
+    "id":             { "type": "string", "format": "uuid", "description": "Client-generated UUID (crypto.randomUUID())" },
+    "clientName":     { "type": "string", "description": "Primary contact full name" },
+    "company":        { "type": "string", "description": "Client company name" },
+    "primaryContact": { "type": "string", "description": "Name of primary point of contact" },
+    "email":          { "type": "string", "format": "email" },
+    "serviceType": {
+      "type": "string",
+      "enum": ["ai-readiness", "ai-strategy", "ai-pilot", "ai-governance", "ai-training", "ai-ops"],
+      "description": "Service type key — drives workflow, forms, and output document types"
+    },
+    "startDate":      { "type": "string", "format": "date", "description": "YYYY-MM-DD" },
+    "owner":          { "type": "string", "description": "Barinhall team member responsible for the engagement" },
+    "targetOutcome":  { "type": "string", "description": "Stated outcome for this engagement" },
+    "notes":          { "type": "string", "description": "Free-text intake notes (Phase 1 plain-text field)" },
+    "status": {
+      "type": "string",
+      "enum": ["Draft", "Active", "On Hold", "Completed"]
+    },
+    "createdAt":      { "type": "string", "format": "date-time" },
+
+    "workflow": {
+      "type": "array",
+      "description": "Ordered checklist of service-specific workflow steps",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "done"],
+        "properties": {
+          "id":    { "type": "string" },
+          "label": { "type": "string" },
+          "done":  { "type": "boolean" }
+        }
+      }
+    },
+
+    "forms": {
+      "type": "object",
+      "description": "Saved structured form data, keyed by formKey. Each value is a flat object of field key → string value.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
+    },
+
+    "templateStatuses": {
+      "type": "object",
+      "description": "Completion status per form key",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["Not Started", "In Progress", "Complete"]
+      }
+    },
+
+    "outputs": {
+      "type": "array",
+      "description": "Generated output document records (Phase 4). Content is always regenerated from form data on demand; only metadata is stored.",
+      "items": {
+        "type": "object",
+        "required": ["id", "documentType", "filename", "generatedAt"],
+        "properties": {
+          "id":           { "type": "string", "format": "uuid" },
+          "documentType": {
+            "type": "string",
+            "enum": [
+              "executive-summary",
+              "readiness-report",
+              "roadmap-summary",
+              "pilot-charter",
+              "governance-findings-summary",
+              "training-action-plan",
+              "monthly-ops-review"
+            ]
+          },
+          "filename":     { "type": "string", "description": "Follows convention: ClientName_Service_DocType_YYYY-MM-DD.md" },
+          "generatedAt":  { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+
+    "notesLog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "date", "author", "content"],
+        "properties": {
+          "id":      { "type": "string", "format": "uuid" },
+          "date":    { "type": "string", "format": "date-time" },
+          "author":  { "type": "string" },
+          "content": { "type": "string" }
+        }
+      }
+    },
+
+    "decisionsLog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "date", "decision", "owner"],
+        "properties": {
+          "id":        { "type": "string", "format": "uuid" },
+          "date":      { "type": "string", "format": "date-time" },
+          "decision":  { "type": "string" },
+          "rationale": { "type": "string" },
+          "owner":     { "type": "string" }
+        }
+      }
+    },
+
+    "risksLog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "date", "title", "severity", "status", "owner"],
+        "properties": {
+          "id":          { "type": "string", "format": "uuid" },
+          "date":        { "type": "string", "format": "date-time" },
+          "title":       { "type": "string" },
+          "description": { "type": "string" },
+          "severity":    { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] },
+          "status":      { "type": "string", "enum": ["Open", "Monitoring", "Resolved"] },
+          "owner":       { "type": "string" }
+        }
+      }
+    }
+  }
+}

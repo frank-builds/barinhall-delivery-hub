@@ -1,0 +1,98 @@
+{
+  "name": "Barinhall — New Engagement Created",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## New Engagement Created\n\nFires when a new engagement is created in Barinhall Delivery Hub.\n\n**Setup required:**\n1. Copy the webhook URL from the Webhook node and add it to your app's `addEngagement` handler as a fire-and-forget POST.\n2. Configure Slack credentials in the Send Slack Message node (or swap for Email).\n\n**Payload schema:** See `docs/integrations/contracts/webhook-events.json` → `engagement.created`\n**Sample payload:** `docs/integrations/sample-payloads/new-engagement-created.json`",
+        "height": 260,
+        "width": 480,
+        "color": 7
+      },
+      "id": "11111111-1111-1111-1111-111111111101",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 60]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-engagement",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "11111111-1111-1111-1111-111111111102",
+      "name": "Webhook — New Engagement",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 360],
+      "webhookId": "barinhall-new-engagement"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\nconst eng = body.engagement ?? body;\n\nreturn [{\n  json: {\n    clientName:   eng.clientName,\n    company:      eng.company,\n    serviceType:  eng.serviceType,\n    owner:        eng.owner,\n    email:        eng.email,\n    startDate:    eng.startDate,\n    status:       eng.status,\n    slackMessage: `🆕 New engagement created\\n*Client:* ${eng.clientName} — ${eng.company}\\n*Service:* ${eng.serviceType}\\n*Owner:* ${eng.owner}\\n*Start date:* ${eng.startDate}`,\n    emailSubject: `New engagement: ${eng.clientName} (${eng.company})`,\n    emailBody:    `A new engagement has been created in Barinhall Delivery Hub.\\n\\nClient: ${eng.clientName}\\nCompany: ${eng.company}\\nService: ${eng.serviceType}\\nOwner: ${eng.owner}\\nStart Date: ${eng.startDate}\\nStatus: ${eng.status}`\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-111111111103",
+      "name": "Format Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 360]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "operation": "post",
+        "channel": {
+          "__rl": true,
+          "value": "#engagements",
+          "mode": "name"
+        },
+        "text": "={{ $json.slackMessage }}",
+        "otherOptions": {}
+      },
+      "id": "11111111-1111-1111-1111-111111111104",
+      "name": "Send Slack Message",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [720, 360],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack — Barinhall"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook — New Engagement": {
+      "main": [
+        [{ "node": "Format Notification", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Notification": {
+      "main": [
+        [{ "node": "Send Slack Message", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "barinhall-phase5-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "barinhall-delivery-hub"
+  },
+  "id": "barinhall-new-engagement-v1",
+  "tags": [
+    {
+      "createdAt": "2026-05-02T00:00:00.000Z",
+      "updatedAt": "2026-05-02T00:00:00.000Z",
+      "id": "barinhall-1",
+      "name": "barinhall"
+    }
+  ]
+}

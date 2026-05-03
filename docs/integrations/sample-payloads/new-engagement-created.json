@@ -1,0 +1,18 @@
+{
+  "event": "engagement.created",
+  "timestamp": "2026-05-02T10:15:00.000Z",
+  "source": "Barinhall Delivery Hub",
+  "engagement": {
+    "id": "a3c7e9f2-1d4b-4a8c-b5d6-2e8f0a1b3c5d",
+    "clientName": "Alex Rivera",
+    "company": "Southwest Manufacturing Co",
+    "primaryContact": "Alex Rivera",
+    "email": "alex@swmanufacturing.com",
+    "serviceType": "ai-readiness",
+    "startDate": "2026-05-02",
+    "owner": "Frank",
+    "targetOutcome": "Identify the top 3 AI automation opportunities across production and logistics operations.",
+    "status": "Draft",
+    "createdAt": "2026-05-02T10:15:00.000Z"
+  }
+}

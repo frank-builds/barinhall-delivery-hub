@@ -1,0 +1,98 @@
+{
+  "name": "Barinhall — Document Export Ready",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Document Export Ready\n\nFires when a document is generated in the Output Center.\n\n**Setup required:**\n1. Copy the webhook URL from the Webhook node and add it to `OutputCenter.jsx` `handleGenerate()` as a fire-and-forget POST after `saveOutput()` succeeds.\n2. Configure Slack credentials on the Send Notification node.\n\n**Payload schema:** See `docs/integrations/contracts/webhook-events.json` → `engagement.output_generated`\n**Sample:** `docs/integrations/sample-payloads/document-export-ready.json`",
+        "height": 260,
+        "width": 480,
+        "color": 3
+      },
+      "id": "33333333-3333-3333-3333-333333333301",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 60]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "document-export-ready",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "33333333-3333-3333-3333-333333333302",
+      "name": "Webhook — Export Ready",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 360],
+      "webhookId": "barinhall-doc-export"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\nconst eng    = body.engagement ?? {};\nconst output = body.output     ?? {};\n\nreturn [{\n  json: {\n    clientName:    eng.clientName,\n    company:       eng.company,\n    serviceType:   eng.serviceType,\n    owner:         eng.owner,\n    documentType:  output.documentType,\n    filename:      output.filename,\n    generatedAt:   output.generatedAt,\n    slackMessage:  `📄 Output ready: *${output.filename}*\\n*Client:* ${eng.clientName} — ${eng.company}\\n*Type:* ${output.documentType}\\n*Owner:* ${eng.owner}`,\n    emailSubject:  `Output ready: ${output.documentType} for ${eng.clientName}`,\n    emailBody:     `A new output document has been generated in Barinhall Delivery Hub.\\n\\nClient: ${eng.clientName}\\nCompany: ${eng.company}\\nDocument type: ${output.documentType}\\nFilename: ${output.filename}\\nGenerated: ${output.generatedAt}`\n  }\n}];"
+      },
+      "id": "33333333-3333-3333-3333-333333333303",
+      "name": "Format Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 360]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "operation": "post",
+        "channel": {
+          "__rl": true,
+          "value": "#engagements",
+          "mode": "name"
+        },
+        "text": "={{ $json.slackMessage }}",
+        "otherOptions": {}
+      },
+      "id": "33333333-3333-3333-3333-333333333304",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [720, 360],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack — Barinhall"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook — Export Ready": {
+      "main": [
+        [{ "node": "Format Notification", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Notification": {
+      "main": [
+        [{ "node": "Send Notification", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "barinhall-phase5-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "barinhall-delivery-hub"
+  },
+  "id": "barinhall-doc-export-v1",
+  "tags": [
+    {
+      "createdAt": "2026-05-02T00:00:00.000Z",
+      "updatedAt": "2026-05-02T00:00:00.000Z",
+      "id": "barinhall-1",
+      "name": "barinhall"
+    }
+  ]
+}

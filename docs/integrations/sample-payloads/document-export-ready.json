@@ -1,0 +1,17 @@
+{
+  "event": "engagement.output_generated",
+  "timestamp": "2026-05-02T11:04:00.000Z",
+  "source": "Barinhall Delivery Hub",
+  "engagement": {
+    "id": "seed-1",
+    "clientName": "Maria Torres",
+    "company": "Inland Empire Logistics",
+    "serviceType": "ai-readiness",
+    "owner": "Frank"
+  },
+  "output": {
+    "documentType": "executive-summary",
+    "filename": "Maria_Torres_AI_Readiness_Assessment_Executive_Summary_2026-05-02.md",
+    "generatedAt": "2026-05-02T11:04:00.000Z"
+  }
+}

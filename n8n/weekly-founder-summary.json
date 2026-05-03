@@ -1,0 +1,123 @@
+{
+  "name": "Barinhall — Weekly Founder Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Weekly Founder Summary\n\nRuns every Monday at 09:00. Fetches all engagements from Supabase, generates a full digest (status counts, workflow progress, stale alerts, open risks, recent activity), and emails it to the founder.\n\n**Setup required:**\n1. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` as n8n environment variables.\n2. Set `FOUNDER_EMAIL` and `SENDER_EMAIL` as n8n environment variables.\n3. Configure SMTP credentials on the Send Digest Email node.\n\n**Digest logic mirrors:** `src/lib/digestGenerator.js`\n**Sample output:** `docs/integrations/sample-payloads/weekly-founder-summary.json`",
+        "height": 280,
+        "width": 520,
+        "color": 4
+      },
+      "id": "44444444-4444-4444-4444-444444444401",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 60]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [1],
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "44444444-4444-4444-4444-444444444402",
+      "name": "Schedule — Monday 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 380]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/engagements?select=data",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_ANON_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_ANON_KEY }}" },
+            { "name": "Accept",        "value": "application/json" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "44444444-4444-4444-4444-444444444403",
+      "name": "Fetch Engagements",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 380]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mirrors the logic in src/lib/digestGenerator.js\nconst STALE_DAYS  = 7;\nconst RECENT_DAYS = 7;\nconst now = Date.now();\n\nfunction msSince(iso) { return iso ? now - new Date(iso).getTime() : Infinity; }\nfunction isRecent(iso) { return msSince(iso) < RECENT_DAYS * 86400000; }\nfunction isStale(iso)  { return msSince(iso) > STALE_DAYS  * 86400000; }\nfunction fmt(iso) { return iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'; }\nfunction lastActivity(eng) {\n  const a = eng.notesLog?.slice(-1)[0]?.date;\n  const b = eng.outputs?.slice(-1)[0]?.generatedAt;\n  return [a, b].filter(Boolean).sort().slice(-1)[0] ?? null;\n}\n\nconst rows = $input.all();\nconst all  = rows.flatMap(r => Array.isArray(r.json) ? r.json.map(row => row.data) : [r.json?.data].filter(Boolean));\n\nconst active    = all.filter(e => e?.status === 'Active');\nconst draft     = all.filter(e => e?.status === 'Draft');\nconst onHold    = all.filter(e => e?.status === 'On Hold');\nconst completed = all.filter(e => e?.status === 'Completed');\n\nconst stale = active.filter(e => isStale(lastActivity(e)));\n\nconst highRisks = active.flatMap(e =>\n  (e.risksLog ?? []).filter(r => r.status === 'Open' && ['High','Critical'].includes(r.severity))\n  .map(r => ({ ...r, engName: e.clientName, company: e.company }))\n);\n\nconst recentNotes = active.flatMap(e =>\n  (e.notesLog ?? []).filter(n => isRecent(n.date)).map(n => ({ ...n, engName: e.clientName }))\n).sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5);\n\nconst recentOutputs = all.flatMap(e =>\n  (e.outputs ?? []).filter(o => isRecent(o.generatedAt)).map(o => ({ ...o, engName: e.clientName }))\n);\n\n// Build digest markdown\nconst today = new Date();\nconst weekOf = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });\nconst lines = [\n  '# Weekly Founder Digest',\n  '',\n  `**Week of:** ${weekOf}`,\n  `**Generated:** ${fmt(today.toISOString())}`,\n  '',\n  '---',\n  '',\n  '## Engagement Summary',\n  '',\n  '| Status | Count |',\n  '|---|---|',\n  `| Active | ${active.length} |`,\n  `| Draft | ${draft.length} |`,\n  `| On Hold | ${onHold.length} |`,\n  `| Completed | ${completed.length} |`,\n  `| **Total** | **${all.length}** |`,\n  ''\n];\n\nif (active.length > 0) {\n  lines.push('## Active Engagements', '', '| Client | Workflow Progress |', '|---|---|');\n  active.forEach(e => {\n    const total = e.workflow?.length ?? 0;\n    const done  = e.workflow?.filter(s => s.done).length ?? 0;\n    const pct   = total > 0 ? Math.round(done/total*100) : 0;\n    lines.push(`| ${e.clientName} | ${done}/${total} (${pct}%) |`);\n  });\n  lines.push('');\n}\n\nif (stale.length > 0) {\n  lines.push('## ⚠️ Stale Engagements', '');\n  stale.forEach(e => lines.push(`- **${e.clientName}** (${e.company}) — last activity: ${fmt(lastActivity(e))}`));\n  lines.push('');\n}\n\nif (highRisks.length > 0) {\n  lines.push('## 🔴 Open High / Critical Risks', '');\n  highRisks.forEach(r => lines.push(`- **[${r.severity}]** ${r.title} — _${r.engName}_`));\n  lines.push('');\n}\n\nif (recentNotes.length > 0) {\n  lines.push('## Recent Notes', '');\n  recentNotes.forEach(n => {\n    const preview = n.content.length > 120 ? n.content.slice(0,120)+'…' : n.content;\n    lines.push(`- **${n.engName}** (${fmt(n.date)}): ${preview}`);\n  });\n  lines.push('');\n}\n\nlines.push('---', '*Generated by Barinhall Delivery Hub*');\n\nconst digest = lines.join('\\n');\n\nreturn [{\n  json: {\n    digest,\n    subject:      `Barinhall Weekly Digest — ${fmt(today.toISOString())}`,\n    to:           $env.FOUNDER_EMAIL,\n    from:         $env.SENDER_EMAIL,\n    summary: {\n      totalEngagements: all.length,\n      activeCount:      active.length,\n      draftCount:       draft.length,\n      staleCount:       stale.length,\n      openHighRisks:    highRisks.length,\n      recentOutputsCount: recentOutputs.length\n    }\n  }\n}];"
+      },
+      "id": "44444444-4444-4444-4444-444444444404",
+      "name": "Generate Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 380]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.from }}",
+        "toEmail":   "={{ $json.to }}",
+        "subject":   "={{ $json.subject }}",
+        "text":      "={{ $json.digest }}",
+        "options":   {}
+      },
+      "id": "44444444-4444-4444-4444-444444444405",
+      "name": "Send Digest Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [960, 380],
+      "credentials": {
+        "smtp": {
+          "id": "CONFIGURE_ME",
+          "name": "SMTP — Barinhall"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule — Monday 09:00": {
+      "main": [
+        [{ "node": "Fetch Engagements", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Engagements": {
+      "main": [
+        [{ "node": "Generate Digest", "type": "main", "index": 0 }]
+      ]
+    },
+    "Generate Digest": {
+      "main": [
+        [{ "node": "Send Digest Email", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "barinhall-phase5-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "barinhall-delivery-hub"
+  },
+  "id": "barinhall-weekly-digest-v1",
+  "tags": [
+    {
+      "createdAt": "2026-05-02T00:00:00.000Z",
+      "updatedAt": "2026-05-02T00:00:00.000Z",
+      "id": "barinhall-1",
+      "name": "barinhall"
+    }
+  ]
+}

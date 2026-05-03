@@ -1,0 +1,31 @@
+{
+  "event": "engagement.stale",
+  "timestamp": "2026-05-02T08:00:00.000Z",
+  "source": "Barinhall Delivery Hub",
+  "reminders": [
+    {
+      "type": "stale-engagement",
+      "engagementId": "seed-2",
+      "clientName": "James Okafor",
+      "company": "Desert Southwest Dental",
+      "serviceType": "ai-strategy",
+      "owner": "Frank",
+      "status": "Draft",
+      "daysSinceActivity": 17,
+      "lastActivityDate": "2026-04-15T10:00:00.000Z",
+      "incompleteWorkflowSteps": [
+        "Client intake & goals alignment",
+        "Pre-workshop preparation",
+        "Workshop facilitation",
+        "Synthesis & theme extraction",
+        "Roadmap draft",
+        "Client review session",
+        "Final delivery & next steps"
+      ],
+      "incompleteWorkflowStepCount": 7,
+      "openRisksCount": 1,
+      "subject": "Reminder: James Okafor engagement needs attention",
+      "message": "The engagement with James Okafor (Desert Southwest Dental) has had no activity for 17 days. 7 workflow step(s) are incomplete: Client intake & goals alignment, Pre-workshop preparation, Workshop facilitation, and 4 more. 1 open risk(s) require attention."
+    }
+  ]
+}

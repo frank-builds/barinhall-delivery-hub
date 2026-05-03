@@ -1,0 +1,113 @@
+{
+  "version": "1.0",
+  "source": "Barinhall Delivery Hub",
+  "description": "Defines the four automation events, their trigger conditions, and their payload shapes. These contracts are used to build the n8n workflow templates in /n8n/ and the sample payloads in /docs/integrations/sample-payloads/.",
+  "events": [
+    {
+      "event": "engagement.created",
+      "description": "Fires when a new engagement is created via the New Engagement form.",
+      "trigger": "Manual — app sends POST to webhook URL after addEngagement() succeeds.",
+      "webhookPath": "/webhook/new-engagement",
+      "n8nWorkflow": "n8n/new-engagement-created.json",
+      "payloadShape": {
+        "event":     "engagement.created",
+        "timestamp": "<ISO 8601>",
+        "source":    "Barinhall Delivery Hub",
+        "engagement": {
+          "id":           "<uuid>",
+          "clientName":   "<string>",
+          "company":      "<string>",
+          "primaryContact": "<string>",
+          "email":        "<email>",
+          "serviceType":  "<service-key>",
+          "startDate":    "<YYYY-MM-DD>",
+          "owner":        "<string>",
+          "targetOutcome": "<string>",
+          "status":       "Draft",
+          "createdAt":    "<ISO 8601>"
+        }
+      }
+    },
+    {
+      "event": "engagement.stale",
+      "description": "Fires on a daily schedule for every Active engagement that has had no recorded notes or output activity in 7 or more days.",
+      "trigger": "Scheduled — n8n schedule trigger runs daily at 08:00. n8n fetches engagements from Supabase REST API, filters for stale, and emits a reminder.",
+      "webhookPath": null,
+      "n8nWorkflow": "n8n/stale-task-reminder.json",
+      "payloadShape": {
+        "event":     "engagement.stale",
+        "timestamp": "<ISO 8601>",
+        "source":    "Barinhall Delivery Hub",
+        "reminders": [
+          {
+            "type":                        "stale-engagement",
+            "engagementId":                "<uuid>",
+            "clientName":                  "<string>",
+            "company":                     "<string>",
+            "serviceType":                 "<service-key>",
+            "owner":                       "<string>",
+            "status":                      "Active",
+            "daysSinceActivity":           "<number>",
+            "lastActivityDate":            "<ISO 8601 | null>",
+            "incompleteWorkflowSteps":     ["<step label>"],
+            "incompleteWorkflowStepCount": "<number>",
+            "openRisksCount":              "<number>",
+            "subject":                     "<string>",
+            "message":                     "<string>"
+          }
+        ]
+      }
+    },
+    {
+      "event": "engagement.output_generated",
+      "description": "Fires when an output document is generated in the Output Center.",
+      "trigger": "Manual — app sends POST to webhook URL after saveOutput() succeeds.",
+      "webhookPath": "/webhook/document-export-ready",
+      "n8nWorkflow": "n8n/document-export-ready.json",
+      "payloadShape": {
+        "event":     "engagement.output_generated",
+        "timestamp": "<ISO 8601>",
+        "source":    "Barinhall Delivery Hub",
+        "engagement": {
+          "id":          "<uuid>",
+          "clientName":  "<string>",
+          "company":     "<string>",
+          "serviceType": "<service-key>",
+          "owner":       "<string>"
+        },
+        "output": {
+          "documentType": "<document-type-id>",
+          "filename":     "<ClientName_Service_DocType_YYYY-MM-DD.md>",
+          "generatedAt":  "<ISO 8601>"
+        }
+      }
+    },
+    {
+      "event": "digest.weekly",
+      "description": "Weekly founder digest summarising all engagements — status counts, workflow progress, stale alerts, open risks, recent notes, and recent outputs.",
+      "trigger": "Scheduled — n8n schedule trigger runs every Monday at 09:00. n8n fetches engagements from Supabase, generates the digest, and emails or posts to Slack.",
+      "webhookPath": null,
+      "n8nWorkflow": "n8n/weekly-founder-summary.json",
+      "payloadShape": {
+        "event":     "digest.weekly",
+        "timestamp": "<ISO 8601>",
+        "source":    "Barinhall Delivery Hub",
+        "period": {
+          "start": "<YYYY-MM-DD>",
+          "end":   "<YYYY-MM-DD>"
+        },
+        "summary": {
+          "totalEngagements": "<number>",
+          "activeCount":      "<number>",
+          "draftCount":       "<number>",
+          "onHoldCount":      "<number>",
+          "completedCount":   "<number>",
+          "staleCount":       "<number>",
+          "openHighRisks":    "<number>",
+          "recentOutputsCount": "<number>"
+        },
+        "digest": "<full markdown string>"
+      }
+    }
+  ]
+}

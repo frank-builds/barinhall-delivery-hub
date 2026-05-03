@@ -12,6 +12,7 @@ import { Templates } from './pages/Templates.jsx';
 import { NotFound } from './pages/NotFound.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { OutputCenter } from './pages/OutputCenter.jsx';
+import { DigestPage } from './pages/DigestPage.jsx';
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -37,6 +38,7 @@ function AppShell() {
           <Route path="/engagements/:id/forms/:formKey"        element={<FormPage />} />
           <Route path="/engagements/:id/preview/:formKey"      element={<PreviewPage />} />
           <Route path="/templates"                             element={<Templates />} />
+          <Route path="/digest"                                element={<DigestPage />} />
           <Route path="*"                                      element={<NotFound />} />
         </Routes>
       </Layout>
