@@ -55,6 +55,7 @@ export function FormPage() {
   }, [id, formKey]);
 
   const [saved, setSaved] = useState(false);
+  const [facilitatorMode, setFacilitatorMode] = useState(false);
 
   if (!engagement) {
     return (
@@ -106,7 +107,17 @@ export function FormPage() {
           <h1 className="text-xl font-bold text-gray-900">{formDef.label}</h1>
           <p className="text-sm text-gray-500 mt-0.5">{engagement.clientName} · {engagement.company}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <button
+            onClick={() => setFacilitatorMode(m => !m)}
+            className={`text-xs px-2.5 py-1 rounded-md border font-medium transition-colors ${
+              facilitatorMode
+                ? 'bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200'
+                : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700'
+            }`}
+          >
+            {facilitatorMode ? 'Facilitator mode on' : 'Facilitator mode'}
+          </button>
           <TemplateBadge status={status} />
           <select
             value={status}
@@ -131,6 +142,7 @@ export function FormPage() {
                 field={field}
                 value=""
                 onChange={() => {}}
+                facilitatorMode={facilitatorMode}
               />
             );
           }
@@ -146,6 +158,7 @@ export function FormPage() {
                   field={field}
                   value={computeDerivedValue(field, formState)}
                   onChange={() => {}}
+                  facilitatorMode={facilitatorMode}
                 />
               </div>
             );
@@ -161,6 +174,7 @@ export function FormPage() {
                 field={field}
                 value={formState[field.key] ?? ''}
                 onChange={handleFieldChange}
+                facilitatorMode={facilitatorMode}
               />
             </div>
           );
