@@ -310,8 +310,9 @@ export function EngagementDetail() {
         onUpdate={(riskId, fields) => updateRisk(engagement.id, riskId, fields)}
       />
 
-      {/* ── Attachments (Phase 9) ── */}
+      {/* ── Attachments (Phase 9 / 9b) ── */}
       <AttachmentsPanel
+        engagementId={engagement.id}
         attachments={engagement.attachments ?? []}
         defaultOwner={engagement.owner}
         onAdd={att => addAttachment(engagement.id, att)}
