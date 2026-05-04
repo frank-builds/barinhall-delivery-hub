@@ -8,6 +8,7 @@ import { NotesLog } from '../components/NotesLog.jsx';
 import { DecisionsLog } from '../components/DecisionsLog.jsx';
 import { RisksLog } from '../components/RisksLog.jsx';
 import { AttachmentsPanel } from '../components/AttachmentsPanel.jsx';
+import { EngagementArtifacts } from '../components/artifacts/EngagementArtifacts.jsx';
 import { SERVICES } from '../data/services.js';
 import { getFormDefs, TEMPLATE_STATUSES } from '../data/formDefinitions.js';
 import { computeStatus, effectiveStatus } from '../lib/statusUtils.js';
@@ -285,6 +286,9 @@ export function EngagementDetail() {
           </div>
         </section>
       )}
+
+      {/* ── Saved Artifacts (Phase 10 / 10b) ── */}
+      <EngagementArtifacts engagement={engagement} />
 
       {/* ── Notes log (Phase 2B) ── */}
       <NotesLog

@@ -533,11 +533,29 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
   const template = TEMPLATES[type];
   const saved    = engagement?.artifactData?.[type];
 
+  // Guard: if the templateKey has no matching template entry, render a graceful
+  // fallback rather than crashing on template.subject below.
+  if (!template && !saved) {
+    return (
+      <div className="py-10 text-center text-sm text-gray-400 italic">
+        No template found for <strong>{type}</strong>.
+        <br />
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-4 text-xs text-gray-400 hover:text-gray-600 underline"
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
+
   const [subject, setSubject] = useState(
-    () => saved?.subject ?? merge(template.subject, engagement)
+    () => saved?.subject ?? merge((template ?? { subject: '' }).subject, engagement)
   );
   const [body, setBody] = useState(
-    () => saved?.body ?? merge(template.body, engagement)
+    () => saved?.body ?? merge((template ?? { body: '' }).body, engagement)
   );
   const [copiedSubject, setCopiedSubject] = useState(false);
   const [copiedAll,     setCopiedAll]     = useState(false);
@@ -546,8 +564,8 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
   // Re-merge when engagement changes (new engagement selected)
   useEffect(() => {
     const newSaved = engagement?.artifactData?.[type];
-    setSubject(newSaved?.subject ?? merge(template.subject, engagement));
-    setBody(newSaved?.body    ?? merge(template.body,    engagement));
+    setSubject(newSaved?.subject ?? merge((template ?? { subject: '' }).subject, engagement));
+    setBody(newSaved?.body    ?? merge((template ?? { body: '' }).body,    engagement));
     setIsSaved(!!newSaved);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engagement?.id]);
