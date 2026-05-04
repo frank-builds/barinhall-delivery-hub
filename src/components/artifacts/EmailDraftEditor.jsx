@@ -533,9 +533,32 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
   const template = TEMPLATES[type];
   const saved    = engagement?.artifactData?.[type];
 
-  // Guard: if the templateKey has no matching template entry, render a graceful
-  // fallback rather than crashing on template.subject below.
-  if (!template && !saved) {
+  // Compute the fallback flag BEFORE any hooks — used after all hooks are called.
+  // (Hooks must be called unconditionally on every render — Rules of Hooks.)
+  const noTemplate = !template && !saved;
+
+  // ── All hooks first, regardless of noTemplate ────────────────────────────────
+  const [subject, setSubject] = useState(
+    () => saved?.subject ?? (template ? merge(template.subject, engagement) : '')
+  );
+  const [body, setBody] = useState(
+    () => saved?.body ?? (template ? merge(template.body, engagement) : '')
+  );
+  const [copiedSubject, setCopiedSubject] = useState(false);
+  const [copiedAll,     setCopiedAll]     = useState(false);
+  const [isSaved,       setIsSaved]       = useState(!!saved);
+
+  // Re-merge when engagement changes (new engagement selected)
+  useEffect(() => {
+    const newSaved = engagement?.artifactData?.[type];
+    setSubject(newSaved?.subject ?? (template ? merge(template.subject, engagement) : ''));
+    setBody(newSaved?.body    ?? (template ? merge(template.body,    engagement) : ''));
+    setIsSaved(!!newSaved);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [engagement?.id]);
+
+  // Guard: render fallback for unknown templateKey AFTER all hooks have been called.
+  if (noTemplate) {
     return (
       <div className="py-10 text-center text-sm text-gray-400 italic">
         No template found for <strong>{type}</strong>.
@@ -550,25 +573,6 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
       </div>
     );
   }
-
-  const [subject, setSubject] = useState(
-    () => saved?.subject ?? merge((template ?? { subject: '' }).subject, engagement)
-  );
-  const [body, setBody] = useState(
-    () => saved?.body ?? merge((template ?? { body: '' }).body, engagement)
-  );
-  const [copiedSubject, setCopiedSubject] = useState(false);
-  const [copiedAll,     setCopiedAll]     = useState(false);
-  const [isSaved,       setIsSaved]       = useState(!!saved);
-
-  // Re-merge when engagement changes (new engagement selected)
-  useEffect(() => {
-    const newSaved = engagement?.artifactData?.[type];
-    setSubject(newSaved?.subject ?? merge((template ?? { subject: '' }).subject, engagement));
-    setBody(newSaved?.body    ?? merge((template ?? { body: '' }).body,    engagement));
-    setIsSaved(!!newSaved);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engagement?.id]);
 
   function markDirty() { setIsSaved(false); }
 

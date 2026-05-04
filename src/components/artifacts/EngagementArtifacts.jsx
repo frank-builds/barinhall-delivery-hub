@@ -222,20 +222,16 @@ function ArtifactViewerModal({ storageKey, component, label, engagement, onClose
 
     // Phase 10b component routes
     if (component === 'emailDraft') {
-      // Guard: EmailDraftEditor crashes if the key has no matching TEMPLATES entry.
-      // For unknown email types we fall back to a simple read-only display.
-      try {
-        return (
-          <EmailDraftEditor
-            type={storageKey}
-            engagement={engagement}
-            onSave={onSave}
-            onClose={onClose}
-          />
-        );
-      } catch {
-        // fallback handled below
-      }
+      // EmailDraftEditor handles unknown keys gracefully via its own noTemplate guard
+      // (all hooks are called unconditionally; fallback UI renders for unknown types).
+      return (
+        <EmailDraftEditor
+          type={storageKey}
+          engagement={engagement}
+          onSave={onSave}
+          onClose={onClose}
+        />
+      );
     }
     if (component === 'checklist') {
       return (
