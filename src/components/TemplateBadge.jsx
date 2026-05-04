@@ -1,12 +1,13 @@
+// Uses the .bh-badge base class (index.css) + per-status Tailwind color utilities.
 const STATUS_STYLES = {
-  'Not Started': 'bg-gray-100 text-gray-500',
-  'In Progress': 'bg-yellow-100 text-yellow-700',
-  'Complete':    'bg-green-100 text-green-700',
+  'Not Started': 'bg-slate-100  text-slate-500  border-slate-200',
+  'In Progress': 'bg-amber-50   text-amber-700  border-amber-200',
+  'Complete':    'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
 export function TemplateBadge({ status }) {
   return (
-    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-500'}`}>
+    <span className={`bh-badge ${STATUS_STYLES[status] ?? 'bg-slate-100 text-slate-400 border-slate-200'}`}>
       {status}
     </span>
   );

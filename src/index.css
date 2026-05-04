@@ -1,3 +1,155 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Barinhall CSS Design Tokens ──────────────────────────────────────────────
+ * CSS custom properties mirroring tailwind.config.js values.
+ * Use in JSX inline styles or generated document HTML where Tailwind classes
+ * are not available (e.g., dangerouslySetInnerHTML SOW previews).
+ * ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --bh-brand:       #4f46e5;   /* indigo-600 — primary actions, links */
+  --bh-brand-dark:  #3730a3;   /* indigo-800 — wordmark, deep accent */
+  --bh-brand-dim:   #e0e7ff;   /* indigo-100 — tinted surfaces */
+
+  /* Page / surface */
+  --bh-bg:          #f8fafc;   /* slate-50  — page background */
+  --bh-surface:     #ffffff;   /* white     — cards, panels */
+  --bh-surface-alt: #f1f5f9;   /* slate-100 — alternate rows, inset sections */
+
+  /* Borders */
+  --bh-border:      #e2e8f0;   /* slate-200 — default borders */
+  --bh-border-muted:#f1f5f9;   /* slate-100 — subtle inner dividers */
+
+  /* Text */
+  --bh-text:        #0f172a;   /* slate-900 — primary text */
+  --bh-text-sub:    #475569;   /* slate-600 — secondary / supporting text */
+  --bh-text-muted:  #94a3b8;   /* slate-400 — placeholders, helper copy */
+
+  /* Status */
+  --bh-success:     #16a34a;   /* green-600 */
+  --bh-warning:     #d97706;   /* amber-600 */
+  --bh-danger:      #dc2626;   /* red-600   */
+}
+
+/* ── Base layer ───────────────────────────────────────────────────────────────
+ * Global element resets and typographic defaults.
+ * Inter loaded in index.html via Google Fonts.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Enable Inter optical-size axis and character variant features */
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+  }
+
+  /* Heading hierarchy — one h1 per page */
+  h1 { @apply text-2xl font-bold   tracking-tight text-slate-900; line-height: 1.25; }
+  h2 { @apply text-lg  font-semibold              text-slate-800; line-height: 1.35; }
+  h3 { @apply text-base font-semibold             text-slate-700; line-height: 1.4;  }
+
+  /* Preserve visible focus rings for keyboard navigation */
+  :focus-visible {
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-1;
+  }
+}
+
+/* ── Custom shadow utilities ──────────────────────────────────────────────────
+ * Defined here (not in tailwind.config.js) so they are resolvable by @apply
+ * inside @layer components. They are also available as className strings in JSX.
+ *
+ *  shadow-card        Subtle resting elevation for cards and panels
+ *  shadow-card-hover  Slightly lifted elevation used on hover
+ *  shadow-modal       Deep shadow for modals and drawers
+ * ─────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.04);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 4px 8px -2px rgb(15 23 42 / 0.09), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+  }
+  .shadow-modal {
+    box-shadow: 0 20px 30px -8px rgb(15 23 42 / 0.14), 0 8px 12px -4px rgb(15 23 42 / 0.08);
+  }
+}
+
+/* ── Component layer ──────────────────────────────────────────────────────────
+ * Reusable utility classes for shared UI patterns across the app.
+ *
+ *  .bh-card            White rounded card with subtle shadow
+ *  .bh-card-hover      Hover elevation modifier (add alongside .bh-card)
+ *  .bh-section-label   All-caps section label (xs, tracked, muted slate)
+ *  .bh-input           Standard form control (input / textarea / select)
+ *  .bh-btn-primary     Filled indigo primary action button
+ *  .bh-btn-secondary   Outlined neutral secondary button
+ *  .bh-btn-ghost       Text-only subtle tertiary button
+ *  .bh-badge           Base pill badge — pair with background/text/border utils
+ * ─────────────────────────────────────────────────────────────────────────── */
+@layer components {
+
+  /* ── Cards & panels ── */
+  .bh-card {
+    /* shadow-card is defined above in @layer utilities — safe to @apply here */
+    @apply bg-white rounded-xl border border-slate-200 shadow-card;
+  }
+  .bh-card-hover {
+    @apply hover:shadow-card-hover hover:border-slate-300 transition-all duration-150;
+  }
+
+  /* ── Typography ── */
+  .bh-section-label {
+    @apply text-[10px] font-bold uppercase tracking-widest text-slate-400;
+  }
+
+  /* ── Form controls ── */
+  .bh-input {
+    @apply w-full border border-slate-300 rounded-lg px-3 py-2
+           text-sm text-slate-900 placeholder-slate-400 bg-white
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+           disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed
+           transition-colors;
+  }
+
+  /* ── Buttons ── */
+  .bh-btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5
+           bg-indigo-600 text-white text-sm font-medium
+           px-4 py-2 rounded-lg
+           hover:bg-indigo-700 active:bg-indigo-800
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1
+           disabled:opacity-50 disabled:cursor-not-allowed
+           transition-colors;
+  }
+  .bh-btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5
+           bg-white text-slate-700 text-sm font-medium
+           px-4 py-2 rounded-lg border border-slate-300
+           hover:bg-slate-50 active:bg-slate-100
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1
+           disabled:opacity-50 disabled:cursor-not-allowed
+           transition-colors;
+  }
+  .bh-btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5
+           text-slate-500 text-sm font-medium
+           px-3 py-1.5 rounded-lg
+           hover:text-slate-800 hover:bg-slate-100
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400
+           transition-colors;
+  }
+
+  /* ── Badges ── */
+  .bh-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border;
+  }
+}

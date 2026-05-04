@@ -12,18 +12,27 @@ const LOCAL_KEY      = 'barinhall_engagements';
 const VIEW_KEY       = 'barinhall_dashboard_view';
 const ALL_STATUSES   = ['Draft', 'Active', 'On Hold', 'Completed'];
 
+// Status-specific accent colours for stat cards
+const STAT_ACCENTS = {
+  Draft:      'text-slate-700',
+  Active:     'text-emerald-600',
+  'On Hold':  'text-amber-600',
+  Completed:  'text-sky-600',
+};
+
 // ── Stat bar ──────────────────────────────────────────────────────────────────
 function StatBar({ engagements }) {
   const counts = ALL_STATUSES.map(s => ({
     label: s,
     count: engagements.filter(e => effectiveStatus(e) === s).length,
+    accent: STAT_ACCENTS[s] ?? 'text-slate-700',
   }));
   return (
-    <div className="flex flex-wrap gap-3 mb-5">
-      {counts.map(({ label, count }) => (
-        <div key={label} className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-center min-w-[72px]">
-          <p className="text-lg font-bold text-gray-900">{count}</p>
-          <p className="text-xs text-gray-500">{label}</p>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      {counts.map(({ label, count, accent }) => (
+        <div key={label} className="bh-card px-4 py-3 text-center">
+          <p className={`text-2xl font-bold tabular-nums ${accent}`}>{count}</p>
+          <p className="text-xs text-slate-500 mt-0.5 font-medium">{label}</p>
         </div>
       ))}
     </div>
@@ -33,13 +42,12 @@ function StatBar({ engagements }) {
 // ── View-toggle icon buttons ───────────────────────────────────────────────────
 function ViewToggle({ view, onChange }) {
   return (
-    <div className="flex items-center gap-1 bg-gray-100 rounded-md p-1">
+    <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-1">
       <button
         onClick={() => onChange('grid')}
         title="Grid view"
-        className={`p-1.5 rounded transition-colors ${view === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}
+        className={`p-1.5 rounded-md transition-colors ${view === 'grid' ? 'bg-white shadow-card text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
       >
-        {/* 2×3 grid icon */}
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
           <rect x="1" y="1" width="6" height="6" rx="1"/>
           <rect x="9" y="1" width="6" height="6" rx="1"/>
@@ -50,9 +58,8 @@ function ViewToggle({ view, onChange }) {
       <button
         onClick={() => onChange('kanban')}
         title="Kanban view"
-        className={`p-1.5 rounded transition-colors ${view === 'kanban' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}
+        className={`p-1.5 rounded-md transition-colors ${view === 'kanban' ? 'bg-white shadow-card text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
       >
-        {/* 4-column icon */}
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
           <rect x="1"  y="1" width="3" height="14" rx="1"/>
           <rect x="5"  y="1" width="3" height="10" rx="1"/>
@@ -127,7 +134,7 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
+      <div className="flex items-center justify-center py-24 text-slate-400 text-sm">
         Loading engagements…
       </div>
     );
@@ -137,32 +144,30 @@ export function Dashboard() {
     <div>
       {/* ── Migration banner ── */}
       {hasMigratable && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 flex items-center justify-between gap-4">
           <p className="text-sm text-amber-800">
-            You have <strong>{localData.length}</strong> engagement{localData.length !== 1 ? 's' : ''} stored locally. Migrate them to the cloud to access them on any device.
+            You have <strong>{localData.length}</strong> engagement{localData.length !== 1 ? 's' : ''} stored locally.
+            Migrate them to the cloud to access them on any device.
           </p>
           <button
             onClick={handleMigrate}
             disabled={migrating}
-            className="flex-shrink-0 bg-amber-600 text-white text-sm font-medium rounded-md px-3 py-1.5 hover:bg-amber-700 disabled:opacity-50 transition-colors"
+            className="flex-shrink-0 bg-amber-600 text-white text-sm font-medium rounded-lg px-3 py-1.5 hover:bg-amber-700 disabled:opacity-50 transition-colors"
           >
             {migrating ? 'Migrating…' : 'Migrate now'}
           </button>
         </div>
       )}
 
-      {/* ── Header row ── */}
-      <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
+      {/* ── Page header ── */}
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1>Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">
             {engagements.length} engagement{engagements.length !== 1 ? 's' : ''} total
           </p>
         </div>
-        <Link
-          to="/engagements/new"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
-        >
+        <Link to="/engagements/new" className="bh-btn-primary">
           + New Engagement
         </Link>
       </div>
@@ -170,28 +175,31 @@ export function Dashboard() {
       {/* ── Stat bar ── */}
       {engagements.length > 0 && <StatBar engagements={engagements} />}
 
-      {/* ── Search + filters + view toggle ── */}
+      {/* ── Search / filters / view toggle ── */}
       {engagements.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-5 items-center">
-          {/* Search */}
+        <div className="flex flex-wrap gap-2 mb-6 items-center">
+          {/* Search input */}
           <input
             type="text"
             placeholder="Search by client, company, or owner…"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            className="flex-1 min-w-[200px] text-sm border border-gray-200 rounded-md px-3 py-1.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="flex-1 min-w-[200px] text-sm border border-slate-200 rounded-lg px-3 py-1.5
+                       text-slate-700 placeholder-slate-400
+                       focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent
+                       bg-white transition-colors"
           />
 
-          {/* Status chips */}
+          {/* Status filter chips */}
           <div className="flex flex-wrap gap-1">
             {['All', ...ALL_STATUSES].map(s => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
                   statusFilter === s
                     ? 'bg-indigo-600 border-indigo-600 text-white'
-                    : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    : 'border-slate-200 text-slate-500 bg-white hover:border-slate-300 hover:text-slate-700'
                 }`}
               >
                 {s}
@@ -203,7 +211,8 @@ export function Dashboard() {
           <select
             value={serviceFilter}
             onChange={e => setServiceFilter(e.target.value)}
-            className="text-xs border border-gray-200 rounded-md px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-600 bg-white
+                       focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors"
           >
             <option value="All">All services</option>
             {SERVICES.map(s => (
@@ -211,11 +220,11 @@ export function Dashboard() {
             ))}
           </select>
 
-          {/* Clear filters */}
+          {/* Clear link */}
           {hasActiveFilters && (
             <button
               onClick={() => { setQuery(''); setStatusFilter('All'); setServiceFilter('All'); }}
-              className="text-xs text-gray-400 hover:text-gray-600 underline"
+              className="text-xs text-slate-400 hover:text-slate-600 underline transition-colors"
             >
               Clear
             </button>
@@ -227,20 +236,20 @@ export function Dashboard() {
         </div>
       )}
 
-      {/* ── Empty state ── */}
+      {/* ── Empty states ── */}
       {engagements.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <p className="text-lg mb-2">No active engagements</p>
-          <Link to="/engagements/new" className="text-indigo-600 hover:underline text-sm">
+        <div className="text-center py-24">
+          <p className="text-slate-400 mb-1">No engagements yet</p>
+          <Link to="/engagements/new" className="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition-colors">
             Create your first engagement →
           </Link>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-sm mb-2">No engagements match your filters.</p>
+        <div className="text-center py-20">
+          <p className="text-sm text-slate-400 mb-2">No engagements match your filters.</p>
           <button
             onClick={() => { setQuery(''); setStatusFilter('All'); setServiceFilter('All'); }}
-            className="text-indigo-600 hover:underline text-sm"
+            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition-colors"
           >
             Clear filters
           </button>
@@ -248,7 +257,7 @@ export function Dashboard() {
       ) : view === 'kanban' ? (
         <KanbanBoard engagements={filtered} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(e => (
             <EngagementCard key={e.id} engagement={e} />
           ))}

@@ -198,13 +198,17 @@ function generateSowHtml(d) {
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const consultantDisplay = [d.consultantName, d.consultantTitle].filter(Boolean).join(', ');
 
-  // ── 1. Cover block ──────────────────────────────────────────────────────────
+  // ── 1. Cover block (with Barinhall logo) ───────────────────────────────────
   const cover = `
 <div style="border-bottom:4px solid #4338ca;padding-bottom:18px;margin-bottom:28px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <img src="/barinhall-logo.png" alt="Barinhall" style="height:28px;width:auto;object-fit:contain" />
+    <p style="font-size:11px;color:#6b7280;margin:0">Confidential · Draft</p>
+  </div>
   <p style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6d28d9;margin:0 0 6px;font-weight:600">Professional Services</p>
-  <h1 style="font-size:26px;font-weight:800;margin:0 0 4px;color:#1e1b4b">${d.sowTitle || 'Statement of Work'}</h1>
+  <h1 style="font-size:26px;font-weight:800;margin:0 0 4px;color:#1e1b4b;font-family:inherit">${d.sowTitle || 'Statement of Work'}</h1>
   ${d.engagementTitle ? `<p style="font-size:15px;color:#4338ca;margin:0 0 12px;font-weight:600">${d.engagementTitle}</p>` : ''}
-  <p style="margin:0;color:#6b7280;font-size:12px">Prepared ${today}</p>
+  <p style="margin:0;color:#6b7280;font-size:12px">Prepared by ${d.consultantFirm || 'Barinhall'} · ${today}</p>
 </div>
 
 <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:28px;border:1px solid #e5e7eb">

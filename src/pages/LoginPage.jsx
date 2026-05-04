@@ -4,11 +4,11 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 
 export function LoginPage() {
   const { user, signIn, signUp } = useAuth();
-  const [mode, setMode] = useState('signin');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [mode,       setMode]       = useState('signin');
+  const [email,      setEmail]      = useState('');
+  const [password,   setPassword]   = useState('');
+  const [error,      setError]      = useState('');
+  const [message,    setMessage]    = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   if (user) return <Navigate to="/" replace />;
@@ -34,25 +34,40 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Barinhall Delivery Hub</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {mode === 'signin' ? 'Sign in to your account' : 'Create a new account'}
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
 
-        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+      {/* Brand header */}
+      <div className="mb-8 text-center">
+        <img
+          src="/barinhall-logo.png"
+          alt="Barinhall"
+          className="h-10 w-auto mx-auto mb-4 object-contain"
+        />
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          Delivery Hub
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          {mode === 'signin' ? 'Sign in to your account' : 'Create a new account'}
+        </p>
+      </div>
+
+      {/* Form card */}
+      <div className="w-full max-w-sm">
+        <form onSubmit={handleSubmit} className="bh-card p-6 space-y-4">
+
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+              {error}
+            </p>
           )}
           {message && (
-            <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2">{message}</p>
+            <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5">
+              {message}
+            </p>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               Email
             </label>
             <input
@@ -60,13 +75,14 @@ export function LoginPage() {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="bh-input"
               placeholder="you@example.com"
+              autoComplete="email"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
               Password
             </label>
             <input
@@ -74,15 +90,16 @@ export function LoginPage() {
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="bh-input"
               placeholder="••••••••"
+              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
             />
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-indigo-600 text-white text-sm font-medium rounded-lg px-4 py-2 hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            className="bh-btn-primary w-full mt-1"
           >
             {submitting
               ? (mode === 'signin' ? 'Signing in…' : 'Creating account…')
@@ -90,16 +107,24 @@ export function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-slate-500 mt-4">
           {mode === 'signin' ? (
-            <>Don't have an account?{' '}
-              <button onClick={() => { setMode('signup'); setError(''); setMessage(''); }} className="text-indigo-600 hover:underline">
+            <>Don&apos;t have an account?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('signup'); setError(''); setMessage(''); }}
+                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+              >
                 Sign up
               </button>
             </>
           ) : (
             <>Already have an account?{' '}
-              <button onClick={() => { setMode('signin'); setError(''); setMessage(''); }} className="text-indigo-600 hover:underline">
+              <button
+                type="button"
+                onClick={() => { setMode('signin'); setError(''); setMessage(''); }}
+                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+              >
                 Sign in
               </button>
             </>
