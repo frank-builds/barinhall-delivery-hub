@@ -179,6 +179,18 @@ export const PLAYBOOKS = {
         'Data quality memo drafted: what was received and confidence level per category',
         'Any critical gaps either resolved via clarification call or documented as scoring assumptions',
       ],
+      artifacts: [
+        {
+          id: 'ar-s2-checklist', label: 'Data collection checklist', artifactType: 'checklist',
+          description: 'Track which requested materials have arrived and which are still outstanding.',
+          templateKey: 'dataCollectionChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ar-s2-memo', label: 'Data quality memo', artifactType: 'document',
+          description: 'Document received materials, confidence level per scoring category, and any unresolved gaps.',
+          templateKey: 'dataQualityMemo', component: 'document', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -220,6 +232,18 @@ export const PLAYBOOKS = {
         'Top recommendation drafted with client-specific context (not generic)',
         'Composite score reviewed — analyst can justify the band label from the evidence',
         'Scoring Worksheet and Use Case form saved in Delivery Hub',
+      ],
+      artifacts: [
+        {
+          id: 'ar-s3-scoring', label: 'Readiness scoring', artifactType: 'scoring',
+          description: 'Score all 7 readiness categories using the weighted rubric. Computes a weighted percentage total.',
+          templateKey: 'readinessScoring', component: 'scoring', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ar-s3-initiative', label: 'Use case scorer', artifactType: 'scoring',
+          description: 'Score and rank the top AI use cases using the 5-criterion weighted prioritisation model.',
+          templateKey: 'initiativeScorer', component: 'scoring', launchMode: 'modal', isRequired: true,
+        },
       ],
     },
 
@@ -267,6 +291,18 @@ export const PLAYBOOKS = {
         'Template statuses updated to "In Progress" in Delivery Hub',
         'Internal reviewer assigned and review scheduled',
       ],
+      artifacts: [
+        {
+          id: 'ar-s4-report', label: 'Assessment report notes', artifactType: 'document',
+          description: 'Draft narrative for the full readiness assessment report, section by section.',
+          templateKey: 'assessmentReport', component: 'document', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'ar-s4-qa', label: 'Report QA checklist', artifactType: 'checklist',
+          description: 'Run through all 9 QA checks before marking the draft as ready for internal review.',
+          templateKey: 'internalQaChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+      ],
     },
 
     {
@@ -309,6 +345,18 @@ export const PLAYBOOKS = {
         'Final versions produced with DRAFT removed from filenames',
         'Reviewer sign-off recorded (email confirmation or written comment)',
         'Both final documents saved and ready to send to client',
+      ],
+      artifacts: [
+        {
+          id: 'ar-s5-qa', label: 'Reviewer checklist', artifactType: 'checklist',
+          description: 'All 9 reviewer checks — ensure every score is traceable and the recommendation is client-specific.',
+          templateKey: 'internalQaChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ar-s5-actions', label: 'Review action tracker', artifactType: 'tracker',
+          description: 'Log all reviewer feedback items and track resolution status before final sign-off.',
+          templateKey: 'reviewActions', component: 'actionTracker', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -366,6 +414,23 @@ export const PLAYBOOKS = {
         'Engagement status set to Completed in Delivery Hub',
         'Decisions and next steps logged in Delivery Hub Decisions log',
         'All final artifacts archived in the client project folder',
+      ],
+      artifacts: [
+        {
+          id: 'ar-s6-agenda', label: 'Debrief agenda', artifactType: 'agenda',
+          description: 'Structured 60–90 minute debrief: score → categories → use cases → recommendation → Q&A → next steps.',
+          templateKey: 'debriefAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'ar-s6-followup', label: 'Debrief follow-up email', artifactType: 'emailTemplate',
+          description: 'Post-call summary email confirming findings, agreed next steps, owners, and dates.',
+          templateKey: 'debriefFollowUpEmail', component: 'emailDraft', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ar-s6-actions', label: 'Action tracker', artifactType: 'tracker',
+          description: 'Capture all agreed next steps from the debrief with owners and due dates.',
+          templateKey: 'debriefActions', component: 'actionTracker', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
   ],
@@ -428,6 +493,23 @@ export const PLAYBOOKS = {
         'Success definition captured in client\'s own words',
         'Goals alignment summary sent to client within 24h of call',
       ],
+      artifacts: [
+        {
+          id: 'as-s1-sow', label: 'Statement of Work', artifactType: 'builder',
+          description: 'Draft the SOW for the AI Strategy & Roadmap Workshop engagement.',
+          templateKey: 'sow', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'as-s1-stakeholders', label: 'Stakeholder map', artifactType: 'form',
+          description: 'Build an influence/interest register of key workshop participants and decision-makers.',
+          templateKey: 'stakeholderMap', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'as-s1-notes', label: 'Planning notes', artifactType: 'document',
+          description: 'Document goals alignment findings: strategic priorities, constraints, and success definition.',
+          templateKey: 'planningNotes', component: 'document', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -469,6 +551,28 @@ export const PLAYBOOKS = {
         'Tech setup confirmed (virtual) or room/materials confirmed (on-site)',
         'Dry-run completed; timing and transition points are clean',
         'Parking lot tracker ready',
+      ],
+      artifacts: [
+        {
+          id: 'as-s2-agenda', label: 'Workshop agenda', artifactType: 'agenda',
+          description: 'Full-day workshop agenda with exercises, timings, owners, and facilitation notes.',
+          templateKey: 'workshopAgenda', component: 'agenda', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'as-s2-prep', label: 'Workshop prep checklist', artifactType: 'checklist',
+          description: 'Confirm all facilitation materials, logistics, dry-run, and participant communications are ready.',
+          templateKey: 'workshopPrepChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'as-s2-invite', label: 'Participant invite', artifactType: 'emailTemplate',
+          description: 'Invitation and pre-work email to send workshop participants at least 48h before the session.',
+          templateKey: 'participantInviteEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'as-s2-prep-email', label: 'Workshop prep email', artifactType: 'emailTemplate',
+          description: 'Preparation briefing for participants covering what to expect and how to come prepared.',
+          templateKey: 'workshopPrepEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -528,6 +632,23 @@ export const PLAYBOOKS = {
         'Canvas/board exported or photographed immediately post-session',
         'Same-day debrief email sent to all participants',
       ],
+      artifacts: [
+        {
+          id: 'as-s3-agenda', label: 'Workshop agenda', artifactType: 'agenda',
+          description: 'Live workshop agenda — edit timings and notes as the session unfolds.',
+          templateKey: 'workshopAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'as-s3-notes', label: 'Workshop notes', artifactType: 'document',
+          description: 'Capture raw workshop output: use cases, themes, prioritization votes, and dependencies.',
+          templateKey: 'workshopNotes', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'as-s3-actions', label: 'Parking lot tracker', artifactType: 'tracker',
+          description: 'Log parking-lot items and post-workshop actions with owners and dates.',
+          templateKey: 'workshopActions', component: 'actionTracker', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -564,6 +685,18 @@ export const PLAYBOOKS = {
         'Phase 1 anchor initiative identified and defensible',
         'Cross-cutting dependencies documented',
         'Synthesis narrative drafted (2–3 paragraphs)',
+      ],
+      artifacts: [
+        {
+          id: 'as-s4-matrix', label: 'Theme matrix', artifactType: 'document',
+          description: 'Cluster and score workshop use cases by theme, impact, and feasibility. Draft the synthesis narrative.',
+          templateKey: 'themeMatrix', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'as-s4-scorer', label: 'Initiative scorer', artifactType: 'scoring',
+          description: 'Score each use case across 5 weighted criteria: strategic alignment, impact, feasibility, resources, time-to-value.',
+          templateKey: 'initiativeScorer', component: 'scoring', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -602,6 +735,18 @@ export const PLAYBOOKS = {
         'Phase sequencing logic is defensible (Phase 1 initiative is genuinely achievable first)',
         'Draft saved in client folder with DRAFT designation',
         'Internal reviewer assigned; review scheduled within 1–2 business days',
+      ],
+      artifacts: [
+        {
+          id: 'as-s5-roadmap', label: 'Roadmap document', artifactType: 'document',
+          description: 'Draft the phased AI roadmap with initiatives, timelines, owners, dependencies, and success definition.',
+          templateKey: 'roadmapBuilder', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'as-s5-review-email', label: 'Review session email', artifactType: 'emailTemplate',
+          description: 'Email sharing the draft roadmap and inviting the client to a structured review session.',
+          templateKey: 'reviewSessionEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -656,6 +801,18 @@ export const PLAYBOOKS = {
         'Final document produced with DRAFT removed from filename',
         'Client confirms the roadmap is ready for internal use',
       ],
+      artifacts: [
+        {
+          id: 'as-s6-agenda', label: 'Review session agenda', artifactType: 'agenda',
+          description: 'Structured roadmap review: Phase 1 walkthrough → Phases 2–3 → dependencies → success definition → feedback.',
+          templateKey: 'reviewSessionAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'as-s6-actions', label: 'Feedback action tracker', artifactType: 'tracker',
+          description: 'Log all client feedback items from the review call and track which changes are incorporated.',
+          templateKey: 'reviewFeedbackActions', component: 'actionTracker', launchMode: 'modal', isRequired: true,
+        },
+      ],
     },
 
     {
@@ -697,6 +854,18 @@ export const PLAYBOOKS = {
         'Engagement status set to Completed in Delivery Hub',
         'Phase 1 owner and start date logged in Decisions log',
         'All artifacts archived in client folder',
+      ],
+      artifacts: [
+        {
+          id: 'as-s7-delivery', label: 'Delivery email', artifactType: 'emailTemplate',
+          description: 'Final delivery email with all documents attached and Phase 1 owner and start date confirmed.',
+          templateKey: 'deliveryEmail', component: 'emailDraft', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'as-s7-actions', label: 'Next steps tracker', artifactType: 'tracker',
+          description: 'Log confirmed Phase 1 actions with owners and dates for a clean handoff.',
+          templateKey: 'strategyNextSteps', component: 'actionTracker', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
   ],
@@ -756,6 +925,23 @@ export const PLAYBOOKS = {
         'Pilot team identified (both Barinhall and client side)',
         'Pilot Charter and Metrics forms saved in Delivery Hub',
       ],
+      artifacts: [
+        {
+          id: 'ap-s1-sow', label: 'Pilot SOW', artifactType: 'document',
+          description: 'Draft the pilot statement of work: scope, tools, team, timeline, and success criteria summary.',
+          templateKey: 'pilotSow', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s1-success', label: 'Success criteria form', artifactType: 'scoring',
+          description: 'Define primary KPI targets, secondary metrics, adoption thresholds, and go/no-go conditions.',
+          templateKey: 'successCriteriaForm', component: 'scoring', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s1-kickoff', label: 'Pilot kickoff email', artifactType: 'emailTemplate',
+          description: 'Kickoff confirmation email with pilot overview, agreed success criteria, and Week 1 priorities.',
+          templateKey: 'pilotKickoffEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -797,6 +983,18 @@ export const PLAYBOOKS = {
         'Connectivity test passed — no unresolved firewall or SSO blocks',
         'Any delayed access items escalated to client champion with a resolution date',
         'Build environment confirmed ready to proceed to Step 3',
+      ],
+      artifacts: [
+        {
+          id: 'ap-s2-access', label: 'Access setup checklist', artifactType: 'checklist',
+          description: 'Track all required system access, credentials, and connectivity confirmations before build begins.',
+          templateKey: 'accessSetupChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s2-notes', label: 'Technical setup notes', artifactType: 'document',
+          description: 'Document the confirmed build environment: credentials, endpoints, data sources, and test results.',
+          templateKey: 'technicalSetupNotes', component: 'document', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -843,6 +1041,18 @@ export const PLAYBOOKS = {
         'Client pilot team has confirmed go-ahead to launch',
         'No unresolved show-stopper issues',
       ],
+      artifacts: [
+        {
+          id: 'ap-s3-build', label: 'Build progress checklist', artifactType: 'checklist',
+          description: 'Track build stages: happy path, error handling, edge cases, internal review, and demo sign-off.',
+          templateKey: 'buildProgressChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s3-config', label: 'Configuration notes', artifactType: 'document',
+          description: 'Document the solution configuration: settings, prompts, workflow logic, and integration endpoints.',
+          templateKey: 'configurationNotes', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+      ],
     },
 
     {
@@ -888,6 +1098,18 @@ export const PLAYBOOKS = {
         'Post-session email sent within 2 hours of session',
         'No participant left with unresolved access or usage blockers',
       ],
+      artifacts: [
+        {
+          id: 'ap-s4-onboarding', label: 'Onboarding checklist', artifactType: 'checklist',
+          description: 'Confirm all participants are trained, have access, and know how to report issues.',
+          templateKey: 'onboardingChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s4-agenda', label: 'Onboarding session agenda', artifactType: 'agenda',
+          description: 'Structure the onboarding session: live walkthrough, supervised practice, Q&A, and issue-reporting brief.',
+          templateKey: 'sessionAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -928,6 +1150,18 @@ export const PLAYBOOKS = {
         'No high-severity issue left unresolved for more than 24 hours',
         'Weekly check-in calls completed with a written summary',
         'All configuration changes logged and client-notified',
+      ],
+      artifacts: [
+        {
+          id: 'ap-s5-monitoring', label: 'Monitoring checklist', artifactType: 'checklist',
+          description: 'Weekly monitoring tasks: check dashboards, review logs, triage issues, and update metrics.',
+          templateKey: 'monitoringChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s5-issues', label: 'Issue & action tracker', artifactType: 'tracker',
+          description: 'Log all issues, escalations, and weekly check-in actions with severity and resolution status.',
+          templateKey: 'pilotIssues', component: 'actionTracker', launchMode: 'modal', isRequired: true,
+        },
       ],
     },
 
@@ -977,6 +1211,23 @@ export const PLAYBOOKS = {
         'Any approved adjustments documented with rationale and implementation date',
         'Client decision recorded on whether to continue as-is, adjust, or extend',
       ],
+      artifacts: [
+        {
+          id: 'ap-s6-agenda', label: 'Mid-pilot review agenda', artifactType: 'agenda',
+          description: 'Structured 60-minute mid-point review: metrics → issues → adjustments → trajectory → decisions.',
+          templateKey: 'midPilotReviewAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'ap-s6-email', label: 'Mid-pilot check-in email', artifactType: 'emailTemplate',
+          description: 'Progress update email covering metrics so far, blockers, and any proposed adjustments.',
+          templateKey: 'midPilotEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'ap-s6-results', label: 'Pilot results form', artifactType: 'scoring',
+          description: 'Record midpoint actuals against each success criterion and draft the go/no-go trajectory.',
+          templateKey: 'pilotResultsForm', component: 'scoring', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -1016,6 +1267,18 @@ export const PLAYBOOKS = {
         'Metrics form in Delivery Hub completed',
         'Final results report saved in client folder',
         'Client notified that pilot period is closed and results are ready',
+      ],
+      artifacts: [
+        {
+          id: 'ap-s7-results', label: 'Pilot results form', artifactType: 'scoring',
+          description: 'Final results vs. success criteria: actuals, percentage changes, and go/no-go verdict.',
+          templateKey: 'pilotResultsForm', component: 'scoring', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s7-retro', label: 'Retrospective notes', artifactType: 'document',
+          description: 'Document the pilot retrospective: what worked, what did not, and lessons for scale-up or future pilots.',
+          templateKey: 'retrospectiveNotes', component: 'document', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -1080,6 +1343,23 @@ export const PLAYBOOKS = {
         'Engagement marked Complete in Delivery Hub',
         'Recommendation and next steps logged in Decisions log',
       ],
+      artifacts: [
+        {
+          id: 'ap-s8-recommendation', label: 'Recommendation document', artifactType: 'document',
+          description: 'Write the formal scale / iterate / stop recommendation with evidence, rationale, and next steps.',
+          templateKey: 'recommendationBuilder', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s8-delivery', label: 'Pilot delivery email', artifactType: 'emailTemplate',
+          description: 'Completion email with headline outcome, results summary, recommendation, and agreed next steps.',
+          templateKey: 'pilotDeliveryEmail', component: 'emailDraft', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ap-s8-actions', label: 'Next steps tracker', artifactType: 'tracker',
+          description: 'Capture all agreed next steps from the results call with owners and dates.',
+          templateKey: 'pilotNextSteps', component: 'actionTracker', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
   ],
 
@@ -1136,6 +1416,23 @@ export const PLAYBOOKS = {
         'Scope confirmation document sent to client within 24h of call',
         'Governance form initiated in Delivery Hub',
       ],
+      artifacts: [
+        {
+          id: 'ag-s1-sow', label: 'Statement of Work', artifactType: 'builder',
+          description: 'Draft the governance review SOW: scope, systems under review, deliverables, and timeline.',
+          templateKey: 'sow', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ag-s1-scope', label: 'Governance scope doc', artifactType: 'document',
+          description: 'Document the confirmed review scope: in-scope systems, stakeholder roles, and document requests sent.',
+          templateKey: 'governanceScopeDoc', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ag-s1-email', label: 'Scope confirmation email', artifactType: 'emailTemplate',
+          description: 'Formal scope confirmation email covering in-scope systems, deliverables, and access requirements.',
+          templateKey: 'scopeConfirmEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -1177,6 +1474,18 @@ export const PLAYBOOKS = {
         'Shadow AI systems identified and included',
         'Documentation gaps logged and flagged',
       ],
+      artifacts: [
+        {
+          id: 'ag-s2-inventory', label: 'AI inventory checklist', artifactType: 'checklist',
+          description: 'Track all in-scope AI systems: confirmed, awaiting documentation, and any shadow AI identified.',
+          templateKey: 'aiInventoryChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ag-s2-notes', label: 'Inventory notes', artifactType: 'document',
+          description: 'Build the structured AI system inventory: tool name, use case, data inputs, ownership, controls, and risk tier.',
+          templateKey: 'inventoryNotes', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+      ],
     },
 
     {
@@ -1213,6 +1522,18 @@ export const PLAYBOOKS = {
         'Analyst notes written for each finding (specific risk if not addressed)',
         'Governance form completed and saved in Delivery Hub',
       ],
+      artifacts: [
+        {
+          id: 'ag-s3-risk', label: 'Risk assessment form', artifactType: 'scoring',
+          description: 'Score 7 risk and control domains: data privacy, bias, explainability, security, compliance, dependency, reputation.',
+          templateKey: 'riskAssessmentForm', component: 'scoring', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ag-s3-notes', label: 'Risk & control notes', artifactType: 'document',
+          description: 'Annotate findings per control domain — evidence basis and specific risk if the gap is not addressed.',
+          templateKey: 'policyGapNotes', component: 'document', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -1246,6 +1567,18 @@ export const PLAYBOOKS = {
         'Regulatory alignment assessed for all applicable regulations',
         'Gap severity classified (Critical / High / Medium) for each item',
         'Policy gap table cross-referenced with control matrix — no inconsistencies',
+      ],
+      artifacts: [
+        {
+          id: 'ag-s4-policy', label: 'Policy review checklist', artifactType: 'checklist',
+          description: 'Assess coverage across 6 framework areas: acceptable use, data governance, vendor oversight, incident response, ethics, training.',
+          templateKey: 'policyReviewChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ag-s4-gaps', label: 'Policy gap notes', artifactType: 'document',
+          description: 'Document the gap analysis: gap area, severity (Critical / High / Medium), current state, and remediation required.',
+          templateKey: 'policyGapNotes', component: 'document', launchMode: 'modal', isRequired: true,
+        },
       ],
     },
 
@@ -1290,6 +1623,18 @@ export const PLAYBOOKS = {
         'Governance Findings Summary generated from Output Center',
         'Executive summary written (2–3 paragraphs, accessible to a non-technical reader)',
         'Internal review of the Findings Summary completed before sharing with client',
+      ],
+      artifacts: [
+        {
+          id: 'ag-s5-recommendations', label: 'Governance recommendations', artifactType: 'document',
+          description: 'Draft the top 3–5 findings with severity, current state, specific risk, and concrete remediation actions.',
+          templateKey: 'governanceRecommendations', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ag-s5-email', label: 'Governance delivery email', artifactType: 'emailTemplate',
+          description: 'Delivery email for the Governance Findings Summary with top recommendations and proposed briefing date.',
+          templateKey: 'governanceDeliveryEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -1347,6 +1692,18 @@ export const PLAYBOOKS = {
         'Post-briefing email sent within 2 hours',
         'Agreed actions logged in Delivery Hub Decisions log',
         'Engagement marked Complete in Delivery Hub',
+      ],
+      artifacts: [
+        {
+          id: 'ag-s6-agenda', label: 'Governance briefing agenda', artifactType: 'agenda',
+          description: 'Structured 60-minute findings briefing: posture summary → findings walk-through → prioritization → next steps.',
+          templateKey: 'governanceBriefingAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'ag-s6-actions', label: 'Remediation action tracker', artifactType: 'tracker',
+          description: 'Capture all agreed remediation actions from the briefing with owners and target dates.',
+          templateKey: 'remediationActions', component: 'actionTracker', launchMode: 'modal', isRequired: true,
+        },
       ],
     },
   ],
@@ -1406,6 +1763,18 @@ export const PLAYBOOKS = {
         'Needs Assessment summary sent to client and confirmed',
         'Needs form in Delivery Hub completed',
       ],
+      artifacts: [
+        {
+          id: 'at-s1-needs', label: 'Training needs scoring', artifactType: 'scoring',
+          description: 'Score 7 dimensions of training readiness: AI literacy, data skills, tool familiarity, change readiness, and more.',
+          templateKey: 'trainingNeedsForm', component: 'scoring', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'at-s1-intake', label: 'Training intake email', artifactType: 'emailTemplate',
+          description: 'Pre-training intake questionnaire to the client: participant profile, skill baseline, and learning goals.',
+          templateKey: 'trainingIntakeEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -1441,6 +1810,18 @@ export const PLAYBOOKS = {
         'Facilitator guide complete: talking points, exercise instructions, and common Q&A',
         'Participant materials created and reviewed for clarity and appropriate literacy level',
         'Internal review completed; curriculum approved for use',
+      ],
+      artifacts: [
+        {
+          id: 'at-s2-curriculum', label: 'Curriculum outline', artifactType: 'document',
+          description: 'Design the session curriculum: learning objectives, module sequence, exercises, timing, and facilitator notes.',
+          templateKey: 'curriculumOutline', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'at-s2-prework', label: 'Pre-work materials', artifactType: 'document',
+          description: 'Draft the participant pre-read: session purpose, what to come prepared with, and expected takeaways.',
+          templateKey: 'preworkMaterials', component: 'document', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -1482,6 +1863,18 @@ export const PLAYBOOKS = {
         'Dry-run of facilitator guide completed',
         'Facilitator kit assembled and ready',
         'Go/no-go checkpoint completed 24h before: participant count, access, and any changes confirmed',
+      ],
+      artifacts: [
+        {
+          id: 'at-s3-logistics', label: 'Logistics checklist', artifactType: 'checklist',
+          description: 'Confirm all session logistics: materials, tech, pre-work sent, dry-run done, and go/no-go cleared.',
+          templateKey: 'logisticsChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'at-s3-agenda', label: 'Session agenda', artifactType: 'agenda',
+          description: 'Build the timed training session agenda with modules, exercises, breaks, and owner notes.',
+          templateKey: 'sessionAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -1537,6 +1930,23 @@ export const PLAYBOOKS = {
         'Post-session evaluation form collected from every participant',
         'Wrap-up included a stated key takeaway and a call to action',
       ],
+      artifacts: [
+        {
+          id: 'at-s4-agenda', label: 'Session agenda', artifactType: 'agenda',
+          description: 'Live session agenda — use during delivery to track timing and module transitions.',
+          templateKey: 'sessionAgenda', component: 'agenda', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'at-s4-attendance', label: 'Attendance & notes', artifactType: 'checklist',
+          description: 'Track participant attendance and log any questions or moments to address in follow-up.',
+          templateKey: 'attendanceChecklist', component: 'checklist', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'at-s4-delivery', label: 'Delivery notes', artifactType: 'document',
+          description: 'Capture facilitation observations: what landed well, participant questions, energy, and follow-up needs.',
+          templateKey: 'deliveryNotes', component: 'document', launchMode: 'modal', isRequired: false,
+        },
+      ],
     },
 
     {
@@ -1580,6 +1990,23 @@ export const PLAYBOOKS = {
         'Evaluation summary shared with client contact',
         'Any recommended follow-on training topics logged in Decisions log',
         'Engagement marked Complete in Delivery Hub',
+      ],
+      artifacts: [
+        {
+          id: 'at-s5-followup', label: 'Post-training email', artifactType: 'emailTemplate',
+          description: 'Follow-up email with resources, action plan, answers to session questions, and evaluation summary.',
+          templateKey: 'postTrainingEmail', component: 'emailDraft', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'at-s5-actions', label: 'Training action tracker', artifactType: 'tracker',
+          description: 'Document all agreed post-training actions with owners and due dates.',
+          templateKey: 'trainingActions', component: 'actionTracker', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'at-s5-module', label: 'Module feedback notes', artifactType: 'checklist',
+          description: 'Review which content modules landed well and which need refinement for future sessions.',
+          templateKey: 'moduleChecklist', component: 'checklist', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
   ],
@@ -1631,6 +2058,18 @@ export const PLAYBOOKS = {
         'End-of-month review date confirmed',
         'Written work plan sent to client same day',
       ],
+      artifacts: [
+        {
+          id: 'ao-s1-checkin', label: 'Monthly check-in email', artifactType: 'emailTemplate',
+          description: 'Agenda and pre-read for the monthly check-in: prior-month status, current priorities, and escalations.',
+          templateKey: 'monthlyCheckInEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'ao-s1-actions', label: 'Work plan tracker', artifactType: 'tracker',
+          description: 'Capture the confirmed monthly work plan: committed deliverables, owners, and dates.',
+          templateKey: 'monthlyWorkPlan', component: 'actionTracker', launchMode: 'modal', isRequired: true,
+        },
+      ],
     },
 
     {
@@ -1666,6 +2105,18 @@ export const PLAYBOOKS = {
         'Incident log updated with date, severity, status, and resolution notes',
         'All client-reported issues acknowledged and actioned',
         'Any recurring patterns flagged for tuning (Step 3)',
+      ],
+      artifacts: [
+        {
+          id: 'ao-s2-monitoring', label: 'Monitoring checklist', artifactType: 'checklist',
+          description: 'Systematic weekly monitoring: check dashboards, classify errors, and update the incident log.',
+          templateKey: 'monitoringChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ao-s2-incidents', label: 'Incident tracker', artifactType: 'tracker',
+          description: 'Log all incidents with severity, status, and resolution notes. Track P1 and P2 resolution times.',
+          templateKey: 'incidentLog', component: 'actionTracker', launchMode: 'modal', isRequired: true,
+        },
       ],
     },
 
@@ -1705,6 +2156,13 @@ export const PLAYBOOKS = {
         'Change log updated with every action: date, system, description, and outcome',
         'Any rollbacks documented with root cause',
       ],
+      artifacts: [
+        {
+          id: 'ao-s3-tuning', label: 'Tuning notes', artifactType: 'document',
+          description: 'Document change specs, test results, deployment confirmations, and any rollback records for this cycle.',
+          templateKey: 'tuningNotes', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+      ],
     },
 
     {
@@ -1741,6 +2199,18 @@ export const PLAYBOOKS = {
         'Monthly Ops Review form in Delivery Hub completed',
         'Report generated from Output Center with no placeholder gaps',
         'Report narrative is intelligible to a non-technical reader',
+      ],
+      artifacts: [
+        {
+          id: 'ao-s4-metrics', label: 'Metrics & insights notes', artifactType: 'document',
+          description: 'Compile monthly metrics, trends, completed work, client feedback, and narrative for the ops report.',
+          templateKey: 'metricsNotes', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ao-s4-report-email', label: 'Monthly report email', artifactType: 'emailTemplate',
+          description: 'Monthly AI operations report email with headline metrics, open issues, and next-month focus areas.',
+          templateKey: 'monthlyReportEmail', component: 'emailDraft', launchMode: 'modal', isRequired: false,
+        },
       ],
     },
 
@@ -1782,6 +2252,18 @@ export const PLAYBOOKS = {
         'Irrelevant or stale items removed',
         'Updated backlog shared with client',
         'Client\'s top 2–3 priorities for next cycle confirmed',
+      ],
+      artifacts: [
+        {
+          id: 'ao-s5-backlog', label: 'Backlog scorer', artifactType: 'scoring',
+          description: 'Score and rank backlog items by business value, technical urgency, client impact, and effort.',
+          templateKey: 'backlogScorer', component: 'scoring', launchMode: 'modal', isRequired: false,
+        },
+        {
+          id: 'ao-s5-actions', label: 'Backlog action tracker', artifactType: 'tracker',
+          description: 'Manage the active backlog: close completed items, add new items, and confirm next-cycle priorities.',
+          templateKey: 'backlogItems', component: 'actionTracker', launchMode: 'modal', isRequired: true,
+        },
       ],
     },
 
@@ -1828,6 +2310,18 @@ export const PLAYBOOKS = {
         'Process improvement actions logged in Decisions log in Delivery Hub',
         'Next month\'s check-in call scheduled',
         'Retro summary and next month plan sent to client in writing',
+      ],
+      artifacts: [
+        {
+          id: 'ao-s6-retro', label: 'Retrospective notes', artifactType: 'document',
+          description: 'Document the cycle retrospective: what went well, what to improve, and specific process changes for next cycle.',
+          templateKey: 'retrospectiveNotes', component: 'document', launchMode: 'modal', isRequired: true,
+        },
+        {
+          id: 'ao-s6-wrapup', label: 'Wrap-up checklist', artifactType: 'checklist',
+          description: 'Confirm all cycle-close tasks: report delivered, decisions logged, backlog updated, next check-in scheduled.',
+          templateKey: 'wrapUpChecklist', component: 'checklist', launchMode: 'modal', isRequired: true,
+        },
       ],
     },
   ],
