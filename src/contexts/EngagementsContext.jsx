@@ -182,6 +182,24 @@ export function EngagementsProvider({ children }) {
     }));
   }
 
+  // ── Artifact data (Phase 10) ─────────────────────────────────────────────
+
+  /**
+   * Upserts a single artifact data key on the engagement.
+   * E.g. updateArtifactData(id, 'sow', { fields: {...}, htmlPreview: '...' })
+   * The key lives at engagement.artifactData[key] and is free-form so new
+   * artifact types can be added without schema migrations.
+   */
+  function updateArtifactData(engagementId, key, data) {
+    applyAndSave(engagementId, eng => ({
+      ...eng,
+      artifactData: {
+        ...(eng.artifactData ?? {}),
+        [key]: data,
+      },
+    }));
+  }
+
   // ── Attachments (Phase 9) ────────────────────────────────────────────────
 
   /**
@@ -259,6 +277,7 @@ export function EngagementsProvider({ children }) {
       updateEngagementFields,
       addAttachment,
       removeAttachment,
+      updateArtifactData,
       getEngagement,
     }}>
       {children}
