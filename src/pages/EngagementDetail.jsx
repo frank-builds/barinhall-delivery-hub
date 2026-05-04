@@ -7,6 +7,7 @@ import { TemplateBadge } from '../components/TemplateBadge.jsx';
 import { NotesLog } from '../components/NotesLog.jsx';
 import { DecisionsLog } from '../components/DecisionsLog.jsx';
 import { RisksLog } from '../components/RisksLog.jsx';
+import { AttachmentsPanel } from '../components/AttachmentsPanel.jsx';
 import { SERVICES } from '../data/services.js';
 import { getFormDefs, TEMPLATE_STATUSES } from '../data/formDefinitions.js';
 import { computeStatus, effectiveStatus } from '../lib/statusUtils.js';
@@ -159,6 +160,8 @@ export function EngagementDetail() {
     addNote, updateNote,
     addDecision, updateDecision,
     addRisk, updateRisk,
+    addAttachment,
+    removeAttachment,
   } = useEngagements();
 
   const engagement = getEngagement(id);
@@ -305,6 +308,14 @@ export function EngagementDetail() {
         defaultOwner={engagement.owner}
         onAdd={fields => addRisk(engagement.id, fields)}
         onUpdate={(riskId, fields) => updateRisk(engagement.id, riskId, fields)}
+      />
+
+      {/* ── Attachments (Phase 9) ── */}
+      <AttachmentsPanel
+        attachments={engagement.attachments ?? []}
+        defaultOwner={engagement.owner}
+        onAdd={att => addAttachment(engagement.id, att)}
+        onRemove={attId => removeAttachment(engagement.id, attId)}
       />
     </div>
   );

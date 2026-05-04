@@ -70,6 +70,7 @@ export function EngagementsProvider({ children }) {
       notesLog: [],
       decisionsLog: [],
       risksLog: [],
+      attachments: [],
       createdAt: new Date().toISOString(),
     };
 
@@ -181,6 +182,29 @@ export function EngagementsProvider({ children }) {
     }));
   }
 
+  // ── Attachments (Phase 9) ────────────────────────────────────────────────
+
+  /**
+   * Add a new attachment record to an engagement.
+   * Pass in the full attachment object (id, filename, url, storageKey, size,
+   * type, category, uploadedBy, uploadedAt, isClientVisible).
+   * To swap in a real backend, upload the file first, then call this with the
+   * resulting storageKey / remote URL.
+   */
+  function addAttachment(engagementId, attachment) {
+    applyAndSave(engagementId, eng => ({
+      ...eng,
+      attachments: [...(eng.attachments ?? []), attachment],
+    }));
+  }
+
+  function removeAttachment(engagementId, attachmentId) {
+    applyAndSave(engagementId, eng => ({
+      ...eng,
+      attachments: (eng.attachments ?? []).filter(a => a.id !== attachmentId),
+    }));
+  }
+
   // ── Engagement field updates ─────────────────────────────────────────────
 
   function updateEngagementFields(engagementId, fields) {
@@ -233,6 +257,8 @@ export function EngagementsProvider({ children }) {
       saveOutput,
       setStatusOverride,
       updateEngagementFields,
+      addAttachment,
+      removeAttachment,
       getEngagement,
     }}>
       {children}
