@@ -10,6 +10,11 @@ import { useEngagements } from '../../hooks/useEngagements.js';
 import { SowBuilder } from './SowBuilder.jsx';
 import { EmailDraftEditor } from './EmailDraftEditor.jsx';
 import { StakeholderMapBuilder } from './StakeholderMapBuilder.jsx';
+import { ChecklistBuilder } from './ChecklistBuilder.jsx';
+import { AgendaBuilder } from './AgendaBuilder.jsx';
+import { ScoringForm } from './ScoringForm.jsx';
+import { ActionTracker } from './ActionTracker.jsx';
+import { StructuredDocument } from './StructuredDocument.jsx';
 
 // ── Icon map ──────────────────────────────────────────────────────────────────
 
@@ -18,33 +23,38 @@ const ARTIFACT_ICONS = {
   emailTemplate: '✉️',
   form:          '📋',
   downloadable:  '⬇️',
+  checklist:     '✅',
+  agenda:        '📅',
+  scoring:       '📊',
+  tracker:       '🗂️',
+  document:      '📄',
 };
 
-// ── Builder registry — add new templateKeys here as artifacts are created ─────
+// ── Builder registry ──────────────────────────────────────────────────────────
+// Routes by artifact.component (new) or artifact.templateKey (legacy).
+// Add new component keys here when new artifact builders are created.
 
-function BuilderRouter({ templateKey, engagement, onSave, onClose }) {
-  if (templateKey === 'sow') {
-    return <SowBuilder engagement={engagement} onSave={onSave} onClose={onClose} />;
-  }
+function BuilderRouter({ artifact, engagement, onSave, onClose }) {
+  const { templateKey } = artifact;
+  // 'component' field allows explicit routing; falls back to templateKey for
+  // backward-compatibility with Phase 10 artifacts that pre-date this field.
+  const comp = artifact.component ?? templateKey;
+
+  // ── Legacy routes (Phase 10 Step 1 artifacts) ─────────────────────────────
+  if (templateKey === 'sow')              return <SowBuilder engagement={engagement} onSave={onSave} onClose={onClose} />;
+  if (templateKey === 'stakeholderMap')   return <StakeholderMapBuilder engagement={engagement} onSave={onSave} onClose={onClose} />;
   if (templateKey === 'preCallEmail' || templateKey === 'dataRequestEmail') {
-    return (
-      <EmailDraftEditor
-        type={templateKey}
-        engagement={engagement}
-        onSave={onSave}
-        onClose={onClose}
-      />
-    );
+    return <EmailDraftEditor type={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
   }
-  if (templateKey === 'stakeholderMap') {
-    return (
-      <StakeholderMapBuilder
-        engagement={engagement}
-        onSave={onSave}
-        onClose={onClose}
-      />
-    );
-  }
+
+  // ── New component routes (Phase 10b) ──────────────────────────────────────
+  if (comp === 'checklist')     return <ChecklistBuilder     storageKey={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
+  if (comp === 'agenda')        return <AgendaBuilder        storageKey={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
+  if (comp === 'scoring')       return <ScoringForm          storageKey={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
+  if (comp === 'actionTracker') return <ActionTracker        storageKey={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
+  if (comp === 'document')      return <StructuredDocument   storageKey={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
+  if (comp === 'emailDraft')    return <EmailDraftEditor type={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
+
   return (
     <div className="py-10 text-center text-sm text-gray-400 italic">
       Builder for <strong>{templateKey}</strong> is not yet implemented.
@@ -121,7 +131,7 @@ function ArtifactModal({ artifact, onClose }) {
         <div className="px-6 py-5 overflow-y-auto" style={{ maxHeight: '72vh' }}>
           <BuilderRouter
             key={selectedId}                 // remount on engagement change
-            templateKey={artifact.templateKey}
+            artifact={artifact}
             engagement={engagement}
             onSave={onSave}
             onClose={onClose}
