@@ -2,6 +2,8 @@
 // Receives a step object from PLAYBOOKS and renders all populated sections.
 // Sections that are null/empty are omitted cleanly.
 
+import { ArtifactLauncher } from './artifacts/ArtifactLauncher.jsx';
+
 // ── Section wrapper ───────────────────────────────────────────────────────────
 function Section({ title, children, accent = false }) {
   return (
@@ -103,6 +105,11 @@ export function PlaybookStepDetail({ step }) {
             ))}
           </ul>
         </Section>
+      )}
+
+      {/* Step Tools — artifact launchers (Phase 10) */}
+      {step.artifacts?.length > 0 && (
+        <ArtifactLauncher artifacts={step.artifacts} />
       )}
 
     </div>

@@ -86,6 +86,53 @@ export const PLAYBOOKS = {
         'Stakeholder map (champion, potential resistor, budget owner) captured',
         'Data request email sent to client within 24h of call',
       ],
+
+      // ── Phase 10: Step tools (artifact launchers) ──────────────────────────
+      // Each entry maps to a builder component via templateKey.
+      // Add artifacts to other steps/services by following this schema —
+      // no code changes needed; the ArtifactLauncher renders them automatically.
+      artifacts: [
+        {
+          id:           'ai-readiness-sow',
+          label:        'Statement of Work',
+          artifactType: 'builder',
+          description:  'Draft a scoped SOW capturing deliverables, timeline, fees, and key contacts. Generates a clean HTML document ready for review or PDF export.',
+          templateKey:  'sow',
+          outputFormat: 'html',
+          launchMode:   'modal',
+          isRequired:   true,
+        },
+        {
+          id:           'ai-readiness-pre-call-email',
+          label:        'Pre-call email',
+          artifactType: 'emailTemplate',
+          description:  'Editable preparation email to send the client 48h before the discovery call. Merge fields auto-populate from engagement data.',
+          templateKey:  'preCallEmail',
+          outputFormat: 'emailDraft',
+          launchMode:   'modal',
+          isRequired:   false,
+        },
+        {
+          id:           'ai-readiness-stakeholder-map',
+          label:        'Stakeholder map',
+          artifactType: 'form',
+          description:  'Build an influence/interest register of key stakeholders. Structured for future matrix visualisation.',
+          templateKey:  'stakeholderMap',
+          outputFormat: 'structured',
+          launchMode:   'modal',
+          isRequired:   false,
+        },
+        {
+          id:           'ai-readiness-data-request',
+          label:        'Data request email',
+          artifactType: 'emailTemplate',
+          description:  'Structured data request email with an editable checklist of materials to send the client within 24h of the call.',
+          templateKey:  'dataRequestEmail',
+          outputFormat: 'emailDraft',
+          launchMode:   'modal',
+          isRequired:   false,
+        },
+      ],
     },
 
     {
