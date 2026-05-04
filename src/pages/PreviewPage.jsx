@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useEngagements } from '../hooks/useEngagements.js';
 import { getFormDef } from '../data/formDefinitions.js';
 import { generateMarkdown } from '../data/templateMappings.js';
+import { renderMarkdownBlocks } from '../lib/markdownRenderer.jsx';
 
 export function PreviewPage() {
   const { id, formKey } = useParams();
@@ -14,8 +15,10 @@ export function PreviewPage() {
   if (!engagement) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500 mb-3">Engagement not found.</p>
-        <Link to="/" className="text-indigo-600 hover:underline text-sm">← Dashboard</Link>
+        <p className="text-slate-500 mb-3">Engagement not found.</p>
+        <Link to="/" className="text-indigo-600 hover:text-indigo-800 text-sm transition-colors">
+          ← Dashboard
+        </Link>
       </div>
     );
   }
@@ -25,8 +28,13 @@ export function PreviewPage() {
   if (!formDef) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500 mb-3">Template not found.</p>
-        <Link to={`/engagements/${id}`} className="text-indigo-600 hover:underline text-sm">← Back to engagement</Link>
+        <p className="text-slate-500 mb-3">Template not found.</p>
+        <Link
+          to={`/engagements/${id}`}
+          className="text-indigo-600 hover:text-indigo-800 text-sm transition-colors"
+        >
+          ← Back to engagement
+        </Link>
       </div>
     );
   }
@@ -42,40 +50,75 @@ export function PreviewPage() {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-4 flex items-center gap-2 text-sm text-gray-400">
-        <Link to="/" className="hover:text-gray-600">Dashboard</Link>
-        <span>/</span>
-        <Link to={`/engagements/${id}`} className="hover:text-gray-600">{engagement.clientName}</Link>
-        <span>/</span>
-        <span className="text-gray-600">{formDef.label} — Preview</span>
-      </div>
 
-      <div className="flex justify-between items-center mb-4">
+      {/* ── Breadcrumb ── */}
+      <nav className="mb-5 flex items-center gap-1.5 text-sm text-slate-400">
+        <Link to="/" className="hover:text-slate-600 transition-colors">Dashboard</Link>
+        <span>/</span>
+        <Link to={`/engagements/${id}`} className="hover:text-slate-600 transition-colors">
+          {engagement.clientName}
+        </Link>
+        <span>/</span>
+        <span className="text-slate-600">{formDef.label}</span>
+      </nav>
+
+      {/* ── Page header ── */}
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">{formDef.label}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Generated markdown · {engagement.clientName}</p>
+          <h1>{formDef.label}</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Document preview · {engagement.clientName}
+          </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             to={`/engagements/${id}/forms/${formKey}`}
-            className="text-sm text-indigo-600 hover:underline"
+            className="bh-btn-ghost"
           >
             ← Edit Form
           </Link>
-          <button
-            onClick={handleCopy}
-            className="border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-sm hover:bg-gray-50 transition-colors"
-          >
-            {copied ? 'Copied!' : 'Copy'}
+          <button onClick={handleCopy} className="bh-btn-secondary">
+            {copied ? (
+              <><span className="text-emerald-600">✓</span> Copied</>
+            ) : (
+              'Copy markdown'
+            )}
           </button>
         </div>
       </div>
 
-      <div className="border border-gray-200 rounded-lg bg-white">
-        <pre className="p-5 text-xs text-gray-700 font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto">
-          {markdown}
-        </pre>
+      {/* ── Document card ── */}
+      <div className="bh-card overflow-hidden">
+        {/* Document header bar */}
+        <div className="bg-indigo-700 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img
+              src="/barinhall-logo.png"
+              alt="Barinhall"
+              className="h-6 w-auto object-contain opacity-90"
+              onError={e => { e.target.style.display = 'none'; }}
+            />
+            <span className="text-indigo-200 text-sm font-medium">Barinhall Delivery Hub</span>
+          </div>
+          <span className="text-indigo-300 text-xs">Preview · {formDef.label}</span>
+        </div>
+
+        {/* Document body */}
+        <div className="px-8 py-7">
+          {renderMarkdownBlocks(markdown)}
+        </div>
+
+        {/* Document footer */}
+        <div className="border-t border-slate-100 px-8 py-3 bg-slate-50 flex items-center justify-between">
+          <span className="text-xs text-slate-400">
+            {engagement.clientName} · {engagement.company}
+          </span>
+          <span className="text-xs text-slate-400">
+            Generated by Barinhall Delivery Hub
+          </span>
+        </div>
       </div>
+
     </div>
   );
 }

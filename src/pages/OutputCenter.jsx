@@ -6,6 +6,7 @@ import { generateDocument } from '../lib/outputGenerators.js';
 import { makeFilename, makeFolderName } from '../lib/outputNaming.js';
 import { exportEngagementZip } from '../lib/zipExport.js';
 import { SERVICES } from '../data/services.js';
+import { renderMarkdownBlocks } from '../lib/markdownRenderer.jsx';
 
 function formatDate(isoString) {
   if (!isoString) return '—';
@@ -37,8 +38,8 @@ export function OutputCenter() {
   if (!engagement) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500 mb-3">Engagement not found.</p>
-        <Link to="/" className="text-indigo-600 hover:underline text-sm">← Back to Dashboard</Link>
+        <p className="text-slate-500 mb-3">Engagement not found.</p>
+        <Link to="/" className="text-indigo-600 hover:text-indigo-800 text-sm transition-colors">← Back to Dashboard</Link>
       </div>
     );
   }
@@ -87,31 +88,33 @@ export function OutputCenter() {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-4">
+
+      {/* ── Breadcrumb ── */}
+      <div className="mb-5">
         <Link
           to={`/engagements/${id}`}
-          className="text-sm text-gray-400 hover:text-gray-600"
+          className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
         >
           ← {engagement.clientName}
         </Link>
       </div>
 
       {/* ── Header ── */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Output Center</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <h1>Output Center</h1>
+          <p className="text-slate-500 text-sm mt-1">
             {engagement.clientName} · {service?.label ?? engagement.serviceType}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-400">
-            {generatedCount} / {totalDefs} generated
+          <span className="text-xs text-slate-400 font-medium">
+            {generatedCount}/{totalDefs} generated
           </span>
           <button
             onClick={handleExportZip}
             disabled={exporting || outputs.length === 0}
-            className="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-40 transition-colors"
+            className="bh-btn-primary disabled:opacity-40"
           >
             {exporting ? 'Exporting…' : 'Export Zip'}
           </button>
@@ -119,37 +122,37 @@ export function OutputCenter() {
       </div>
 
       {exportError && (
-        <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+        <p className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
           {exportError}
         </p>
       )}
 
       {outputDefs.length === 0 ? (
-        <p className="text-sm text-gray-500 py-8 text-center">
+        <p className="text-sm text-slate-400 py-10 text-center">
           No document types defined for this service.
         </p>
       ) : (
         <div className="space-y-3 mb-8">
           {outputDefs.map(def => {
-            const existing = getExistingOutput(def.id);
-            const missing  = checkMissingFields(def, engagement);
-            const ready    = missing.length === 0;
+            const existing    = getExistingOutput(def.id);
+            const missing     = checkMissingFields(def, engagement);
+            const ready       = missing.length === 0;
             const isPreviewing = previewDocType === def.id;
 
             return (
-              <div
-                key={def.id}
-                className="border border-gray-200 rounded-lg bg-white overflow-hidden"
-              >
-                <div className="px-4 py-3 flex items-start justify-between gap-4">
+              <div key={def.id} className="bh-card overflow-hidden">
+                {/* Row */}
+                <div className="px-4 py-3.5 flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800">{def.label}</p>
+                    <p className="text-sm font-medium text-slate-800">{def.label}</p>
                     {existing ? (
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        Generated {formatDate(existing.generatedAt)} · {existing.filename}
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Generated {formatDate(existing.generatedAt)}
+                        <span className="mx-1.5 opacity-40">·</span>
+                        <code className="font-mono">{existing.filename}</code>
                       </p>
                     ) : (
-                      <p className="text-xs text-gray-400 mt-0.5">Not yet generated</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Not yet generated</p>
                     )}
                     {!ready && (
                       <p className="text-xs text-amber-600 mt-1">
@@ -158,18 +161,18 @@ export function OutputCenter() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
                     {existing && (
                       <>
                         <button
                           onClick={() => setPreviewDocType(isPreviewing ? null : def.id)}
-                          className="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-2 py-1 transition-colors"
+                          className="bh-btn-ghost text-xs px-2.5 py-1"
                         >
                           {isPreviewing ? 'Hide' : 'Preview'}
                         </button>
                         <button
                           onClick={() => handleDownloadSingle(existing)}
-                          className="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-2 py-1 transition-colors"
+                          className="bh-btn-ghost text-xs px-2.5 py-1"
                         >
                           Download
                         </button>
@@ -179,11 +182,11 @@ export function OutputCenter() {
                       onClick={() => handleGenerate(def)}
                       disabled={!ready || generating === def.id}
                       title={!ready ? `Complete required fields first: ${missing.join(', ')}` : ''}
-                      className={`text-xs font-medium px-3 py-1 rounded transition-colors ${
+                      className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
                         ready
                           ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      } disabled:opacity-50`}
+                          : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      }`}
                     >
                       {generating === def.id
                         ? 'Generating…'
@@ -192,11 +195,18 @@ export function OutputCenter() {
                   </div>
                 </div>
 
+                {/* Inline preview panel */}
                 {isPreviewing && existing && (
-                  <div className="border-t border-gray-100 bg-gray-50 px-4 py-3">
-                    <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono leading-relaxed max-h-96 overflow-y-auto">
-                      {generateDocument(def.id, engagement)}
-                    </pre>
+                  <div className="border-t border-slate-100">
+                    {/* Preview header */}
+                    <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-medium text-slate-500">{def.label} — Preview</span>
+                      <span className="text-xs text-slate-400">{engagement.clientName}</span>
+                    </div>
+                    {/* Rendered document */}
+                    <div className="px-6 py-5 max-h-[500px] overflow-y-auto">
+                      {renderMarkdownBlocks(generateDocument(def.id, engagement))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -207,21 +217,19 @@ export function OutputCenter() {
 
       {/* ── Manifest ── */}
       {outputs.length > 0 && (
-        <section className="border border-gray-200 rounded-lg bg-white px-4 py-4">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-            Output Manifest
-          </h2>
+        <section className="bh-card px-4 py-4 mb-4">
+          <p className="bh-section-label mb-3">Output Manifest</p>
           <div className="space-y-2">
             {outputs
               .filter(o => outputDefs.some(d => d.id === o.documentType))
               .map(o => (
                 <div key={o.id} className="flex items-center justify-between text-xs">
-                  <span className="text-gray-700 font-mono truncate mr-4">{o.filename}</span>
-                  <span className="text-gray-400 flex-shrink-0">{formatDate(o.generatedAt)}</span>
+                  <code className="text-slate-700 font-mono truncate mr-4">{o.filename}</code>
+                  <span className="text-slate-400 flex-shrink-0">{formatDate(o.generatedAt)}</span>
                 </div>
               ))}
           </div>
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-slate-400 mt-3">
             MANIFEST.json is included in the zip export.
           </p>
         </section>
@@ -229,11 +237,9 @@ export function OutputCenter() {
 
       {/* ── Zip structure note ── */}
       {outputs.length > 0 && (
-        <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-            Zip folder structure
-          </p>
-          <pre className="text-xs text-gray-600 font-mono leading-relaxed">
+        <div className="bh-card px-4 py-3.5">
+          <p className="bh-section-label mb-2">Zip Folder Structure</p>
+          <pre className="text-xs text-slate-500 font-mono leading-relaxed bg-slate-50 rounded-lg px-3 py-2.5 border border-slate-100">
 {`${makeFolderName(engagement.clientName, serviceLabel, new Date().toISOString().slice(0, 10))}/
   outputs/
 ${outputs.filter(o => outputDefs.some(d => d.id === o.documentType)).map(o => `    ${o.filename}`).join('\n')}
