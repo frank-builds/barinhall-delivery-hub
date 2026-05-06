@@ -13,6 +13,7 @@ import { NotFound } from './pages/NotFound.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { OutputCenter } from './pages/OutputCenter.jsx';
 import { DigestPage } from './pages/DigestPage.jsx';
+import { UseCaseLibrary } from './pages/UseCaseLibrary.jsx';
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -39,6 +40,7 @@ function AppShell() {
           <Route path="/engagements/:id/preview/:formKey"      element={<PreviewPage />} />
           <Route path="/templates"                             element={<Templates />} />
           <Route path="/digest"                                element={<DigestPage />} />
+          <Route path="/library"                               element={<UseCaseLibrary />} />
           <Route path="*"                                      element={<NotFound />} />
         </Routes>
       </Layout>

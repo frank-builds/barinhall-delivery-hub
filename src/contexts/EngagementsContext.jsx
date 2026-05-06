@@ -223,6 +223,25 @@ export function EngagementsProvider({ children }) {
     }));
   }
 
+  // ── Use Case Library integration ─────────────────────────────────────────
+
+  /** Add a use case ID to the engagement's candidateUseCases list (idempotent). */
+  function addCandidateUseCase(engagementId, useCaseId) {
+    applyAndSave(engagementId, eng => {
+      const existing = eng.candidateUseCases ?? [];
+      if (existing.includes(useCaseId)) return eng;
+      return { ...eng, candidateUseCases: [...existing, useCaseId] };
+    });
+  }
+
+  /** Remove a use case ID from the engagement's candidateUseCases list. */
+  function removeCandidateUseCase(engagementId, useCaseId) {
+    applyAndSave(engagementId, eng => ({
+      ...eng,
+      candidateUseCases: (eng.candidateUseCases ?? []).filter(id => id !== useCaseId),
+    }));
+  }
+
   // ── Engagement field updates ─────────────────────────────────────────────
 
   function updateEngagementFields(engagementId, fields) {
@@ -278,6 +297,8 @@ export function EngagementsProvider({ children }) {
       addAttachment,
       removeAttachment,
       updateArtifactData,
+      addCandidateUseCase,
+      removeCandidateUseCase,
       getEngagement,
     }}>
       {children}

@@ -12,6 +12,8 @@ import { EngagementArtifacts } from '../components/artifacts/EngagementArtifacts
 import { SERVICES } from '../data/services.js';
 import { getFormDefs, TEMPLATE_STATUSES } from '../data/formDefinitions.js';
 import { computeStatus, effectiveStatus } from '../lib/statusUtils.js';
+import { USE_CASES, CATEGORY_BADGE_CLASSES, COMPLEXITY_BADGE_CLASSES } from '../data/useCaseLibrary.js';
+import { UseCasePicker } from '../components/UseCasePicker.jsx';
 
 function DetailRow({ label, value }) {
   return (
@@ -163,7 +165,11 @@ export function EngagementDetail() {
     addRisk, updateRisk,
     addAttachment,
     removeAttachment,
+    addCandidateUseCase,
+    removeCandidateUseCase,
   } = useEngagements();
+
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const engagement = getEngagement(id);
 
@@ -289,6 +295,129 @@ export function EngagementDetail() {
 
       {/* ── Saved Artifacts (Phase 10 / 10b) ── */}
       <EngagementArtifacts engagement={engagement} />
+
+      {/* ── Candidate Use Cases ── */}
+      {(() => {
+        const linked = (engagement.candidateUseCases ?? [])
+          .map(id => USE_CASES.find(uc => uc.id === id))
+          .filter(Boolean);
+        const addedIds = new Set(engagement.candidateUseCases ?? []);
+
+        return (
+          <>
+            <section className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-gray-800">
+                  Candidate Use Cases
+                  {linked.length > 0 && (
+                    <span className="ml-2 text-xs font-normal text-gray-400 tabular-nums">
+                      {linked.length}
+                    </span>
+                  )}
+                </h2>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(true)}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600
+                               hover:text-indigo-800 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add from Library
+                  </button>
+                  {linked.length > 0 && (
+                    <Link
+                      to="/library"
+                      className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      Browse →
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {linked.length === 0 ? (
+                /* Empty state */
+                <div className="border border-dashed border-gray-200 rounded-lg px-5 py-6 text-center bg-white">
+                  <p className="text-sm text-gray-400 mb-2">
+                    No use cases added yet.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(true)}
+                    className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    Browse the library to add candidates →
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {linked.map(uc => (
+                    <div
+                      key={uc.id}
+                      className="border border-gray-200 rounded-lg px-4 py-3 bg-white
+                                 flex flex-wrap items-start justify-between gap-x-4 gap-y-2"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                              CATEGORY_BADGE_CLASSES[uc.category] ?? 'bg-slate-100 text-slate-600 border-slate-200'
+                            }`}
+                          >
+                            {uc.category}
+                          </span>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                              COMPLEXITY_BADGE_CLASSES[uc.complexity] ?? 'bg-slate-100 text-slate-500 border-slate-200'
+                            }`}
+                          >
+                            {uc.complexity}
+                          </span>
+                          <span className="text-xs text-gray-400">{uc.timeToValue}</span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-800">{uc.title}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 leading-snug line-clamp-2">
+                          {uc.suggestedNextStep}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0 pt-0.5">
+                        <Link
+                          to="/library"
+                          className="text-sm text-indigo-600 hover:underline"
+                        >
+                          View
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => removeCandidateUseCase(engagement.id, uc.id)}
+                          className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                          aria-label={`Remove ${uc.title}`}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Picker modal — rendered outside the section flow so it doesn't affect layout */}
+            {pickerOpen && (
+              <UseCasePicker
+                engagementName={engagement.clientName}
+                addedIds={addedIds}
+                onAdd={useCaseId => addCandidateUseCase(engagement.id, useCaseId)}
+                onClose={() => setPickerOpen(false)}
+              />
+            )}
+          </>
+        );
+      })()}
 
       {/* ── Notes log (Phase 2B) ── */}
       <NotesLog
