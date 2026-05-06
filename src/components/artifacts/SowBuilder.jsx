@@ -9,6 +9,7 @@
 // deliverables, string assumptions/exclusions) into the v2 shape safely.
 
 import { useState } from 'react';
+import { exportHtmlStringToPdf, makePdfFilename } from '../../lib/exportPdf.js';
 
 // ── Style constants ───────────────────────────────────────────────────────────
 
@@ -515,10 +516,12 @@ function MilestoneList({ items, onChange }) {
 
 export function SowBuilder({ engagement, onSave, onClose }) {
   const savedFields = engagement?.artifactData?.sow?.fields;
-  const [form,   setForm]   = useState(() => normalizeSow(savedFields, engagement));
-  const [tab,    setTab]    = useState('form');
-  const [copied, setCopied] = useState(false);
-  const [saved_, setSaved_] = useState(!!savedFields);
+  const [form,     setForm]     = useState(() => normalizeSow(savedFields, engagement));
+  const [tab,      setTab]      = useState('form');
+  const [copied,   setCopied]   = useState(false);
+  const [saved_,   setSaved_]   = useState(!!savedFields);
+  const [pdfBusy,  setPdfBusy]  = useState(false);
+  const [pdfError, setPdfError] = useState('');
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -535,6 +538,24 @@ export function SowBuilder({ engagement, onSave, onClose }) {
     try { await navigator.clipboard.writeText(generateSowHtml(form)); } catch { /* no-op */ }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleDownloadPdf() {
+    setPdfBusy(true);
+    setPdfError('');
+    try {
+      const filename = makePdfFilename(
+        'SOW',
+        form.clientName || form.company || 'Draft',
+      );
+      await exportHtmlStringToPdf(generateSowHtml(form), filename);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      setPdfError('PDF export failed — please try again.');
+      setTimeout(() => setPdfError(''), 5000);
+    } finally {
+      setPdfBusy(false);
+    }
   }
 
   const previewHtml = tab === 'preview' ? generateSowHtml(form) : '';
@@ -853,7 +874,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
       )}
 
       {/* Action bar */}
-      <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 mt-6 pt-4 border-t border-gray-100 flex-wrap">
         {engagement && (
           <button type="button" onClick={handleSave}
             className={`${BTN} bg-indigo-600 text-white hover:bg-indigo-700`}>
@@ -864,11 +885,18 @@ export function SowBuilder({ engagement, onSave, onClose }) {
           className={`${BTN} border border-gray-300 text-gray-700 hover:bg-gray-50`}>
           {copied ? '✓ Copied!' : 'Copy HTML'}
         </button>
+        <button type="button" onClick={handleDownloadPdf} disabled={pdfBusy}
+          className={`${BTN} border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait`}>
+          {pdfBusy ? 'Generating PDF…' : '↓ Download PDF'}
+        </button>
         <button type="button"
           onClick={() => setTab(t => t === 'form' ? 'preview' : 'form')}
           className={`${BTN} border border-gray-300 text-gray-600 hover:bg-gray-50`}>
           {tab === 'form' ? '👁 Preview' : '📝 Edit form'}
         </button>
+        {pdfError && (
+          <span className="text-xs text-red-600">{pdfError}</span>
+        )}
         <button type="button" onClick={onClose}
           className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline">
           Close

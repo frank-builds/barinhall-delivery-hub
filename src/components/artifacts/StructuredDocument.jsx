@@ -4,6 +4,7 @@
 // Saved to engagement.artifactData[storageKey].
 
 import { useState } from 'react';
+import { exportHtmlStringToPdf, generateStructuredDocHtml, makePdfFilename } from '../../lib/exportPdf.js';
 
 // ── Template registry ─────────────────────────────────────────────────────────
 
@@ -272,8 +273,10 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
   const [sections, setSections] = useState(() =>
     saved?.sections ?? template.sections.map(s => ({ id: crypto.randomUUID(), ...s, content: s.content ?? '' }))
   );
-  const [isSaved, setIsSaved]  = useState(!!saved);
-  const [copied,  setCopied]   = useState(false);
+  const [isSaved,  setIsSaved]  = useState(!!saved);
+  const [copied,   setCopied]   = useState(false);
+  const [pdfBusy,  setPdfBusy]  = useState(false);
+  const [pdfError, setPdfError] = useState('');
 
   function update(id, val) {
     setSections(prev => prev.map(s => s.id === id ? { ...s, content: val } : s));
@@ -288,6 +291,24 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
     try { await navigator.clipboard.writeText(text); } catch {}
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleDownloadPdf() {
+    setPdfBusy(true);
+    setPdfError('');
+    try {
+      const html = generateStructuredDocHtml(title, sections, {
+        clientName: engagement?.clientName ?? '',
+        company:    engagement?.company ?? '',
+      });
+      await exportHtmlStringToPdf(html, makePdfFilename(title, engagement?.clientName));
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      setPdfError('PDF export failed — please try again.');
+      setTimeout(() => setPdfError(''), 5000);
+    } finally {
+      setPdfBusy(false);
+    }
   }
 
   return (
@@ -329,6 +350,17 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
           className="text-xs px-3 py-1.5 rounded-md font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
           {copied ? '✓ Copied!' : '📋 Copy as Markdown'}
         </button>
+        <button
+          type="button"
+          onClick={handleDownloadPdf}
+          disabled={pdfBusy}
+          className="text-xs px-3 py-1.5 rounded-md font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-wait"
+        >
+          {pdfBusy ? 'Generating PDF…' : '↓ Download PDF'}
+        </button>
+        {pdfError && (
+          <span className="text-xs text-red-600">{pdfError}</span>
+        )}
         <button type="button" onClick={onClose}
           className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline">
           Close

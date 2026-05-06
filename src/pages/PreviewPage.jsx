@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useEngagements } from '../hooks/useEngagements.js';
 import { getFormDef } from '../data/formDefinitions.js';
 import { generateMarkdown } from '../data/templateMappings.js';
 import { renderMarkdownBlocks } from '../lib/markdownRenderer.jsx';
+import { exportElementToPdf, makePdfFilename } from '../lib/exportPdf.js';
 
 export function PreviewPage() {
   const { id, formKey } = useParams();
   const { getEngagement } = useEngagements();
   const engagement = getEngagement(id);
 
-  const [copied, setCopied] = useState(false);
+  const [copied,   setCopied]   = useState(false);
+  const [pdfBusy,  setPdfBusy]  = useState(false);
+  const [pdfError, setPdfError] = useState('');
+  const docCardRef = useRef(null);
 
   if (!engagement) {
     return (
@@ -48,6 +52,23 @@ export function PreviewPage() {
     });
   }
 
+  async function handleDownloadPdf() {
+    setPdfBusy(true);
+    setPdfError('');
+    try {
+      await exportElementToPdf(
+        docCardRef.current,
+        makePdfFilename(formDef.label, engagement.clientName),
+      );
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      setPdfError('PDF export failed — please try again.');
+      setTimeout(() => setPdfError(''), 5000);
+    } finally {
+      setPdfBusy(false);
+    }
+  }
+
   return (
     <div className="max-w-3xl">
 
@@ -70,7 +91,7 @@ export function PreviewPage() {
             Document preview · {engagement.clientName}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link
             to={`/engagements/${id}/forms/${formKey}`}
             className="bh-btn-ghost"
@@ -84,11 +105,21 @@ export function PreviewPage() {
               'Copy markdown'
             )}
           </button>
+          <button
+            onClick={handleDownloadPdf}
+            disabled={pdfBusy}
+            className="bh-btn-secondary disabled:opacity-50 disabled:cursor-wait"
+          >
+            {pdfBusy ? 'Generating…' : '↓ Download PDF'}
+          </button>
+          {pdfError && (
+            <span className="text-xs text-red-600">{pdfError}</span>
+          )}
         </div>
       </div>
 
       {/* ── Document card ── */}
-      <div className="bh-card overflow-hidden">
+      <div ref={docCardRef} className="bh-card overflow-hidden">
         {/* Document header bar */}
         <div className="bg-indigo-700 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">

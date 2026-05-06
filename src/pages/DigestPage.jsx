@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useEngagements } from '../hooks/useEngagements.js';
 import { generateWeeklyDigest, computeDigestData } from '../lib/digestGenerator.js';
 import { generateAllReminders } from '../lib/reminderGenerator.js';
 import { getFormDefs } from '../data/formDefinitions.js';
+import { exportElementToPdf, makePdfFilename } from '../lib/exportPdf.js';
 
 function fmtDate(isoString) {
   if (!isoString) return '—';
@@ -54,7 +55,11 @@ const SUMMARY_CONFIG = [
 
 export function DigestPage() {
   const { engagements, loading } = useEngagements();
-  const [copied, setCopied] = useState(false);
+  const [copied,   setCopied]   = useState(false);
+  const [pdfBusy,  setPdfBusy]  = useState(false);
+  const [pdfError, setPdfError] = useState('');
+  // Ref covers the full exportable content area (action buttons are excluded via data-html2canvas-ignore)
+  const exportRef = useRef(null);
 
   if (loading) {
     return (
@@ -76,6 +81,23 @@ export function DigestPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function handleDownloadPdf() {
+    setPdfBusy(true);
+    setPdfError('');
+    try {
+      await exportElementToPdf(
+        exportRef.current,
+        makePdfFilename('Weekly Digest'),
+      );
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      setPdfError('PDF export failed — please try again.');
+      setTimeout(() => setPdfError(''), 5000);
+    } finally {
+      setPdfBusy(false);
+    }
+  }
+
   const weekOf = new Date(d.asOf).toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   });
@@ -87,7 +109,7 @@ export function DigestPage() {
     d.recentOutputs.length > 0;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div ref={exportRef} className="max-w-3xl space-y-6">
 
       {/* ── Page header ── */}
       <div className="flex flex-wrap justify-between items-start gap-3">
@@ -97,13 +119,26 @@ export function DigestPage() {
             Week of {weekOf} · {engagements.length} engagement{engagements.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button onClick={handleCopy} className="bh-btn-secondary">
-          {copied ? (
-            <><span className="text-emerald-600">✓</span> Copied</>
-          ) : (
-            'Copy markdown'
+        {/* data-html2canvas-ignore excludes these buttons from PDF capture */}
+        <div className="flex items-center gap-2 flex-wrap" data-html2canvas-ignore="true">
+          <button onClick={handleCopy} className="bh-btn-secondary">
+            {copied ? (
+              <><span className="text-emerald-600">✓</span> Copied</>
+            ) : (
+              'Copy markdown'
+            )}
+          </button>
+          <button
+            onClick={handleDownloadPdf}
+            disabled={pdfBusy}
+            className="bh-btn-secondary disabled:opacity-50 disabled:cursor-wait"
+          >
+            {pdfBusy ? 'Generating…' : '↓ Download PDF'}
+          </button>
+          {pdfError && (
+            <span className="text-xs text-red-600">{pdfError}</span>
           )}
-        </button>
+        </div>
       </div>
 
       {/* ── Engagement Summary ── */}
