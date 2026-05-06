@@ -272,10 +272,10 @@ export function AttachmentsPanel({
 
       {/* ── Header ── */}
       <div className="flex justify-between items-center mb-3">
-        <h2 className="font-semibold text-gray-800">
+        <h2 className="font-semibold text-slate-800">
           Attachments
           {attachments.length > 0 && (
-            <span className="text-gray-400 font-normal text-sm ml-1">
+            <span className="text-slate-400 font-normal text-sm ml-1">
               ({attachments.length})
             </span>
           )}
@@ -289,11 +289,11 @@ export function AttachmentsPanel({
 
       {/* ── Category selector ── */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs text-gray-500">Category for next upload:</span>
+        <span className="text-xs text-slate-500">Category for next upload:</span>
         <select
           value={pendingCategory}
           onChange={e => setPendingCategory(e.target.value)}
-          className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className="text-xs border border-slate-200 rounded px-2 py-1 text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400"
         >
           <option value="">None</option>
           {ATTACHMENT_CATEGORIES.map(c => (
@@ -310,11 +310,11 @@ export function AttachmentsPanel({
         className={`border-2 border-dashed rounded-lg px-6 py-8 text-center transition-colors mb-4 ${
           isDragging
             ? 'border-indigo-400 bg-indigo-50'
-            : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-gray-50'
+            : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50'
         }`}
       >
         <p className="text-2xl mb-2 select-none">📁</p>
-        <p className="text-sm text-gray-600 mb-1">
+        <p className="text-sm text-slate-600 mb-1">
           Drag &amp; drop files here, or{' '}
           <button
             type="button"
@@ -324,7 +324,7 @@ export function AttachmentsPanel({
             browse files
           </button>
         </p>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-slate-400">
           PDF, DOCX, XLSX, CSV, images &amp; more · Max&nbsp;25&nbsp;MB per file
         </p>
         <input
@@ -346,7 +346,7 @@ export function AttachmentsPanel({
 
       {/* ── Attachment list ── */}
       {attachments.length === 0 ? (
-        <p className="text-sm text-gray-400 italic">No attachments yet.</p>
+        <p className="text-sm text-slate-400 italic">No attachments yet.</p>
       ) : (
         <div className="space-y-2">
           {sorted.map(att => {
@@ -354,7 +354,7 @@ export function AttachmentsPanel({
             return (
               <div
                 key={att.id}
-                className={`border border-gray-200 rounded-lg bg-white px-4 py-3 flex items-start gap-3 transition-opacity ${
+                className={`border border-slate-200 rounded-lg bg-white px-4 py-3 flex items-start gap-3 transition-opacity ${
                   isDeleting ? 'opacity-40' : ''
                 }`}
               >
@@ -382,7 +382,7 @@ export function AttachmentsPanel({
                         </button>
                       ) : (
                         <span
-                          className="text-sm font-medium text-gray-800 break-all"
+                          className="text-sm font-medium text-slate-800 break-all"
                           title={att.filename}
                         >
                           {truncateFilename(att.filename)}
@@ -390,12 +390,12 @@ export function AttachmentsPanel({
                       )}
 
                       {/* Sub-line */}
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-slate-400 mt-0.5">
                         {fmtSize(att.size)}
                         &nbsp;·&nbsp;{fmtDate(att.uploadedAt)}
                         &nbsp;·&nbsp;{att.uploadedBy}
                         {att.category && (
-                          <span className="ml-2 inline-block bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 text-[11px]">
+                          <span className="ml-2 inline-block bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[11px]">
                             {att.category}
                           </span>
                         )}
@@ -410,8 +410,8 @@ export function AttachmentsPanel({
                       onClick={() => handleRemove(att)}
                       className={`flex-shrink-0 text-sm leading-none mt-0.5 transition-colors ${
                         isDeleting
-                          ? 'text-gray-300 cursor-not-allowed'
-                          : 'text-gray-300 hover:text-red-500'
+                          ? 'text-slate-300 cursor-not-allowed'
+                          : 'text-slate-300 hover:text-red-500'
                       }`}
                     >
                       {isDeleting ? '…' : '✕'}
@@ -426,3 +426,4 @@ export function AttachmentsPanel({
     </section>
   );
 }
+

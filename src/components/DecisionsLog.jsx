@@ -4,7 +4,7 @@ function fmt(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-const INPUT = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
+const INPUT = 'w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
 
 const EMPTY = { decision: '', rationale: '', owner: '' };
 
@@ -15,7 +15,7 @@ function DecisionForm({ draft, onChange, onSave, onCancel, variant }) {
   return (
     <div className={wrapClass}>
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Decision <span className="text-red-400">*</span></label>
+        <label className="block text-xs font-medium text-slate-600 mb-1">Decision <span className="text-red-400">*</span></label>
         <textarea
           rows={2}
           value={draft.decision}
@@ -26,7 +26,7 @@ function DecisionForm({ draft, onChange, onSave, onCancel, variant }) {
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Rationale</label>
+        <label className="block text-xs font-medium text-slate-600 mb-1">Rationale</label>
         <textarea
           rows={2}
           value={draft.rationale}
@@ -36,7 +36,7 @@ function DecisionForm({ draft, onChange, onSave, onCancel, variant }) {
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Owner</label>
+        <label className="block text-xs font-medium text-slate-600 mb-1">Owner</label>
         <input
           type="text"
           value={draft.owner}
@@ -45,8 +45,8 @@ function DecisionForm({ draft, onChange, onSave, onCancel, variant }) {
         />
       </div>
       <div className="flex gap-2">
-        <button onClick={onSave} className="bg-indigo-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-indigo-700">Save</button>
-        <button onClick={onCancel} className="border border-gray-300 text-gray-600 px-4 py-1.5 rounded text-sm hover:bg-gray-50">Cancel</button>
+        <button onClick={onSave} className="bh-btn-primary py-1.5">Save</button>
+        <button onClick={onCancel} className="border border-slate-300 text-slate-600 px-4 py-1.5 rounded text-sm hover:bg-slate-50">Cancel</button>
       </div>
     </div>
   );
@@ -84,7 +84,7 @@ export function DecisionsLog({ entries, defaultOwner, onAdd, onUpdate }) {
   return (
     <section className="mt-8">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="font-semibold text-gray-800">Decisions {entries.length > 0 && <span className="text-gray-400 font-normal text-sm">({entries.length})</span>}</h2>
+        <h2 className="font-semibold text-slate-800">Decisions {entries.length > 0 && <span className="text-slate-400 font-normal text-sm">({entries.length})</span>}</h2>
         {!showAdd && (
           <button
             onClick={() => { setEditingId(null); setAddDraft({ ...EMPTY, owner: defaultOwner }); setShowAdd(true); }}
@@ -106,12 +106,12 @@ export function DecisionsLog({ entries, defaultOwner, onAdd, onUpdate }) {
       )}
 
       {entries.length === 0 && !showAdd && (
-        <p className="text-sm text-gray-400 italic">No decisions logged yet.</p>
+        <p className="text-sm text-slate-400 italic">No decisions logged yet.</p>
       )}
 
       <div className="space-y-2">
         {entries.map(entry => (
-          <div key={entry.id} className="border border-gray-200 rounded-lg bg-white">
+          <div key={entry.id} className="border border-slate-200 rounded-lg bg-white">
             {editingId === entry.id ? (
               <DecisionForm
                 draft={editDraft}
@@ -123,18 +123,18 @@ export function DecisionsLog({ entries, defaultOwner, onAdd, onUpdate }) {
             ) : (
               <div className="p-4">
                 <div className="flex justify-between items-start gap-2">
-                  <p className="text-sm font-medium text-gray-800 flex-1">{entry.decision}</p>
+                  <p className="text-sm font-medium text-slate-800 flex-1">{entry.decision}</p>
                   <button
                     onClick={() => openEdit(entry)}
-                    className="text-xs text-gray-400 hover:text-indigo-600 flex-shrink-0 mt-0.5"
+                    className="text-xs text-slate-400 hover:text-indigo-600 flex-shrink-0 mt-0.5"
                   >
                     Edit
                   </button>
                 </div>
                 {entry.rationale && (
-                  <p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{entry.rationale}</p>
+                  <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{entry.rationale}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-2">{fmt(entry.date)} · {entry.owner}</p>
+                <p className="text-xs text-slate-400 mt-2">{fmt(entry.date)} · {entry.owner}</p>
               </div>
             )}
           </div>

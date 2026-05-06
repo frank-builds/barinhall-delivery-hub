@@ -3,7 +3,7 @@ import { effectiveStatus } from '../lib/statusUtils.js';
 import { useEngagements } from '../hooks/useEngagements.js';
 
 const COLUMNS = [
-  { status: 'Draft',     color: 'bg-gray-100  border-gray-200',  label: 'Draft'     },
+  { status: 'Draft',     color: 'bg-slate-100  border-slate-200',  label: 'Draft'     },
   { status: 'Active',    color: 'bg-green-50  border-green-200', label: 'Active'    },
   { status: 'On Hold',   color: 'bg-yellow-50 border-yellow-200',label: 'On Hold'   },
   { status: 'Completed', color: 'bg-blue-50   border-blue-200',  label: 'Completed' },
@@ -26,8 +26,8 @@ export function KanbanBoard({ engagements }) {
             >
               {/* Column header */}
               <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-sm font-semibold text-gray-700">{col.label}</span>
-                <span className="text-xs text-gray-400 font-medium">{cards.length}</span>
+                <span className="text-sm font-semibold text-slate-700">{col.label}</span>
+                <span className="text-xs text-slate-400 font-medium">{cards.length}</span>
               </div>
 
               {/* Cards */}
@@ -43,7 +43,7 @@ export function KanbanBoard({ engagements }) {
                           ev.stopPropagation();
                           setStatusOverride(e.id, ev.target.value);
                         }}
-                        className="w-full text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-400 bg-white hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 cursor-pointer"
+                        className="w-full text-xs border border-slate-200 rounded-md px-2 py-1 text-slate-400 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 cursor-pointer"
                       >
                         <option value="" disabled>Move to…</option>
                         {ALL_STATUSES.filter(s => s !== col.status).map(s => (
@@ -54,7 +54,7 @@ export function KanbanBoard({ engagements }) {
                   </div>
                 ))}
                 {cards.length === 0 && (
-                  <p className="text-xs text-gray-400 text-center py-6">No engagements</p>
+                  <p className="text-xs text-slate-400 text-center py-6">No engagements</p>
                 )}
               </div>
             </div>

@@ -2,15 +2,26 @@ import { Link } from 'react-router-dom';
 import { StatusBadge } from './StatusBadge.jsx';
 import { SERVICES } from '../data/services.js';
 import { effectiveStatus } from '../lib/statusUtils.js';
+import { computeEngagementProgress } from '../lib/engagementProgress.js';
+
+// Stage-specific bar colour. Cards use journey-stage progress (created →
+// discovery → building → ready → complete), not raw workflow-step ratio.
+const STAGE_BAR_COLOR = {
+  created:   'bg-slate-400',
+  discovery: 'bg-indigo-500',
+  building:  'bg-violet-500',
+  delivery:  'bg-emerald-500',
+  complete:  'bg-emerald-600',
+};
 
 export function EngagementCard({ engagement }) {
   const svcKeys = engagement.serviceTypes ?? (engagement.serviceType ? [engagement.serviceType] : []);
   const serviceLabel = svcKeys
     .map(k => SERVICES.find(s => s.key === k)?.label ?? k)
     .join(', ');
-  const done = engagement.workflow.filter(s => s.done).length;
-  const total = engagement.workflow.length;
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  const { pct, stage, label } = computeEngagementProgress(engagement);
+  const barColor = STAGE_BAR_COLOR[stage] ?? STAGE_BAR_COLOR.discovery;
 
   return (
     <Link
@@ -37,15 +48,15 @@ export function EngagementCard({ engagement }) {
         <span>{engagement.startDate}</span>
       </div>
 
-      {/* Workflow progress */}
+      {/* Journey-stage progress (Sprint B) */}
       <div>
-        <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-          <span>Progress</span>
-          <span className="tabular-nums font-medium">{done}/{total}</span>
+        <div className="flex justify-between items-center text-xs mb-1.5">
+          <span className="text-slate-500 truncate">{label}</span>
+          <span className="text-slate-500 tabular-nums font-medium flex-shrink-0 ml-2">{pct}%</span>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
           <div
-            className={`h-1.5 rounded-full transition-all ${pct === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+            className={`h-1.5 rounded-full transition-all ${barColor}`}
             style={{ width: `${pct}%` }}
           />
         </div>

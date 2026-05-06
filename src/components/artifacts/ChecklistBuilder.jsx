@@ -151,7 +151,7 @@ export const CHECKLIST_TEMPLATES = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const INPUT = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 flex-1';
+const INPUT = 'border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 flex-1';
 
 function makeItem(text = '', checked = false) {
   return { id: crypto.randomUUID(), text, checked, notes: '' };
@@ -205,11 +205,11 @@ export function ChecklistBuilder({ storageKey, engagement, onSave, onClose }) {
       {/* Progress bar */}
       {total > 0 && (
         <div className="mb-4">
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <div className="flex justify-between text-xs text-slate-500 mb-1">
             <span>{done} / {total} complete</span>
             <span>{pct}%</span>
           </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-indigo-500 rounded-full transition-all"
               style={{ width: `${pct}%` }}
@@ -228,13 +228,13 @@ export function ChecklistBuilder({ storageKey, engagement, onSave, onClose }) {
               onChange={() => toggle(item.id)}
               className="mt-1 flex-shrink-0 accent-indigo-600"
             />
-            <span className={`text-sm flex-1 ${item.checked ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+            <span className={`text-sm flex-1 ${item.checked ? 'line-through text-slate-400' : 'text-slate-700'}`}>
               {item.text}
             </span>
             <button
               type="button"
               onClick={() => remove(item.id)}
-              className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 text-xs flex-shrink-0 transition-opacity"
+              className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 text-xs flex-shrink-0 transition-opacity"
             >
               ✕
             </button>
@@ -254,11 +254,11 @@ export function ChecklistBuilder({ storageKey, engagement, onSave, onClose }) {
             className={INPUT}
           />
           <button type="button" onClick={addItem}
-            className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-md hover:bg-indigo-700 font-medium flex-shrink-0">
+            className="bh-btn-primary text-xs py-1.5 flex-shrink-0">
             Add
           </button>
           <button type="button" onClick={() => setAdding(false)}
-            className="text-xs border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md hover:bg-gray-50 flex-shrink-0">
+            className="text-xs border border-slate-300 text-slate-600 px-3 py-1.5 rounded-md hover:bg-slate-50 flex-shrink-0">
             Cancel
           </button>
         </div>
@@ -270,7 +270,7 @@ export function ChecklistBuilder({ storageKey, engagement, onSave, onClose }) {
       )}
 
       {/* Action bar */}
-      <div className="flex items-center gap-2 pt-4 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 pt-4 border-t border-slate-100 flex-wrap">
         {engagement && (
           <button type="button" onClick={handleSave}
             className="text-xs px-3 py-1.5 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
@@ -278,7 +278,7 @@ export function ChecklistBuilder({ storageKey, engagement, onSave, onClose }) {
           </button>
         )}
         <button type="button" onClick={onClose}
-          className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline">
+          className="ml-auto text-xs text-slate-400 hover:text-slate-600 underline">
           Close
         </button>
       </div>

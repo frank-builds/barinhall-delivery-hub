@@ -4,7 +4,9 @@
 // Saved to engagement.artifactData[storageKey].
 
 import { useState } from 'react';
-import { exportHtmlStringToPdf, generateStructuredDocHtml, makePdfFilename } from '../../lib/exportPdf.js';
+import { generateStructuredDocHtml, makePdfFilename } from '../../lib/exportPdf.js';
+import { usePdfExport } from '../../hooks/usePdfExport.js';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 
 // ── Template registry ─────────────────────────────────────────────────────────
 
@@ -273,10 +275,9 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
   const [sections, setSections] = useState(() =>
     saved?.sections ?? template.sections.map(s => ({ id: crypto.randomUUID(), ...s, content: s.content ?? '' }))
   );
-  const [isSaved,  setIsSaved]  = useState(!!saved);
-  const [copied,   setCopied]   = useState(false);
-  const [pdfBusy,  setPdfBusy]  = useState(false);
-  const [pdfError, setPdfError] = useState('');
+  const [isSaved, setIsSaved] = useState(!!saved);
+  const { exportHtmlString, busy: pdfBusy, error: pdfError } = usePdfExport();
+  const { copy, copied } = useCopyToClipboard();
 
   function update(id, val) {
     setSections(prev => prev.map(s => s.id === id ? { ...s, content: val } : s));
@@ -286,29 +287,17 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
     onSave(storageKey, { title, sections });
     setIsSaved(true);
   }
-  async function handleCopy() {
+  function handleCopy() {
     const text = `# ${title}\n\n` + sections.map(s => `## ${s.heading}\n\n${s.content || '—'}`).join('\n\n');
-    try { await navigator.clipboard.writeText(text); } catch {}
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    return copy(text);
   }
 
-  async function handleDownloadPdf() {
-    setPdfBusy(true);
-    setPdfError('');
-    try {
-      const html = generateStructuredDocHtml(title, sections, {
-        clientName: engagement?.clientName ?? '',
-        company:    engagement?.company ?? '',
-      });
-      await exportHtmlStringToPdf(html, makePdfFilename(title, engagement?.clientName));
-    } catch (err) {
-      console.error('PDF export failed:', err);
-      setPdfError('PDF export failed — please try again.');
-      setTimeout(() => setPdfError(''), 5000);
-    } finally {
-      setPdfBusy(false);
-    }
+  function handleDownloadPdf() {
+    const html = generateStructuredDocHtml(title, sections, {
+      clientName: engagement?.clientName ?? '',
+      company:    engagement?.company ?? '',
+    });
+    return exportHtmlString(html, makePdfFilename(title, engagement?.clientName));
   }
 
   return (
@@ -318,7 +307,7 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
         <input
           value={title}
           onChange={e => { setTitle(e.target.value); setIsSaved(false); }}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="bh-input text-sm font-semibold"
         />
       </div>
 
@@ -326,35 +315,33 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
       <div className="space-y-5">
         {sections.map(section => (
           <div key={section.id}>
-            <label className="block text-xs font-bold text-gray-600 mb-1.5">{section.heading}</label>
+            <label className="block text-xs font-bold text-slate-600 mb-1.5">{section.heading}</label>
             <textarea
               rows={4}
               value={section.content}
               onChange={e => update(section.id, e.target.value)}
               placeholder={section.placeholder}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 leading-relaxed resize-y"
+              className="bh-input leading-relaxed resize-y"
             />
           </div>
         ))}
       </div>
 
       {/* Action bar */}
-      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-slate-100 flex-wrap">
         {engagement && (
-          <button type="button" onClick={handleSave}
-            className="text-xs px-3 py-1.5 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+          <button type="button" onClick={handleSave} className="bh-btn-primary py-1.5 text-xs">
             {isSaved ? '✓ Saved' : 'Save to engagement'}
           </button>
         )}
-        <button type="button" onClick={handleCopy}
-          className="text-xs px-3 py-1.5 rounded-md font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+        <button type="button" onClick={handleCopy} className="bh-btn-secondary py-1.5 text-xs">
           {copied ? '✓ Copied!' : '📋 Copy as Markdown'}
         </button>
         <button
           type="button"
           onClick={handleDownloadPdf}
           disabled={pdfBusy}
-          className="text-xs px-3 py-1.5 rounded-md font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-wait"
+          className="bh-btn-secondary py-1.5 text-xs disabled:opacity-50 disabled:cursor-wait"
         >
           {pdfBusy ? 'Generating PDF…' : '↓ Download PDF'}
         </button>
@@ -362,7 +349,7 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
           <span className="text-xs text-red-600">{pdfError}</span>
         )}
         <button type="button" onClick={onClose}
-          className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline">
+          className="ml-auto text-xs text-slate-400 hover:text-slate-600 underline">
           Close
         </button>
       </div>

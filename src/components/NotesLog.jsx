@@ -4,7 +4,7 @@ function fmt(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-const INPUT = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
+const INPUT = 'w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
 
 export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
   const [showAdd, setShowAdd]   = useState(false);
@@ -41,7 +41,7 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
   return (
     <section className="mt-8">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="font-semibold text-gray-800">Notes {entries.length > 0 && <span className="text-gray-400 font-normal text-sm">({entries.length})</span>}</h2>
+        <h2 className="font-semibold text-slate-800">Notes {entries.length > 0 && <span className="text-slate-400 font-normal text-sm">({entries.length})</span>}</h2>
         {!showAdd && (
           <button
             onClick={openAdd}
@@ -55,7 +55,7 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
       {showAdd && (
         <div className="border border-indigo-200 rounded-lg p-4 bg-indigo-50 mb-3 space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Author</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Author</label>
             <input
               type="text"
               value={addDraft.author}
@@ -64,7 +64,7 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Note <span className="text-red-400">*</span></label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Note <span className="text-red-400">*</span></label>
             <textarea
               rows={3}
               value={addDraft.content}
@@ -75,23 +75,23 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
             />
           </div>
           <div className="flex gap-2">
-            <button onClick={handleAdd} className="bg-indigo-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-indigo-700">Save</button>
-            <button onClick={() => setShowAdd(false)} className="border border-gray-300 text-gray-600 px-4 py-1.5 rounded text-sm hover:bg-gray-50">Cancel</button>
+            <button onClick={handleAdd} className="bh-btn-primary py-1.5">Save</button>
+            <button onClick={() => setShowAdd(false)} className="border border-slate-300 text-slate-600 px-4 py-1.5 rounded text-sm hover:bg-slate-50">Cancel</button>
           </div>
         </div>
       )}
 
       {entries.length === 0 && !showAdd && (
-        <p className="text-sm text-gray-400 italic">No notes yet.</p>
+        <p className="text-sm text-slate-400 italic">No notes yet.</p>
       )}
 
       <div className="space-y-2">
         {entries.map(entry => (
-          <div key={entry.id} className="border border-gray-200 rounded-lg bg-white">
+          <div key={entry.id} className="border border-slate-200 rounded-lg bg-white">
             {editingId === entry.id ? (
               <div className="p-4 space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Author</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Author</label>
                   <input
                     type="text"
                     value={editDraft.author}
@@ -100,7 +100,7 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Note <span className="text-red-400">*</span></label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Note <span className="text-red-400">*</span></label>
                   <textarea
                     rows={3}
                     value={editDraft.content}
@@ -110,22 +110,22 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={handleUpdate} className="bg-indigo-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-indigo-700">Save</button>
-                  <button onClick={() => setEditingId(null)} className="border border-gray-300 text-gray-600 px-4 py-1.5 rounded text-sm hover:bg-gray-50">Cancel</button>
+                  <button onClick={handleUpdate} className="bh-btn-primary py-1.5">Save</button>
+                  <button onClick={() => setEditingId(null)} className="border border-slate-300 text-slate-600 px-4 py-1.5 rounded text-sm hover:bg-slate-50">Cancel</button>
                 </div>
               </div>
             ) : (
               <div className="p-4">
                 <div className="flex justify-between items-start gap-2">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap flex-1">{entry.content}</p>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap flex-1">{entry.content}</p>
                   <button
                     onClick={() => openEdit(entry)}
-                    className="text-xs text-gray-400 hover:text-indigo-600 flex-shrink-0 mt-0.5"
+                    className="text-xs text-slate-400 hover:text-indigo-600 flex-shrink-0 mt-0.5"
                   >
                     Edit
                   </button>
                 </div>
-                <p className="text-xs text-gray-400 mt-2">{fmt(entry.date)} · {entry.author}</p>
+                <p className="text-xs text-slate-400 mt-2">{fmt(entry.date)} · {entry.author}</p>
               </div>
             )}
           </div>

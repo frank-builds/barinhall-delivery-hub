@@ -65,9 +65,7 @@ export function NewEngagement() {
   }
 
   const inputClass = name =>
-    `w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-      errors[name] ? 'border-red-400' : 'border-gray-300'
-    }`;
+    `bh-input ${errors[name] ? 'border-red-400' : ''}`;
 
   function FieldError({ name }) {
     return errors[name] ? <p className="text-xs text-red-500 mt-1">{errors[name]}</p> : null;
@@ -75,7 +73,7 @@ export function NewEngagement() {
 
   function Label({ htmlFor, text, required }) {
     return (
-      <label htmlFor={htmlFor ?? undefined} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={htmlFor ?? undefined} className="block text-sm font-medium text-slate-700 mb-1">
         {text}{required && <span className="text-red-500 ml-1">*</span>}
       </label>
     );
@@ -84,8 +82,8 @@ export function NewEngagement() {
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <Link to="/" className="text-sm text-gray-400 hover:text-gray-600">← Dashboard</Link>
-        <h1 className="text-2xl font-bold text-gray-900 mt-2">New Engagement</h1>
+        <Link to="/" className="text-sm text-slate-400 hover:text-slate-600">← Dashboard</Link>
+        <h1 className="mt-2">New Engagement</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -115,7 +113,7 @@ export function NewEngagement() {
 
         <div>
           <Label text="Service Type(s)" required />
-          <div className={`flex flex-wrap gap-2 mt-1 rounded-md p-2 border ${errors.serviceTypes ? 'border-red-400' : 'border-gray-300'}`}>
+          <div className={`flex flex-wrap gap-2 mt-1 rounded-md p-2 border ${errors.serviceTypes ? 'border-red-400' : 'border-slate-300'}`}>
             {SERVICES.map(s => {
               const selected = form.serviceTypes.includes(s.key);
               return (
@@ -126,7 +124,7 @@ export function NewEngagement() {
                   className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
                     selected
                       ? 'bg-indigo-600 border-indigo-600 text-white'
-                      : 'border-gray-300 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+                      : 'border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'
                   }`}
                 >
                   {s.label}
@@ -175,17 +173,10 @@ export function NewEngagement() {
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button
-            type="submit"
-            className="bg-indigo-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
-          >
+          <button type="submit" className="bh-btn-primary">
             Create Engagement
           </button>
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="border border-gray-300 text-gray-600 px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
+          <button type="button" onClick={() => navigate('/')} className="bh-btn-secondary">
             Cancel
           </button>
         </div>

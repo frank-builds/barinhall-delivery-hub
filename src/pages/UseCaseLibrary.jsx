@@ -7,34 +7,10 @@ import {
   COMPLEXITY_LEVELS,
   TIME_TO_VALUE_OPTIONS,
   MATURITY_LEVELS,
-  CATEGORY_BADGE_CLASSES,
-  COMPLEXITY_BADGE_CLASSES,
 } from '../data/useCaseLibrary.js';
 import { SERVICES } from '../data/services.js';
 import { effectiveStatus } from '../lib/statusUtils.js';
-
-// ── Visual design maps ────────────────────────────────────────────────────────
-
-const MATURITY_COLORS = {
-  Exploring:  'bg-slate-100 text-slate-600 border-slate-200',
-  Developing: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-  Advanced:   'bg-emerald-50 text-emerald-700 border-emerald-200',
-};
-
-function CategoryBadge({ category }) {
-  const cls = CATEGORY_BADGE_CLASSES[category] ?? 'bg-slate-100 text-slate-600 border-slate-200';
-  return <span className={`bh-badge ${cls}`}>{category}</span>;
-}
-
-function ComplexityChip({ complexity }) {
-  const cls = COMPLEXITY_BADGE_CLASSES[complexity] ?? 'bg-slate-100 text-slate-500 border-slate-200';
-  return <span className={`bh-badge ${cls}`}>{complexity}</span>;
-}
-
-function MaturityChip({ level }) {
-  const cls = MATURITY_COLORS[level] ?? 'bg-slate-100 text-slate-500 border-slate-200';
-  return <span className={`bh-badge ${cls}`}>{level}</span>;
-}
+import { Badge } from '../components/Badge.jsx';
 
 // ── Use case card (grid / compact list mode) ──────────────────────────────────
 
@@ -54,8 +30,8 @@ function UseCaseCard({ uc, compact = false, selected = false, onClick }) {
           {uc.title}
         </p>
         <div className="flex items-center gap-1.5 flex-wrap">
-          <CategoryBadge category={uc.category} />
-          <ComplexityChip complexity={uc.complexity} />
+          <Badge category={uc.category}>{uc.category}</Badge>
+          <Badge complexity={uc.complexity}>{uc.complexity}</Badge>
         </div>
       </button>
     );
@@ -68,8 +44,8 @@ function UseCaseCard({ uc, compact = false, selected = false, onClick }) {
       className="bh-card bh-card-hover w-full text-left px-4 py-4 flex flex-col gap-2.5 cursor-pointer"
     >
       <div className="flex items-start justify-between gap-2">
-        <CategoryBadge category={uc.category} />
-        <ComplexityChip complexity={uc.complexity} />
+        <Badge category={uc.category}>{uc.category}</Badge>
+        <Badge complexity={uc.complexity}>{uc.complexity}</Badge>
       </div>
       <h3 className="text-sm font-semibold text-slate-900 leading-snug">{uc.title}</h3>
       <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{uc.summary}</p>
@@ -78,7 +54,7 @@ function UseCaseCard({ uc, compact = false, selected = false, onClick }) {
           {uc.timeToValue}
         </span>
         <span className="text-slate-200">·</span>
-        <MaturityChip level={uc.maturityLevel} />
+        <Badge maturity={uc.maturityLevel}>{uc.maturityLevel}</Badge>
       </div>
     </button>
   );
@@ -168,9 +144,9 @@ function UseCaseDetail({ uc, engagements, onAddToEngagement }) {
       {/* ── Header ── */}
       <div>
         <div className="flex items-center gap-2 flex-wrap mb-2.5">
-          <CategoryBadge category={uc.category} />
-          <ComplexityChip complexity={uc.complexity} />
-          <MaturityChip level={uc.maturityLevel} />
+          <Badge category={uc.category}>{uc.category}</Badge>
+          <Badge complexity={uc.complexity}>{uc.complexity}</Badge>
+          <Badge maturity={uc.maturityLevel}>{uc.maturityLevel}</Badge>
         </div>
         <h2 className="text-lg font-bold text-slate-900 leading-snug mb-2">{uc.title}</h2>
         <p className="text-sm text-slate-600 leading-relaxed">{uc.summary}</p>

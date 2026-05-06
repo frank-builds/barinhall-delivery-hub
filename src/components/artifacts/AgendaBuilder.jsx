@@ -111,8 +111,8 @@ function seedAgenda(storageKey) {
   };
 }
 
-const TH = 'text-left text-[10px] font-bold uppercase tracking-wide text-gray-400 pb-1';
-const TD_INPUT = 'border border-gray-200 rounded px-2 py-1 text-xs w-full focus:outline-none focus:ring-1 focus:ring-indigo-400';
+const TH = 'text-left text-[10px] font-bold uppercase tracking-wide text-slate-400 pb-1';
+const TD_INPUT = 'border border-slate-200 rounded px-2 py-1 text-xs w-full focus:outline-none focus:ring-1 focus:ring-indigo-400';
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -157,11 +157,11 @@ export function AgendaBuilder({ storageKey, engagement, onSave, onClose }) {
     <div>
       {/* Title */}
       <div className="mb-4">
-        <label className="text-xs font-semibold text-gray-600 block mb-1">Agenda title</label>
+        <label className="text-xs font-semibold text-slate-600 block mb-1">Agenda title</label>
         <input
           value={title}
           onChange={e => { setTitle(e.target.value); setIsSaved(false); }}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
@@ -185,10 +185,10 @@ export function AgendaBuilder({ storageKey, engagement, onSave, onClose }) {
                   <div className="flex flex-col gap-0.5">
                     <button type="button" onClick={() => moveUp(idx)}
                       disabled={idx === 0}
-                      className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-[10px] leading-none">▲</button>
+                      className="text-slate-300 hover:text-slate-500 disabled:opacity-20 text-[10px] leading-none">▲</button>
                     <button type="button" onClick={() => moveDown(idx)}
                       disabled={idx === items.length - 1}
-                      className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-[10px] leading-none">▼</button>
+                      className="text-slate-300 hover:text-slate-500 disabled:opacity-20 text-[10px] leading-none">▼</button>
                   </div>
                 </td>
                 <td><input value={item.topic} onChange={e => update(item.id, 'topic', e.target.value)} className={TD_INPUT} /></td>
@@ -197,7 +197,7 @@ export function AgendaBuilder({ storageKey, engagement, onSave, onClose }) {
                 <td><input value={item.notes} onChange={e => update(item.id, 'notes', e.target.value)} className={TD_INPUT} /></td>
                 <td className="align-top pt-1">
                   <button type="button" onClick={() => remove(item.id)}
-                    className="text-gray-200 hover:text-red-400 text-xs">✕</button>
+                    className="text-slate-200 hover:text-red-400 text-xs">✕</button>
                 </td>
               </tr>
             ))}
@@ -211,12 +211,12 @@ export function AgendaBuilder({ storageKey, engagement, onSave, onClose }) {
       </button>
 
       {totalMin > 0 && (
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-slate-400 mt-2">
           Total: {totalMin} min ({Math.floor(totalMin / 60)}h {totalMin % 60}m)
         </p>
       )}
 
-      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-slate-100 flex-wrap">
         {engagement && (
           <button type="button" onClick={handleSave}
             className="text-xs px-3 py-1.5 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
@@ -224,7 +224,7 @@ export function AgendaBuilder({ storageKey, engagement, onSave, onClose }) {
           </button>
         )}
         <button type="button" onClick={onClose}
-          className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline">
+          className="ml-auto text-xs text-slate-400 hover:text-slate-600 underline">
           Close
         </button>
       </div>

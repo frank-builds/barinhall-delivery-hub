@@ -8,7 +8,7 @@ import { ArtifactLauncher } from './artifacts/ArtifactLauncher.jsx';
 function Section({ title, children, accent = false }) {
   return (
     <div className={accent ? 'rounded-md bg-indigo-50 border border-indigo-100 px-3 py-2.5' : ''}>
-      <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${accent ? 'text-indigo-500' : 'text-gray-400'}`}>
+      <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 ${accent ? 'text-indigo-500' : 'text-slate-400'}`}>
         {title}
       </p>
       {children}
@@ -39,15 +39,15 @@ export function PlaybookStepDetail({ step }) {
     <div className="mt-3 space-y-4 text-sm">
 
       {/* Objective */}
-      <p className="text-gray-600 italic leading-relaxed">{step.objective}</p>
+      <p className="text-slate-600 italic leading-relaxed">{step.objective}</p>
 
       {/* Meta strip: duration + owner */}
-      <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-500">
+      <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
         <span className="flex items-center gap-1">
-          <span className="text-gray-400">⏱</span> {step.duration}
+          <span className="text-slate-400">⏱</span> {step.duration}
         </span>
         <span className="flex items-center gap-1">
-          <span className="text-gray-400">👤</span> {step.ownerRole}
+          <span className="text-slate-400">👤</span> {step.ownerRole}
         </span>
       </div>
 
@@ -56,8 +56,8 @@ export function PlaybookStepDetail({ step }) {
         <Section title="Required Inputs">
           <ul className="space-y-1">
             {step.requiredInputs.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
-                <span className="mt-0.5 text-gray-300 flex-shrink-0">▸</span>
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
+                <span className="mt-0.5 text-slate-300 flex-shrink-0">▸</span>
                 {item}
               </li>
             ))}
@@ -70,7 +70,7 @@ export function PlaybookStepDetail({ step }) {
         <Section title="Procedure">
           <ol className="space-y-1.5">
             {step.procedure.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
                 <span className="flex-shrink-0 w-4 h-4 mt-0.5 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 text-[10px] font-bold">
                   {i + 1}
                 </span>
@@ -98,7 +98,7 @@ export function PlaybookStepDetail({ step }) {
         <Section title="Definition of Done">
           <ul className="space-y-1">
             {step.acceptanceCriteria.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
                 <span className="flex-shrink-0 text-green-500 mt-0.5">✓</span>
                 {item}
               </li>

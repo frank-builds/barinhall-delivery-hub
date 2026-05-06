@@ -9,20 +9,24 @@
 // deliverables, string assumptions/exclusions) into the v2 shape safely.
 
 import { useState } from 'react';
-import { exportHtmlStringToPdf, makePdfFilename } from '../../lib/exportPdf.js';
+import { makePdfFilename } from '../../lib/exportPdf.js';
+import { usePdfExport } from '../../hooks/usePdfExport.js';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 
-// ── Style constants ───────────────────────────────────────────────────────────
+// ── Local style helpers ──────────────────────────────────────────────────────
+//
+// LABEL/SEC are intentionally local — they're tighter (text-xs / text-[10px])
+// than the page-level bh-section-label and tuned for the dense form layout.
+// Inputs use the standard bh-input class from index.css. Buttons use bh-btn-*.
 
-const BTN   = 'text-xs px-3 py-1.5 rounded-md font-medium transition-colors';
-const INPUT = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400';
-const LABEL = 'block text-xs font-semibold text-gray-600 mb-1';
+const LABEL = 'block text-xs font-semibold text-slate-600 mb-1';
 const SEC   = 'text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-3 pt-1';
 
 function Field({ label, hint, children }) {
   return (
     <div>
       <p className={LABEL}>{label}</p>
-      {hint && <p className="text-[11px] text-gray-400 mb-1">{hint}</p>}
+      {hint && <p className="text-[11px] text-slate-400 mb-1">{hint}</p>}
       {children}
     </div>
   );
@@ -389,11 +393,11 @@ function StringList({ items, onChange, placeholder, addLabel }) {
             value={item}
             onChange={e => update(i, e.target.value)}
             placeholder={placeholder?.(i) ?? `Item ${i + 1}`}
-            className={INPUT}
+            className="bh-input"
           />
           {items.length > 1 && (
             <button type="button" onClick={() => remove(i)}
-              className="flex-shrink-0 text-gray-300 hover:text-red-400 text-sm">✕</button>
+              className="flex-shrink-0 text-slate-300 hover:text-red-400 text-sm">✕</button>
           )}
         </div>
       ))}
@@ -417,38 +421,38 @@ function DeliverablesList({ items, onChange }) {
   return (
     <div className="space-y-3">
       {items.map((dv, i) => (
-        <div key={dv.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-2 relative">
+        <div key={dv.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-2 relative">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Deliverable {i + 1}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Deliverable {i + 1}</p>
             {items.length > 1 && (
               <button type="button" onClick={() => remove(i)}
-                className="text-gray-300 hover:text-red-400 text-xs">Remove</button>
+                className="text-slate-300 hover:text-red-400 text-xs">Remove</button>
             )}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
               <p className={LABEL}>Title *</p>
               <input value={dv.title} onChange={e => update(i, 'title', e.target.value)}
-                placeholder="e.g. AI Readiness Assessment Report" className={INPUT} />
+                placeholder="e.g. AI Readiness Assessment Report" className="bh-input" />
             </div>
             <div className="col-span-2">
               <p className={LABEL}>Description</p>
               <textarea rows={2} value={dv.description}
                 onChange={e => update(i, 'description', e.target.value)}
                 placeholder="What this deliverable contains and how it will be provided..."
-                className={INPUT} />
+                className="bh-input" />
             </div>
             <div>
               <p className={LABEL}>Due Date</p>
               <input type="date" value={dv.dueDate}
                 onChange={e => update(i, 'dueDate', e.target.value)}
-                className={INPUT} />
+                className="bh-input" />
             </div>
             <div>
               <p className={LABEL}>Acceptance Criteria</p>
               <input value={dv.acceptanceCriteria}
                 onChange={e => update(i, 'acceptanceCriteria', e.target.value)}
-                placeholder="e.g. Client written sign-off within 5 days" className={INPUT} />
+                placeholder="e.g. Client written sign-off within 5 days" className="bh-input" />
             </div>
           </div>
         </div>
@@ -477,32 +481,32 @@ function MilestoneList({ items, onChange }) {
           <div className="col-span-3">
             <input type="date" value={m.date}
               onChange={e => update(i, 'date', e.target.value)}
-              className={INPUT} />
+              className="bh-input" />
           </div>
           <div className="col-span-5">
             <input value={m.description}
               onChange={e => update(i, 'description', e.target.value)}
               placeholder="Milestone description"
-              className={INPUT} />
+              className="bh-input" />
           </div>
           <div className="col-span-3">
             <input value={m.linkedDeliverables}
               onChange={e => update(i, 'linkedDeliverables', e.target.value)}
               placeholder="Linked deliverable(s)"
-              className={INPUT} />
+              className="bh-input" />
           </div>
           <div className="col-span-1 flex items-center justify-end pt-1">
             {items.length > 1 && (
               <button type="button" onClick={() => remove(i)}
-                className="text-gray-300 hover:text-red-400 text-sm">✕</button>
+                className="text-slate-300 hover:text-red-400 text-sm">✕</button>
             )}
           </div>
         </div>
       ))}
       <div className="grid grid-cols-12 gap-2">
-        <p className="col-span-3 text-[10px] text-gray-400">Date</p>
-        <p className="col-span-5 text-[10px] text-gray-400">Description</p>
-        <p className="col-span-3 text-[10px] text-gray-400">Linked deliverable(s)</p>
+        <p className="col-span-3 text-[10px] text-slate-400">Date</p>
+        <p className="col-span-5 text-[10px] text-slate-400">Description</p>
+        <p className="col-span-3 text-[10px] text-slate-400">Linked deliverable(s)</p>
       </div>
       <button type="button" onClick={add}
         className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
@@ -516,12 +520,12 @@ function MilestoneList({ items, onChange }) {
 
 export function SowBuilder({ engagement, onSave, onClose }) {
   const savedFields = engagement?.artifactData?.sow?.fields;
-  const [form,     setForm]     = useState(() => normalizeSow(savedFields, engagement));
-  const [tab,      setTab]      = useState('form');
-  const [copied,   setCopied]   = useState(false);
-  const [saved_,   setSaved_]   = useState(!!savedFields);
-  const [pdfBusy,  setPdfBusy]  = useState(false);
-  const [pdfError, setPdfError] = useState('');
+  const [form,    setForm]    = useState(() => normalizeSow(savedFields, engagement));
+  const [tab,     setTab]     = useState('form');
+  const [saved_,  setSaved_]  = useState(!!savedFields);
+
+  const { exportHtmlString, busy: pdfBusy, error: pdfError } = usePdfExport();
+  const { copy, copied } = useCopyToClipboard();
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -534,28 +538,16 @@ export function SowBuilder({ engagement, onSave, onClose }) {
     setSaved_(true);
   }
 
-  async function handleCopyHtml() {
-    try { await navigator.clipboard.writeText(generateSowHtml(form)); } catch { /* no-op */ }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  function handleCopyHtml() {
+    return copy(generateSowHtml(form));
   }
 
-  async function handleDownloadPdf() {
-    setPdfBusy(true);
-    setPdfError('');
-    try {
-      const filename = makePdfFilename(
-        'SOW',
-        form.clientName || form.company || 'Draft',
-      );
-      await exportHtmlStringToPdf(generateSowHtml(form), filename);
-    } catch (err) {
-      console.error('PDF export failed:', err);
-      setPdfError('PDF export failed — please try again.');
-      setTimeout(() => setPdfError(''), 5000);
-    } finally {
-      setPdfBusy(false);
-    }
+  function handleDownloadPdf() {
+    const filename = makePdfFilename(
+      'SOW',
+      form.clientName || form.company || 'Draft',
+    );
+    return exportHtmlString(generateSowHtml(form), filename);
   }
 
   const previewHtml = tab === 'preview' ? generateSowHtml(form) : '';
@@ -563,11 +555,11 @@ export function SowBuilder({ engagement, onSave, onClose }) {
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex gap-1 mb-5 border-b border-gray-200">
+      <div className="flex gap-1 mb-5 border-b border-slate-200">
         {['form', 'preview'].map(t => (
           <button key={t} type="button" onClick={() => setTab(t)}
             className={`text-sm px-4 py-2 font-medium border-b-2 transition-colors -mb-px ${
-              tab === t ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              tab === t ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}>
             {t === 'form' ? '📝 Form' : '👁 Preview'}
           </button>
@@ -582,44 +574,44 @@ export function SowBuilder({ engagement, onSave, onClose }) {
             <SectionHeading>Document &amp; Parties</SectionHeading>
             <div className="grid grid-cols-2 gap-3">
               <Field label="SOW Title">
-                <input value={form.sowTitle} onChange={e => set('sowTitle', e.target.value)} className={INPUT} />
+                <input value={form.sowTitle} onChange={e => set('sowTitle', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Engagement Title">
                 <input value={form.engagementTitle}
                   onChange={e => set('engagementTitle', e.target.value)}
-                  placeholder="e.g. AI Readiness Assessment" className={INPUT} />
+                  placeholder="e.g. AI Readiness Assessment" className="bh-input" />
               </Field>
               <Field label="Client Name *">
                 <input value={form.clientName}
-                  onChange={e => set('clientName', e.target.value)} className={INPUT} />
+                  onChange={e => set('clientName', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Client Company *">
                 <input value={form.company}
-                  onChange={e => set('company', e.target.value)} className={INPUT} />
+                  onChange={e => set('company', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Consulting Firm">
                 <input value={form.consultantFirm}
                   onChange={e => set('consultantFirm', e.target.value)}
-                  placeholder="e.g. Barinhall" className={INPUT} />
+                  placeholder="e.g. Barinhall" className="bh-input" />
               </Field>
               <Field label="Effective Date">
                 <input type="date" value={form.effectiveDate}
-                  onChange={e => set('effectiveDate', e.target.value)} className={INPUT} />
+                  onChange={e => set('effectiveDate', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Performance Period — Start">
                 <input type="date" value={form.termStart}
-                  onChange={e => set('termStart', e.target.value)} className={INPUT} />
+                  onChange={e => set('termStart', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Performance Period — End">
                 <input type="date" value={form.termEnd}
-                  onChange={e => set('termEnd', e.target.value)} className={INPUT} />
+                  onChange={e => set('termEnd', e.target.value)} className="bh-input" />
               </Field>
               <div className="col-span-2">
                 <Field label="Governing Agreement (if applicable)"
                   hint="e.g. 'Master Services Agreement dated 1 January 2025'. Leave blank if this SOW is the primary agreement.">
                   <input value={form.governingAgreement}
                     onChange={e => set('governingAgreement', e.target.value)}
-                    placeholder="Master Services Agreement dated..." className={INPUT} />
+                    placeholder="Master Services Agreement dated..." className="bh-input" />
                 </Field>
               </div>
             </div>
@@ -634,7 +626,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
                 <textarea rows={3} value={form.background}
                   onChange={e => set('background', e.target.value)}
                   placeholder="Describe the business context, drivers, and why this work is needed..."
-                  className={INPUT} />
+                  className="bh-input" />
               </Field>
               <Field label="Objectives / Business Outcomes"
                 hint="List measurable or concrete outcomes the engagement is intended to deliver.">
@@ -654,14 +646,14 @@ export function SowBuilder({ engagement, onSave, onClose }) {
               <textarea rows={4} value={form.scopeNarrative}
                 onChange={e => set('scopeNarrative', e.target.value)}
                 placeholder="Consultant will provide... This engagement will include... Activities include..."
-                className={INPUT} />
+                className="bh-input" />
             </Field>
           </div>
 
           {/* ── 4. Deliverables ── */}
           <div>
             <SectionHeading>Deliverables</SectionHeading>
-            <p className="text-[11px] text-gray-400 mb-3">
+            <p className="text-[11px] text-slate-400 mb-3">
               Add each tangible output. Include a description, due date, and how acceptance will be confirmed.
             </p>
             <DeliverablesList
@@ -680,7 +672,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
           {/* ── 6. Client responsibilities ── */}
           <div>
             <SectionHeading>Client Responsibilities &amp; Dependencies</SectionHeading>
-            <p className="text-[11px] text-gray-400 mb-3">
+            <p className="text-[11px] text-slate-400 mb-3">
               List what Client must provide, decide, or action for the engagement to proceed. Delays here may trigger a Change Order.
             </p>
             <StringList items={form.clientResponsibilities}
@@ -692,7 +684,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
           {/* ── 7. Assumptions ── */}
           <div>
             <SectionHeading>Assumptions</SectionHeading>
-            <p className="text-[11px] text-gray-400 mb-3">
+            <p className="text-[11px] text-slate-400 mb-3">
               State conditions the engagement depends on. Invalid assumptions may require a Change Order.
             </p>
             <StringList items={form.assumptions}
@@ -704,7 +696,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
           {/* ── 8. Out of scope ── */}
           <div>
             <SectionHeading>Out of Scope / Exclusions</SectionHeading>
-            <p className="text-[11px] text-gray-400 mb-3">
+            <p className="text-[11px] text-slate-400 mb-3">
               Explicitly state what is not included to prevent scope creep.
             </p>
             <StringList items={form.exclusions}
@@ -720,7 +712,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
               <Field label="Fee Structure">
                 <select value={form.feeStructure}
                   onChange={e => set('feeStructure', e.target.value)}
-                  className={INPUT}>
+                  className="bh-input">
                   <option value="fixed">Fixed Fee</option>
                   <option value="time-and-materials">Time &amp; Materials</option>
                   <option value="retainer">Monthly Retainer</option>
@@ -729,24 +721,24 @@ export function SowBuilder({ engagement, onSave, onClose }) {
               <Field label="Fee Amount">
                 <input value={form.feeAmount}
                   onChange={e => set('feeAmount', e.target.value)}
-                  placeholder="e.g. $12,500" className={INPUT} />
+                  placeholder="e.g. $12,500" className="bh-input" />
               </Field>
               <div className="col-span-2">
                 <Field label="Billing / Invoicing Schedule"
                   hint="e.g. 50% upon execution, 50% upon delivery of final report.">
                   <input value={form.billingSchedule}
                     onChange={e => set('billingSchedule', e.target.value)}
-                    placeholder="e.g. 50% on execution, 50% on final delivery" className={INPUT} />
+                    placeholder="e.g. 50% on execution, 50% on final delivery" className="bh-input" />
                 </Field>
               </div>
               <Field label="Payment Terms">
                 <input value={form.paymentTerms}
                   onChange={e => set('paymentTerms', e.target.value)}
-                  placeholder="e.g. Net 30" className={INPUT} />
+                  placeholder="e.g. Net 30" className="bh-input" />
               </Field>
               <Field label="Expense Policy">
                 <input value={form.expensePolicy}
-                  onChange={e => set('expensePolicy', e.target.value)} className={INPUT} />
+                  onChange={e => set('expensePolicy', e.target.value)} className="bh-input" />
               </Field>
             </div>
           </div>
@@ -758,7 +750,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
               <Field label="Review Period (business days)">
                 <input value={form.reviewPeriodDays}
                   onChange={e => set('reviewPeriodDays', e.target.value)}
-                  placeholder="e.g. 5" className={INPUT} />
+                  placeholder="e.g. 5" className="bh-input" />
               </Field>
               <div className="col-span-1" />
               <div className="col-span-2">
@@ -767,7 +759,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
                   <textarea rows={2} value={form.acceptanceProcess}
                     onChange={e => set('acceptanceProcess', e.target.value)}
                     placeholder="Describe the sign-off and remediation process, or leave blank for default language..."
-                    className={INPUT} />
+                    className="bh-input" />
                 </Field>
               </div>
             </div>
@@ -779,7 +771,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
             <Field label="Change Control Clause">
               <textarea rows={2} value={form.changeControlNote}
                 onChange={e => set('changeControlNote', e.target.value)}
-                className={INPUT} />
+                className="bh-input" />
             </Field>
           </div>
 
@@ -789,11 +781,11 @@ export function SowBuilder({ engagement, onSave, onClose }) {
             <div className="grid grid-cols-2 gap-3">
               <Field label="Consultant Project Lead">
                 <input value={form.consultantPM}
-                  onChange={e => set('consultantPM', e.target.value)} className={INPUT} />
+                  onChange={e => set('consultantPM', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Client Project Lead">
                 <input value={form.clientPM}
-                  onChange={e => set('clientPM', e.target.value)} className={INPUT} />
+                  onChange={e => set('clientPM', e.target.value)} className="bh-input" />
               </Field>
               <div className="col-span-2">
                 <Field label="Meeting Cadence / Status Reporting"
@@ -801,7 +793,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
                   <input value={form.meetingCadence}
                     onChange={e => set('meetingCadence', e.target.value)}
                     placeholder="e.g. Weekly 30-min check-in, bi-weekly written status report"
-                    className={INPUT} />
+                    className="bh-input" />
                 </Field>
               </div>
             </div>
@@ -814,17 +806,17 @@ export function SowBuilder({ engagement, onSave, onClose }) {
               <Field label="Confidentiality / Data Handling Note">
                 <textarea rows={3} value={form.confidentialityNote}
                   onChange={e => set('confidentialityNote', e.target.value)}
-                  className={INPUT} />
+                  className="bh-input" />
               </Field>
               <Field label="Intellectual Property / Work Product Note">
                 <textarea rows={3} value={form.ipNote}
                   onChange={e => set('ipNote', e.target.value)}
-                  className={INPUT} />
+                  className="bh-input" />
               </Field>
               <Field label="Termination / Suspension Note">
                 <textarea rows={2} value={form.terminationNote}
                   onChange={e => set('terminationNote', e.target.value)}
-                  className={INPUT} />
+                  className="bh-input" />
               </Field>
             </div>
           </div>
@@ -844,21 +836,21 @@ export function SowBuilder({ engagement, onSave, onClose }) {
             <div className="grid grid-cols-2 gap-3">
               <Field label="Consultant Signatory Name">
                 <input value={form.consultantName}
-                  onChange={e => set('consultantName', e.target.value)} className={INPUT} />
+                  onChange={e => set('consultantName', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Consultant Title">
                 <input value={form.consultantTitle}
                   onChange={e => set('consultantTitle', e.target.value)}
-                  placeholder="e.g. Principal Consultant" className={INPUT} />
+                  placeholder="e.g. Principal Consultant" className="bh-input" />
               </Field>
               <Field label="Client Signatory Name">
                 <input value={form.clientSignatoryName}
-                  onChange={e => set('clientSignatoryName', e.target.value)} className={INPUT} />
+                  onChange={e => set('clientSignatoryName', e.target.value)} className="bh-input" />
               </Field>
               <Field label="Client Signatory Title">
                 <input value={form.clientSignatoryTitle}
                   onChange={e => set('clientSignatoryTitle', e.target.value)}
-                  placeholder="e.g. Chief Operating Officer" className={INPUT} />
+                  placeholder="e.g. Chief Operating Officer" className="bh-input" />
               </Field>
             </div>
           </div>
@@ -868,37 +860,35 @@ export function SowBuilder({ engagement, onSave, onClose }) {
 
       {tab === 'preview' && (
         <div
-          className="border border-gray-200 rounded-lg overflow-hidden bg-white p-2"
+          className="border border-slate-200 rounded-lg overflow-hidden bg-white p-2"
           dangerouslySetInnerHTML={{ __html: previewHtml }}
         />
       )}
 
       {/* Action bar */}
-      <div className="flex items-center gap-2 mt-6 pt-4 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 mt-6 pt-4 border-t border-slate-100 flex-wrap">
         {engagement && (
-          <button type="button" onClick={handleSave}
-            className={`${BTN} bg-indigo-600 text-white hover:bg-indigo-700`}>
+          <button type="button" onClick={handleSave} className="bh-btn-primary py-1.5 text-xs">
             {saved_ ? '✓ Saved' : 'Save to engagement'}
           </button>
         )}
-        <button type="button" onClick={handleCopyHtml}
-          className={`${BTN} border border-gray-300 text-gray-700 hover:bg-gray-50`}>
+        <button type="button" onClick={handleCopyHtml} className="bh-btn-secondary py-1.5 text-xs">
           {copied ? '✓ Copied!' : 'Copy HTML'}
         </button>
         <button type="button" onClick={handleDownloadPdf} disabled={pdfBusy}
-          className={`${BTN} border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-wait`}>
+          className="bh-btn-secondary py-1.5 text-xs disabled:opacity-50 disabled:cursor-wait">
           {pdfBusy ? 'Generating PDF…' : '↓ Download PDF'}
         </button>
         <button type="button"
           onClick={() => setTab(t => t === 'form' ? 'preview' : 'form')}
-          className={`${BTN} border border-gray-300 text-gray-600 hover:bg-gray-50`}>
+          className="bh-btn-secondary py-1.5 text-xs">
           {tab === 'form' ? '👁 Preview' : '📝 Edit form'}
         </button>
         {pdfError && (
           <span className="text-xs text-red-600">{pdfError}</span>
         )}
         <button type="button" onClick={onClose}
-          className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline">
+          className="ml-auto text-xs text-slate-400 hover:text-slate-600 underline">
           Close
         </button>
       </div>

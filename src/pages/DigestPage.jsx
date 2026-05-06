@@ -1,9 +1,12 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { useEngagements } from '../hooks/useEngagements.js';
 import { generateWeeklyDigest, computeDigestData } from '../lib/digestGenerator.js';
 import { generateAllReminders } from '../lib/reminderGenerator.js';
 import { getFormDefs } from '../data/formDefinitions.js';
-import { exportElementToPdf, makePdfFilename } from '../lib/exportPdf.js';
+import { makePdfFilename } from '../lib/exportPdf.js';
+import { usePdfExport } from '../hooks/usePdfExport.js';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard.js';
+import { SectionHeader } from '../components/SectionHeader.jsx';
 
 function fmtDate(isoString) {
   if (!isoString) return '—';
@@ -13,22 +16,6 @@ function fmtDate(isoString) {
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
-
-function SectionHeader({ icon, title, count, danger = false }) {
-  return (
-    <div className="flex items-center gap-2 mb-3">
-      {icon && <span role="img" aria-hidden>{icon}</span>}
-      <h2 className={danger ? 'text-red-800' : undefined}>{title}</h2>
-      {count != null && (
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-          danger ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-100 text-slate-500'
-        }`}>
-          {count}
-        </span>
-      )}
-    </div>
-  );
-}
 
 function WorkflowProgressBar({ pct }) {
   return (
@@ -55,9 +42,8 @@ const SUMMARY_CONFIG = [
 
 export function DigestPage() {
   const { engagements, loading } = useEngagements();
-  const [copied,   setCopied]   = useState(false);
-  const [pdfBusy,  setPdfBusy]  = useState(false);
-  const [pdfError, setPdfError] = useState('');
+  const { exportElement, busy: pdfBusy, error: pdfError } = usePdfExport();
+  const { copy, copied } = useCopyToClipboard();
   // Ref covers the full exportable content area (action buttons are excluded via data-html2canvas-ignore)
   const exportRef = useRef(null);
 
@@ -76,26 +62,14 @@ export function DigestPage() {
     .flatMap(eng => generateAllReminders(eng, getFormDefs(eng.serviceType)));
 
   function handleCopy() {
-    navigator.clipboard.writeText(generateWeeklyDigest(engagements));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copy(generateWeeklyDigest(engagements));
   }
 
-  async function handleDownloadPdf() {
-    setPdfBusy(true);
-    setPdfError('');
-    try {
-      await exportElementToPdf(
-        exportRef.current,
-        makePdfFilename('Weekly Digest'),
-      );
-    } catch (err) {
-      console.error('PDF export failed:', err);
-      setPdfError('PDF export failed — please try again.');
-      setTimeout(() => setPdfError(''), 5000);
-    } finally {
-      setPdfBusy(false);
-    }
+  function handleDownloadPdf() {
+    return exportElement(
+      exportRef.current,
+      makePdfFilename('Weekly Digest'),
+    );
   }
 
   const weekOf = new Date(d.asOf).toLocaleDateString('en-US', {
@@ -217,7 +191,7 @@ export function DigestPage() {
       {/* ── Open High / Critical Risks ── */}
       {d.openHighRisks.length > 0 && (
         <section>
-          <SectionHeader icon="🔴" title="Open High / Critical Risks" count={d.openHighRisks.length} danger />
+          <SectionHeader icon="🔴" title="Open High / Critical Risks" count={d.openHighRisks.length} tone="danger" />
           <div className="space-y-2">
             {d.openHighRisks.map((r, i) => (
               <div key={i} className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-3">

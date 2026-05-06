@@ -10,7 +10,7 @@ import { useState } from 'react';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const LEVELS  = ['Low', 'Medium', 'High'];
-const INPUT   = 'border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400 w-full';
+const INPUT   = 'border border-slate-300 rounded-md px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400 w-full';
 const BTN     = 'text-xs px-3 py-1.5 rounded-md font-medium transition-colors';
 
 const EMPTY_STAKEHOLDER = {
@@ -24,7 +24,7 @@ const EMPTY_STAKEHOLDER = {
 
 function levelBadge(level) {
   const colors = {
-    Low:    'bg-gray-100 text-gray-500',
+    Low:    'bg-slate-100 text-slate-500',
     Medium: 'bg-amber-100 text-amber-700',
     High:   'bg-red-100 text-red-700',
   };
@@ -45,7 +45,7 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
     <div className="border border-indigo-200 rounded-lg bg-indigo-50 p-4 space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wide text-gray-500 mb-1">Name *</label>
+          <label className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Name *</label>
           <input
             value={draft.name}
             onChange={e => set('name', e.target.value)}
@@ -55,7 +55,7 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wide text-gray-500 mb-1">Role / Title</label>
+          <label className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Role / Title</label>
           <input
             value={draft.role}
             onChange={e => set('role', e.target.value)}
@@ -64,7 +64,7 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wide text-gray-500 mb-1">Department</label>
+          <label className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Department</label>
           <input
             value={draft.department}
             onChange={e => set('department', e.target.value)}
@@ -73,7 +73,7 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wide text-gray-500 mb-1">Notes</label>
+          <label className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Notes</label>
           <input
             value={draft.notes}
             onChange={e => set('notes', e.target.value)}
@@ -82,7 +82,7 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wide text-gray-500 mb-1">Influence</label>
+          <label className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Influence</label>
           <select
             value={draft.influence}
             onChange={e => set('influence', e.target.value)}
@@ -92,7 +92,7 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
           </select>
         </div>
         <div>
-          <label className="block text-[10px] font-bold uppercase tracking-wide text-gray-500 mb-1">Interest</label>
+          <label className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Interest</label>
           <select
             value={draft.interest}
             onChange={e => set('interest', e.target.value)}
@@ -115,7 +115,7 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
         <button
           type="button"
           onClick={onCancel}
-          className={`${BTN} border border-gray-300 text-gray-600 hover:bg-gray-50`}
+          className={`${BTN} border border-slate-300 text-slate-600 hover:bg-slate-50`}
         >
           Cancel
         </button>
@@ -128,30 +128,30 @@ function StakeholderForm({ initial, onSave, onCancel, saveLabel = 'Save' }) {
 
 function StakeholderRow({ stakeholder, onEdit, onDelete }) {
   return (
-    <div className="border border-gray-200 rounded-lg bg-white px-4 py-3">
+    <div className="border border-slate-200 rounded-lg bg-white px-4 py-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-gray-800">{stakeholder.name}</span>
+            <span className="text-sm font-semibold text-slate-800">{stakeholder.name}</span>
             {stakeholder.role && (
-              <span className="text-xs text-gray-500">{stakeholder.role}</span>
+              <span className="text-xs text-slate-500">{stakeholder.role}</span>
             )}
             {stakeholder.department && (
-              <span className="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
                 {stakeholder.department}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-            <span className="text-[11px] text-gray-400">
+            <span className="text-[11px] text-slate-400">
               Influence: {levelBadge(stakeholder.influence)}
             </span>
-            <span className="text-[11px] text-gray-400">
+            <span className="text-[11px] text-slate-400">
               Interest: {levelBadge(stakeholder.interest)}
             </span>
             {stakeholder.notes && (
-              <span className="text-[11px] text-gray-500 italic">
+              <span className="text-[11px] text-slate-500 italic">
                 {stakeholder.notes}
               </span>
             )}
@@ -162,14 +162,14 @@ function StakeholderRow({ stakeholder, onEdit, onDelete }) {
           <button
             type="button"
             onClick={onEdit}
-            className="text-xs text-gray-400 hover:text-indigo-600"
+            className="text-xs text-slate-400 hover:text-indigo-600"
           >
             Edit
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="text-xs text-gray-300 hover:text-red-500"
+            className="text-xs text-slate-300 hover:text-red-500"
           >
             ✕
           </button>
@@ -222,7 +222,7 @@ export function StakeholderMapBuilder({ engagement, onSave, onClose }) {
     <div>
       {/* Header strip */}
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-slate-500">
           {hasStakeholders
             ? `${stakeholders.length} stakeholder${stakeholders.length !== 1 ? 's' : ''} · Click a name to edit`
             : 'No stakeholders added yet'}
@@ -252,7 +252,7 @@ export function StakeholderMapBuilder({ engagement, onSave, onClose }) {
 
       {/* Stakeholder list */}
       {!hasStakeholders && !showAdd && (
-        <div className="border-2 border-dashed border-gray-200 rounded-lg py-8 text-center text-sm text-gray-400">
+        <div className="border-2 border-dashed border-slate-200 rounded-lg py-8 text-center text-sm text-slate-400">
           <p>👥</p>
           <p className="mt-1">Add stakeholders to build the influence/interest map</p>
         </div>
@@ -281,11 +281,11 @@ export function StakeholderMapBuilder({ engagement, onSave, onClose }) {
 
       {/* Legend */}
       {hasStakeholders && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+        <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">
             Influence / Interest legend
           </p>
-          <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-500">
+          <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
             <span>High influence + High interest → <strong>Manage closely</strong></span>
             <span>High influence + Low interest → <strong>Keep satisfied</strong></span>
             <span>Low influence + High interest → <strong>Keep informed</strong></span>
@@ -295,7 +295,7 @@ export function StakeholderMapBuilder({ engagement, onSave, onClose }) {
       )}
 
       {/* Action bar */}
-      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-slate-100 flex-wrap">
         {engagement && (
           <button
             type="button"
@@ -309,7 +309,7 @@ export function StakeholderMapBuilder({ engagement, onSave, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline"
+          className="ml-auto text-xs text-slate-400 hover:text-slate-600 underline"
         >
           Close
         </button>

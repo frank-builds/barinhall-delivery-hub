@@ -27,7 +27,7 @@ function downloadFile(filename, content) {
 
 export function OutputCenter() {
   const { id } = useParams();
-  const { getEngagement, saveOutput } = useEngagements();
+  const { getEngagement, saveOutput, setDeliverablesReady } = useEngagements();
   const engagement = getEngagement(id);
 
   const [generating, setGenerating]       = useState(null); // docTypeId currently generating
@@ -85,6 +85,18 @@ export function OutputCenter() {
 
   const totalDefs     = outputDefs.length;
   const generatedCount = outputs.filter(o => outputDefs.some(d => d.id === o.documentType)).length;
+  // "All deliverables ready" rule: every defined output type for this service
+  // has a corresponding generated output. We require totalDefs > 0 so empty
+  // service templates don't trigger the CTA.
+  const allDeliverablesGenerated = totalDefs > 0 && generatedCount === totalDefs;
+  const isMarkedReady = !!engagement.deliverablesReady;
+
+  function handleMarkReady() {
+    setDeliverablesReady(engagement.id, true);
+  }
+  function handleUnmarkReady() {
+    setDeliverablesReady(engagement.id, false);
+  }
 
   return (
     <div className="max-w-3xl">
@@ -125,6 +137,48 @@ export function OutputCenter() {
         <p className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
           {exportError}
         </p>
+      )}
+
+      {/* ── Deliverables-ready CTA (Sprint B) ── */}
+      {allDeliverablesGenerated && !isMarkedReady && (
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3.5 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-0.5">
+              All deliverables generated
+            </p>
+            <p className="text-sm text-emerald-900 leading-snug">
+              All {totalDefs} document{totalDefs !== 1 ? 's' : ''} for this service have been generated.
+              Mark this engagement as ready for client review?
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleMarkReady}
+            className="flex-shrink-0 bg-emerald-600 text-white text-sm font-medium rounded-lg px-3 py-1.5 hover:bg-emerald-700 transition-colors"
+          >
+            Mark Ready for Review
+          </button>
+        </div>
+      )}
+
+      {isMarkedReady && (
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <p className="text-sm text-emerald-900 leading-snug">
+            <span className="font-semibold">✓ Deliverables marked ready for client review</span>
+            {engagement.deliverablesReadyAt && (
+              <span className="text-emerald-700 ml-2">
+                · {formatDate(engagement.deliverablesReadyAt)}
+              </span>
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={handleUnmarkReady}
+            className="flex-shrink-0 text-xs text-emerald-700 hover:text-emerald-900 underline transition-colors"
+          >
+            Unmark
+          </button>
+        </div>
       )}
 
       {outputDefs.length === 0 ? (

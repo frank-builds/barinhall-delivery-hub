@@ -8,6 +8,7 @@
 // Persistence: saved draft stored at engagement.artifactData[type]
 
 import { useState, useEffect } from 'react';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 
 // ── Merge helper ──────────────────────────────────────────────────────────────
 
@@ -516,7 +517,7 @@ function EditableBody({ value, onChange }) {
       rows={18}
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y"
+      className="bh-input font-mono leading-relaxed resize-y"
     />
   );
 }
@@ -544,9 +545,12 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
   const [body, setBody] = useState(
     () => saved?.body ?? (template ? merge(template.body, engagement) : '')
   );
-  const [copiedSubject, setCopiedSubject] = useState(false);
-  const [copiedAll,     setCopiedAll]     = useState(false);
-  const [isSaved,       setIsSaved]       = useState(!!saved);
+  const [isSaved, setIsSaved] = useState(!!saved);
+
+  // Two independent clipboard hooks — one per copy button so their "copied"
+  // flags don't conflict visually.
+  const subjectCopy = useCopyToClipboard();
+  const fullCopy    = useCopyToClipboard();
 
   // Re-merge when engagement changes (new engagement selected)
   useEffect(() => {
@@ -560,13 +564,13 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
   // Guard: render fallback for unknown templateKey AFTER all hooks have been called.
   if (noTemplate) {
     return (
-      <div className="py-10 text-center text-sm text-gray-400 italic">
+      <div className="py-10 text-center text-sm text-slate-400 italic">
         No template found for <strong>{type}</strong>.
         <br />
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 text-xs text-gray-400 hover:text-gray-600 underline"
+          className="mt-4 text-xs text-slate-400 hover:text-slate-600 underline"
         >
           Close
         </button>
@@ -575,16 +579,6 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
   }
 
   function markDirty() { setIsSaved(false); }
-
-  async function copyToClipboard(text, setter) {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Clipboard API unavailable — graceful no-op
-    }
-    setter(true);
-    setTimeout(() => setter(false), 2000);
-  }
 
   function buildMailtoHref() {
     const to      = engagement?.email ?? '';
@@ -598,37 +592,35 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
     setIsSaved(true);
   }
 
-  const BTN = 'text-xs px-3 py-1.5 rounded-md font-medium transition-colors';
-
   return (
     <div className="space-y-4">
 
       {/* Subject */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="text-xs font-semibold text-gray-600">Subject line</label>
+          <label className="text-xs font-semibold text-slate-600">Subject line</label>
           <button
             type="button"
-            onClick={() => copyToClipboard(subject, setCopiedSubject)}
-            className="text-[11px] text-gray-400 hover:text-indigo-600 underline"
+            onClick={() => subjectCopy.copy(subject)}
+            className="text-[11px] text-slate-400 hover:text-indigo-600 underline"
           >
-            {copiedSubject ? '✓ Copied' : 'Copy subject'}
+            {subjectCopy.copied ? '✓ Copied' : 'Copy subject'}
           </button>
         </div>
         <input
           value={subject}
           onChange={e => { setSubject(e.target.value); markDirty(); }}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="bh-input"
         />
       </div>
 
       {/* Body */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="text-xs font-semibold text-gray-600">
+          <label className="text-xs font-semibold text-slate-600">
             Email body
             {type === 'dataRequestEmail' && (
-              <span className="ml-1.5 text-gray-400 font-normal">
+              <span className="ml-1.5 text-slate-400 font-normal">
                 — edit checklist items directly in the text
               </span>
             )}
@@ -646,12 +638,12 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
       )}
 
       {/* Action bar */}
-      <div className="flex items-center gap-2 pt-3 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 pt-3 border-t border-slate-100 flex-wrap">
         {engagement && (
           <button
             type="button"
             onClick={handleSave}
-            className={`${BTN} bg-indigo-600 text-white hover:bg-indigo-700`}
+            className="bh-btn-primary py-1.5 text-xs"
           >
             {isSaved ? '✓ Draft saved' : 'Save draft'}
           </button>
@@ -659,17 +651,17 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
 
         <button
           type="button"
-          onClick={() => copyToClipboard(`Subject: ${subject}\n\n${body}`, setCopiedAll)}
-          className={`${BTN} border border-gray-300 text-gray-700 hover:bg-gray-50`}
+          onClick={() => fullCopy.copy(`Subject: ${subject}\n\n${body}`)}
+          className="bh-btn-secondary py-1.5 text-xs"
         >
-          {copiedAll ? '✓ Copied!' : '📋 Copy full email'}
+          {fullCopy.copied ? '✓ Copied!' : '📋 Copy full email'}
         </button>
 
         <a
           href={buildMailtoHref()}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${BTN} border border-gray-300 text-gray-700 hover:bg-gray-50 inline-block`}
+          className="bh-btn-secondary py-1.5 text-xs inline-flex"
         >
           ✉️ Open in mail client
         </a>
@@ -677,7 +669,7 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline"
+          className="ml-auto text-xs text-slate-400 hover:text-slate-600 underline"
         >
           Close
         </button>

@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { useEngagements } from '../../hooks/useEngagements.js';
+import { Modal } from '../Modal.jsx';
 import { SowBuilder } from './SowBuilder.jsx';
 import { EmailDraftEditor } from './EmailDraftEditor.jsx';
 import { StakeholderMapBuilder } from './StakeholderMapBuilder.jsx';
@@ -56,7 +57,7 @@ function BuilderRouter({ artifact, engagement, onSave, onClose }) {
   if (comp === 'emailDraft')    return <EmailDraftEditor type={templateKey} engagement={engagement} onSave={onSave} onClose={onClose} />;
 
   return (
-    <div className="py-10 text-center text-sm text-gray-400 italic">
+    <div className="py-10 text-center text-sm text-slate-400 italic">
       Builder for <strong>{templateKey}</strong> is not yet implemented.
     </div>
   );
@@ -79,73 +80,58 @@ function ArtifactModal({ artifact, onClose }) {
   }
 
   return (
-    // Full-screen backdrop — pointer-events on the backdrop close the modal
-    <div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] flex items-start justify-center overflow-y-auto py-8 px-4"
-      onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}
+    <Modal
+      open
+      onClose={onClose}
+      title={artifact.label}
+      description={artifact.description}
+      maxWidth="max-w-2xl"
     >
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col">
-
-        {/* Modal header */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
-          <div>
-            <h2 className="font-semibold text-gray-900">{artifact.label}</h2>
-            <p className="text-xs text-gray-500 mt-0.5 max-w-lg">{artifact.description}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-700 text-lg leading-none"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Engagement selector */}
-        <div className="px-6 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-gray-500">Engagement:</span>
-          <select
-            value={selectedId}
-            onChange={e => setSelectedId(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-xs"
-          >
-            <option value="">— none selected —</option>
-            {engagements.map(e => (
-              <option key={e.id} value={e.id}>
-                {e.clientName} · {e.company}
-              </option>
-            ))}
-          </select>
-          {!engagement && (
-            <span className="text-[11px] text-gray-400 italic">
-              Select an engagement to pre-populate fields and save output
-            </span>
-          )}
-          {engagement && (
-            <span className="text-[11px] text-green-600 font-medium">
-              ✓ Changes will be saved to this engagement
-            </span>
-          )}
-        </div>
-
-        {/* Builder content — remount fresh when engagement changes */}
-        <div className="px-6 py-5 overflow-y-auto" style={{ maxHeight: '72vh' }}>
-          <BuilderRouter
-            key={selectedId}                 // remount on engagement change
-            artifact={artifact}
-            engagement={engagement}
-            onSave={onSave}
-            onClose={onClose}
-          />
-        </div>
+      {/* Engagement selector */}
+      <div className="px-5 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center gap-2 flex-wrap flex-shrink-0">
+        <span className="text-xs font-medium text-slate-500">Engagement:</span>
+        <select
+          value={selectedId}
+          onChange={e => setSelectedId(e.target.value)}
+          className="bh-input text-xs py-1 w-auto max-w-xs"
+        >
+          <option value="">— none selected —</option>
+          {engagements.map(e => (
+            <option key={e.id} value={e.id}>
+              {e.clientName} · {e.company}
+            </option>
+          ))}
+        </select>
+        {!engagement && (
+          <span className="text-[11px] text-slate-400 italic">
+            Select an engagement to pre-populate fields and save output
+          </span>
+        )}
+        {engagement && (
+          <span className="text-[11px] text-emerald-600 font-medium">
+            ✓ Changes will be saved to this engagement
+          </span>
+        )}
       </div>
-    </div>
+
+      {/* Builder content — remount fresh when engagement changes */}
+      <div className="px-5 py-5 overflow-y-auto" style={{ maxHeight: '72vh' }}>
+        <BuilderRouter
+          key={selectedId}                 // remount on engagement change
+          artifact={artifact}
+          engagement={engagement}
+          onSave={onSave}
+          onClose={onClose}
+        />
+      </div>
+    </Modal>
   );
 }
 
 // ── Public component ──────────────────────────────────────────────────────────
 
 /**
- * @param {object[]} artifacts - From step.artifacts in playbooks.js
+ * @param {object[]} artifacts - From step.artifacts in playbooks.json
  */
 export function ArtifactLauncher({ artifacts }) {
   const [openArtifact, setOpenArtifact] = useState(null);

@@ -286,7 +286,7 @@ function ArtifactViewerModal({ storageKey, component, label, engagement, onClose
 
     // Unknown / unimplemented artifact type
     return (
-      <div className="py-10 text-center text-sm text-gray-400 italic">
+      <div className="py-10 text-center text-sm text-slate-400 italic">
         No viewer available for <strong>{storageKey}</strong> yet.
       </div>
     );
@@ -300,16 +300,16 @@ function ArtifactViewerModal({ storageKey, component, label, engagement, onClose
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col">
 
         {/* Modal header */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-slate-100">
           <div>
-            <h2 className="font-semibold text-gray-900">{label}</h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <h2 className="font-semibold text-slate-900">{label}</h2>
+            <p className="text-xs text-slate-400 mt-0.5">
               {engagement.clientName} · {engagement.company}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-700 text-lg leading-none"
+            className="ml-4 flex-shrink-0 text-slate-400 hover:text-slate-700 text-lg leading-none"
           >
             ✕
           </button>
@@ -373,7 +373,7 @@ export function EngagementArtifacts({ engagement }) {
         {/* Artifact list */}
         <div className="space-y-2">
           {items.map(item => {
-            const typeMeta = TYPE_LABELS[item.component] ?? { label: 'Artifact', cls: 'bg-gray-100 text-gray-500 border-gray-200' };
+            const typeMeta = TYPE_LABELS[item.component] ?? { label: 'Artifact', cls: 'bg-slate-100 text-slate-500 border-slate-200' };
             const savedDate = formatSavedAt(item.data?.savedAt);
 
             return (
@@ -386,13 +386,13 @@ export function EngagementArtifacts({ engagement }) {
                   <span className="flex-shrink-0 text-base">{item.icon}</span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-medium text-gray-800 truncate">{item.label}</p>
+                      <p className="text-sm font-medium text-slate-800 truncate">{item.label}</p>
                       <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${typeMeta.cls}`}>
                         {typeMeta.label}
                       </span>
                     </div>
                     {savedDate && (
-                      <p className="text-[11px] text-gray-400 mt-0.5">Saved {savedDate}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">Saved {savedDate}</p>
                     )}
                   </div>
                 </div>

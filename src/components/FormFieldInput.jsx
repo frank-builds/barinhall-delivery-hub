@@ -1,4 +1,4 @@
-const BASE = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
+const BASE = 'w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
 
 // ── Facilitator guidance block ────────────────────────────────────────────────
 // Rendered below any field that carries facilitator metadata when
@@ -50,9 +50,9 @@ export function FormFieldInput({ field, value, onChange, facilitatorMode = false
           {field.label}
         </h3>
         {field.description && (
-          <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{field.description}</p>
+          <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{field.description}</p>
         )}
-        <div className="mt-2 border-b border-gray-100" />
+        <div className="mt-2 border-b border-slate-100" />
         {facilitatorMode && field.facilitatorNote && (
           <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs">
             <span className="font-semibold text-amber-800 uppercase tracking-wide text-[10px]">Facilitator note</span>
@@ -74,7 +74,7 @@ export function FormFieldInput({ field, value, onChange, facilitatorMode = false
 
     if (!display) {
       return (
-        <div className="rounded-md border border-dashed border-gray-200 px-3 py-2 text-sm text-gray-400 italic">
+        <div className="rounded-md border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-400 italic">
           Answer the sub-questions above to see the derived score
         </div>
       );
@@ -83,7 +83,7 @@ export function FormFieldInput({ field, value, onChange, facilitatorMode = false
       <div className="rounded-md bg-indigo-50 border border-indigo-200 px-3 py-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-semibold text-indigo-800">{display}</span>
-          <span className="text-xs text-gray-400">· {subtitle}</span>
+          <span className="text-xs text-slate-400">· {subtitle}</span>
         </div>
         {summary && (
           <p className="text-xs text-indigo-600 mt-1 italic">{summary}</p>
@@ -97,7 +97,7 @@ export function FormFieldInput({ field, value, onChange, facilitatorMode = false
   const helpAndGuidance = (
     <>
       {field.helpText && (
-        <p className="text-xs text-gray-400 mt-1 leading-relaxed">{field.helpText}</p>
+        <p className="text-xs text-slate-400 mt-1 leading-relaxed">{field.helpText}</p>
       )}
       {facilitatorMode && <FacilitatorGuidance field={field} />}
     </>

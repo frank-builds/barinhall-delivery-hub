@@ -1,19 +1,20 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useEngagements } from '../hooks/useEngagements.js';
 import { getFormDef } from '../data/formDefinitions.js';
 import { generateMarkdown } from '../data/templateMappings.js';
 import { renderMarkdownBlocks } from '../lib/markdownRenderer.jsx';
-import { exportElementToPdf, makePdfFilename } from '../lib/exportPdf.js';
+import { makePdfFilename } from '../lib/exportPdf.js';
+import { usePdfExport } from '../hooks/usePdfExport.js';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard.js';
 
 export function PreviewPage() {
   const { id, formKey } = useParams();
   const { getEngagement } = useEngagements();
   const engagement = getEngagement(id);
 
-  const [copied,   setCopied]   = useState(false);
-  const [pdfBusy,  setPdfBusy]  = useState(false);
-  const [pdfError, setPdfError] = useState('');
+  const { exportElement, busy: pdfBusy, error: pdfError } = usePdfExport();
+  const { copy, copied } = useCopyToClipboard();
   const docCardRef = useRef(null);
 
   if (!engagement) {
@@ -45,28 +46,11 @@ export function PreviewPage() {
 
   const markdown = generateMarkdown(formKey, engagement);
 
-  function handleCopy() {
-    navigator.clipboard.writeText(markdown).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  async function handleDownloadPdf() {
-    setPdfBusy(true);
-    setPdfError('');
-    try {
-      await exportElementToPdf(
-        docCardRef.current,
-        makePdfFilename(formDef.label, engagement.clientName),
-      );
-    } catch (err) {
-      console.error('PDF export failed:', err);
-      setPdfError('PDF export failed — please try again.');
-      setTimeout(() => setPdfError(''), 5000);
-    } finally {
-      setPdfBusy(false);
-    }
+  function handleDownloadPdf() {
+    return exportElement(
+      docCardRef.current,
+      makePdfFilename(formDef.label, engagement.clientName),
+    );
   }
 
   return (
@@ -98,7 +82,7 @@ export function PreviewPage() {
           >
             ← Edit Form
           </Link>
-          <button onClick={handleCopy} className="bh-btn-secondary">
+          <button onClick={() => copy(markdown)} className="bh-btn-secondary">
             {copied ? (
               <><span className="text-emerald-600">✓</span> Copied</>
             ) : (

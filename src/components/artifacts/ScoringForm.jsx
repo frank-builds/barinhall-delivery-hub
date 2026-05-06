@@ -108,7 +108,7 @@ function computeWeightedScore(criteria, maxScore) {
   return ((weighted / totalWeight) * 100).toFixed(1);
 }
 
-const INPUT = 'border border-gray-200 rounded px-2 py-1 text-xs w-full focus:outline-none focus:ring-1 focus:ring-indigo-400';
+const INPUT = 'border border-slate-200 rounded px-2 py-1 text-xs w-full focus:outline-none focus:ring-1 focus:ring-indigo-400';
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -140,12 +140,12 @@ export function ScoringForm({ storageKey, engagement, onSave, onClose }) {
     <div>
       <div className="mb-4">
         <input value={title} onChange={e => { setTitle(e.target.value); setIsSaved(false); }}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400" />
       </div>
 
       {/* Score summary strip */}
       {isWeighted && (
-        <div className="mb-4 flex items-center gap-4 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+        <div className="mb-4 flex items-center gap-4 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">
           <span>{scored} / {criteria.length} criteria scored</span>
           {weightedPct !== null && (
             <span className="font-semibold text-indigo-700">
@@ -158,12 +158,12 @@ export function ScoringForm({ storageKey, engagement, onSave, onClose }) {
       {/* Criteria rows */}
       <div className="space-y-3">
         {criteria.map(c => (
-          <div key={c.id} className="border border-gray-100 rounded-lg p-3 bg-white">
+          <div key={c.id} className="border border-slate-100 rounded-lg p-3 bg-white">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-gray-800 mb-1">{c.name}</p>
+                <p className="text-xs font-semibold text-slate-800 mb-1">{c.name}</p>
                 {c.notes && (
-                  <p className="text-[11px] text-gray-400 italic mb-2">{c.notes}</p>
+                  <p className="text-[11px] text-slate-400 italic mb-2">{c.notes}</p>
                 )}
                 <div className="flex flex-wrap gap-2 items-center">
                   {/* Evidence / target field */}
@@ -178,7 +178,7 @@ export function ScoringForm({ storageKey, engagement, onSave, onClose }) {
               {/* Score picker */}
               <div className="flex-shrink-0 text-right">
                 {isWeighted && c.weight !== null && (
-                  <p className="text-[10px] text-gray-400 mb-1">Weight: {c.weight}%</p>
+                  <p className="text-[10px] text-slate-400 mb-1">Weight: {c.weight}%</p>
                 )}
                 <div className="flex gap-1">
                   {SCORE_OPTIONS.map(s => (
@@ -190,8 +190,8 @@ export function ScoringForm({ storageKey, engagement, onSave, onClose }) {
                         c.score === s && s !== null
                           ? 'bg-indigo-600 border-indigo-600 text-white'
                           : s === null
-                          ? 'border-gray-200 text-gray-300 text-[10px]'
-                          : 'border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+                          ? 'border-slate-200 text-slate-300 text-[10px]'
+                          : 'border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'
                       }`}
                     >
                       {s === null ? '–' : s}
@@ -204,7 +204,7 @@ export function ScoringForm({ storageKey, engagement, onSave, onClose }) {
         ))}
       </div>
 
-      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-100 flex-wrap">
+      <div className="flex items-center gap-2 mt-5 pt-4 border-t border-slate-100 flex-wrap">
         {engagement && (
           <button type="button" onClick={handleSave}
             className="text-xs px-3 py-1.5 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
@@ -212,7 +212,7 @@ export function ScoringForm({ storageKey, engagement, onSave, onClose }) {
           </button>
         )}
         <button type="button" onClick={onClose}
-          className="ml-auto text-xs text-gray-400 hover:text-gray-600 underline">
+          className="ml-auto text-xs text-slate-400 hover:text-slate-600 underline">
           Close
         </button>
       </div>

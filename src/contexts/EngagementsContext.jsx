@@ -223,6 +223,20 @@ export function EngagementsProvider({ children }) {
     }));
   }
 
+  // ── Deliverables-ready flag (Sprint B) ───────────────────────────────────
+
+  /**
+   * Mark the engagement's deliverables as ready for client review (or unmark).
+   * Stamps `deliverablesReadyAt` with an ISO timestamp on transition to true.
+   */
+  function setDeliverablesReady(engagementId, ready) {
+    applyAndSave(engagementId, eng => ({
+      ...eng,
+      deliverablesReady:    !!ready,
+      deliverablesReadyAt:  ready ? new Date().toISOString() : null,
+    }));
+  }
+
   // ── Use Case Library integration ─────────────────────────────────────────
 
   /** Add a use case ID to the engagement's candidateUseCases list (idempotent). */
@@ -299,6 +313,7 @@ export function EngagementsProvider({ children }) {
       updateArtifactData,
       addCandidateUseCase,
       removeCandidateUseCase,
+      setDeliverablesReady,
       getEngagement,
     }}>
       {children}
