@@ -16,12 +16,23 @@ import { getFormDefs, TEMPLATE_STATUSES } from '../data/formDefinitions.js';
 import { computeStatus, effectiveStatus } from '../lib/statusUtils.js';
 import { USE_CASES } from '../data/useCaseLibrary.js';
 import { UseCasePicker } from '../components/UseCasePicker.jsx';
+import { PermissionGate } from '../components/PermissionGate.jsx';
 
 function DetailRow({ label, value }) {
   return (
     <div>
       <p className="bh-section-label">{label}</p>
       <p className="text-sm text-slate-800 mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+/** Read-only status display shown to users without engagements.write */
+function ReadOnlyStatus({ engagement }) {
+  return (
+    <div>
+      <p className="bh-section-label mb-1">Status</p>
+      <StatusBadge status={effectiveStatus(engagement)} />
     </div>
   );
 }
@@ -295,10 +306,15 @@ export function EngagementDetail() {
         />
         <DetailRow label="Owner"           value={engagement.owner} />
         <DetailRow label="Start Date"      value={engagement.startDate} />
-        <StatusControl
-          engagement={engagement}
-          onChange={override => setStatusOverride(engagement.id, override)}
-        />
+        <PermissionGate
+          perm="engagements.write"
+          fallback={<ReadOnlyStatus engagement={engagement} />}
+        >
+          <StatusControl
+            engagement={engagement}
+            onChange={override => setStatusOverride(engagement.id, override)}
+          />
+        </PermissionGate>
         <DetailRow label="Primary Contact" value={engagement.primaryContact} />
         <DetailRow label="Email"           value={engagement.email} />
       </div>

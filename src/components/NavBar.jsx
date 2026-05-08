@@ -1,18 +1,32 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuthz } from '../hooks/useAuthz.js';
 
-const NAV_LINKS = [
+// Links always visible to authenticated users
+const BASE_NAV_LINKS = [
   { to: '/',          label: 'Dashboard' },
   { to: '/templates', label: 'Playbooks' },
   { to: '/library',   label: 'Library'   },
   { to: '/digest',    label: 'Digest'    },
 ];
 
+// Links shown only when the user holds the required permission
+const GATED_NAV_LINKS = [
+  { to: '/admin', label: 'Admin', perm: 'admin.access.read' },
+];
+
 export function NavBar() {
   const { pathname } = useLocation();
   const { user, signOut } = useAuth();
+  const { can } = useAuthz();
   const [open, setOpen] = useState(false);
+
+  // Merge base + permitted gated links
+  const navLinks = [
+    ...BASE_NAV_LINKS,
+    ...GATED_NAV_LINKS.filter(link => can(link.perm)),
+  ];
 
   function isActive(to) {
     return to === '/' ? pathname === '/' : pathname.startsWith(to);
@@ -43,7 +57,7 @@ export function NavBar() {
 
         {/* Primary nav links */}
         <div className="hidden md:flex items-center gap-0.5 flex-1">
-          {NAV_LINKS.map(link => (
+          {navLinks.map(link => (
             <Link
               key={link.to}
               to={link.to}
@@ -95,7 +109,7 @@ export function NavBar() {
       {/* ── Mobile dropdown ── */}
       {open && (
         <div className="md:hidden border-t border-slate-100 bg-white px-4 py-3 space-y-1">
-          {NAV_LINKS.map(link => (
+          {navLinks.map(link => (
             <Link
               key={link.to}
               to={link.to}

@@ -8,6 +8,7 @@ import { exportEngagementZip } from '../lib/zipExport.js';
 import { SERVICES } from '../data/services.js';
 import { renderMarkdownBlocks } from '../lib/markdownRenderer.jsx';
 import { Badge } from '../components/Badge.jsx';
+import { PermissionGate } from '../components/PermissionGate.jsx';
 
 function formatDate(isoString) {
   if (!isoString) return '—';
@@ -174,30 +175,32 @@ export function OutputCenter() {
 
           {/* Right: actions */}
           <div className="flex items-center gap-2 flex-shrink-0 self-start flex-wrap justify-end">
-            {isMarkedReady ? (
-              <>
-                {engagement.deliverablesReadyAt && (
-                  <span className="text-xs text-slate-400">
-                    {formatDate(engagement.deliverablesReadyAt)}
-                  </span>
-                )}
+            <PermissionGate perm="outputs.write">
+              {isMarkedReady ? (
+                <>
+                  {engagement.deliverablesReadyAt && (
+                    <span className="text-xs text-slate-400">
+                      {formatDate(engagement.deliverablesReadyAt)}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleUnmarkReady}
+                    className="text-xs text-slate-400 hover:text-slate-600 underline transition-colors"
+                  >
+                    Unmark
+                  </button>
+                </>
+              ) : allDeliverablesGenerated ? (
                 <button
                   type="button"
-                  onClick={handleUnmarkReady}
-                  className="text-xs text-slate-400 hover:text-slate-600 underline transition-colors"
+                  onClick={handleMarkReady}
+                  className="bh-btn-primary text-sm"
                 >
-                  Unmark
+                  Mark Ready for Review
                 </button>
-              </>
-            ) : allDeliverablesGenerated ? (
-              <button
-                type="button"
-                onClick={handleMarkReady}
-                className="bh-btn-primary text-sm"
-              >
-                Mark Ready for Review
-              </button>
-            ) : null}
+              ) : null}
+            </PermissionGate>
             <button
               onClick={handleExportZip}
               disabled={exporting || outputs.length === 0}

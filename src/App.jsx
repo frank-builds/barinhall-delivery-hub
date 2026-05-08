@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import { AuthzProvider } from './contexts/AuthzContext.jsx';
 import { EngagementsProvider } from './contexts/EngagementsContext.jsx';
 import { useAuth } from './contexts/AuthContext.jsx';
 import { Layout } from './components/Layout.jsx';
@@ -14,6 +15,10 @@ import { LoginPage } from './pages/LoginPage.jsx';
 import { OutputCenter } from './pages/OutputCenter.jsx';
 import { DigestPage } from './pages/DigestPage.jsx';
 import { UseCaseLibrary } from './pages/UseCaseLibrary.jsx';
+import { AdminLayout } from './pages/admin/AdminLayout.jsx';
+import { AdminAccessOverview } from './pages/admin/AdminAccessOverview.jsx';
+import { AdminUsers } from './pages/admin/AdminUsers.jsx';
+import { AdminRoles } from './pages/admin/AdminRoles.jsx';
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -29,22 +34,32 @@ function AppShell() {
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <EngagementsProvider>
-      <Layout>
-        <Routes>
-          <Route path="/"                                      element={<Dashboard />} />
-          <Route path="/engagements/new"                       element={<NewEngagement />} />
-          <Route path="/engagements/:id"                       element={<EngagementDetail />} />
-          <Route path="/engagements/:id/outputs"               element={<OutputCenter />} />
-          <Route path="/engagements/:id/forms/:formKey"        element={<FormPage />} />
-          <Route path="/engagements/:id/preview/:formKey"      element={<PreviewPage />} />
-          <Route path="/templates"                             element={<Templates />} />
-          <Route path="/digest"                                element={<DigestPage />} />
-          <Route path="/library"                               element={<UseCaseLibrary />} />
-          <Route path="*"                                      element={<NotFound />} />
-        </Routes>
-      </Layout>
-    </EngagementsProvider>
+    <AuthzProvider>
+      <EngagementsProvider>
+        <Layout>
+          <Routes>
+            <Route path="/"                                      element={<Dashboard />} />
+            <Route path="/engagements/new"                       element={<NewEngagement />} />
+            <Route path="/engagements/:id"                       element={<EngagementDetail />} />
+            <Route path="/engagements/:id/outputs"               element={<OutputCenter />} />
+            <Route path="/engagements/:id/forms/:formKey"        element={<FormPage />} />
+            <Route path="/engagements/:id/preview/:formKey"      element={<PreviewPage />} />
+            <Route path="/templates"                             element={<Templates />} />
+            <Route path="/digest"                                element={<DigestPage />} />
+            <Route path="/library"                               element={<UseCaseLibrary />} />
+
+            {/* ── Admin routes (guarded inside AdminLayout) ── */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index                element={<AdminAccessOverview />} />
+              <Route path="users"         element={<AdminUsers />} />
+              <Route path="roles"         element={<AdminRoles />} />
+            </Route>
+
+            <Route path="*"                                      element={<NotFound />} />
+          </Routes>
+        </Layout>
+      </EngagementsProvider>
+    </AuthzProvider>
   );
 }
 
