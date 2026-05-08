@@ -127,15 +127,27 @@ export function AuthzProvider({ children }) {
       );
 
       if (provErr) {
-        // Provision failed — could be a duplicate race (two tabs); retry fetch
+        // Provision failed (RLS / constraint / network) — retry the fetch in
+        // case a concurrent tab already inserted the row.
         const { data: retry, error: retryErr } = await fetchProfile(authUser.id);
         if (retryErr || !retry) {
           applyFallback(provErr.message ?? 'Provision error');
           return;
         }
         setProfile(retry);
-      } else {
+      } else if (provisioned) {
+        // INSERT succeeded and returned the new row.
         setProfile(provisioned);
+      } else {
+        // INSERT did nothing and returned no data — this happens when
+        // ignoreDuplicates hits an existing row (ON CONFLICT DO NOTHING).
+        // Re-fetch so we don't call setProfile(null) on an existing row.
+        const { data: existing, error: existErr } = await fetchProfile(authUser.id);
+        if (existErr || !existing) {
+          applyFallback('Row exists but re-fetch after provision returned nothing');
+          return;
+        }
+        setProfile(existing);
       }
 
       setLoading(false);
@@ -169,16 +181,26 @@ export function AuthzProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // ── D1.1 Bootstrap-admin override ──────────────────────────────────────
+  // ── D1.2 Bootstrap-admin override — DB-first precedence ─────────────────
   //
-  // Applied AFTER all profile-loading branches converge so that it fires
-  // regardless of whether a DB row exists, what role that row holds, or
-  // whether is_active is true/false.
+  // The override is a fallback of last resort. It fires ONLY when the DB did
+  // not return a usable profile row — either because the row is genuinely
+  // absent (no row yet, first sign-in) or because the DB was unreachable
+  // (isFallback = true). If the DB returned ANY profile row (regardless of
+  // its role or is_active value), that row is authoritative and the env-var
+  // override is suppressed entirely.
   //
-  // This is intentionally a derived value, not a state update — it does not
-  // cause an extra render and cannot be stale.
+  // Decision tree for `role` / `isActive`:
+  //   1. DB row present  → use row.role and row.is_active (DB wins)
+  //   2. No DB row + env var matches email → bootstrap override (platform_admin)
+  //   3. No DB row + env var not set/mismatch → role=null, isActive=false (locked out)
+  //   4. DB error (isFallback) + env var matches → bootstrap override (recovery)
+  //   4. DB error + env var not set → isFallback banner, locked out
+
+  const hasUsableDbProfile = !isFallback && profile !== null;
 
   const isBootstrapAdmin =
+    !hasUsableDbProfile &&
     !!PLATFORM_ADMIN_EMAIL &&
     (user?.email ?? '').trim().toLowerCase() === PLATFORM_ADMIN_EMAIL;
 

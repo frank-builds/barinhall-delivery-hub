@@ -25,7 +25,17 @@ const TABLE = 'user_profiles';
 
 /**
  * Fetches a single profile by auth user ID.
- * Returns { data, error } — data is null when no row exists.
+ *
+ * Return contract (three distinct cases — do not conflate):
+ *
+ *   { data: <row>, error: null }   — row found; use data.
+ *   { data: null,  error: null }   — query succeeded but no matching row exists
+ *                                    (genuine miss — user has not signed in before,
+ *                                    or the row was deleted). NOT a DB error.
+ *   { data: null,  error: <obj> }  — DB/RLS/network error; treat as DB unavailable.
+ *                                    Caller should call applyFallback(), not lazyProvision().
+ *
+ * Uses maybeSingle() so "no row" is never surfaced as an error object.
  */
 export async function fetchProfile(userId) {
   return supabase
