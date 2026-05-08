@@ -184,10 +184,7 @@ export function Dashboard() {
             placeholder="Search by client, company, or owner…"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            className="flex-1 min-w-[200px] text-sm border border-slate-200 rounded-lg px-3 py-1.5
-                       text-slate-700 placeholder-slate-400
-                       focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent
-                       bg-white transition-colors"
+            className="bh-input flex-1 min-w-[200px] py-1.5"
           />
 
           {/* Status filter chips */}
@@ -211,8 +208,7 @@ export function Dashboard() {
           <select
             value={serviceFilter}
             onChange={e => setServiceFilter(e.target.value)}
-            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-600 bg-white
-                       focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors"
+            className="bh-input w-auto text-xs py-1.5"
           >
             <option value="All">All services</option>
             {SERVICES.map(s => (

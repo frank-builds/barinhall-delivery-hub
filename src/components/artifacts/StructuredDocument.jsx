@@ -335,7 +335,7 @@ export function StructuredDocument({ storageKey, engagement, onSave, onClose }) 
           </button>
         )}
         <button type="button" onClick={handleCopy} className="bh-btn-secondary py-1.5 text-xs">
-          {copied ? '✓ Copied!' : '📋 Copy as Markdown'}
+          {copied ? '✓ Copied!' : 'Copy markdown'}
         </button>
         <button
           type="button"

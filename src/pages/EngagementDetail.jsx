@@ -207,6 +207,86 @@ export function EngagementDetail() {
       {/* ── Next-step banner (Sprint B) ── */}
       <NextStepBanner engagement={engagement} />
 
+      {/* ── Working area ── */}
+      {(() => {
+        const completedFormCount = formDefs.filter(
+          f => (engagement.templateStatuses?.[f.key] ?? 'Not Started') === 'Complete'
+        ).length;
+        const startedFormCount = formDefs.filter(
+          f => (engagement.templateStatuses?.[f.key] ?? 'Not Started') !== 'Not Started'
+        ).length;
+        const outputCount = (engagement.outputs ?? []).length;
+        const isReady     = !!engagement.deliverablesReady;
+
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
+
+            {/* Forms */}
+            {formDefs.length > 0 && (
+              <Link
+                to={`/engagements/${engagement.id}/forms/${formDefs[0].key}`}
+                className="bh-card bh-card-hover px-3.5 py-3 flex items-center gap-2.5"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-slate-700 mb-0.5">Forms &amp; Templates</p>
+                  <p className="text-xs text-slate-400">
+                    {completedFormCount}/{formDefs.length} complete
+                    {startedFormCount > completedFormCount && (
+                      <span className="ml-1.5 text-indigo-500">· {startedFormCount - completedFormCount} in progress</span>
+                    )}
+                  </p>
+                </div>
+                <svg className="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            )}
+
+            {/* Output Center */}
+            <Link
+              to={`/engagements/${engagement.id}/outputs`}
+              className="bh-card bh-card-hover px-3.5 py-3 flex items-center gap-2.5"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-slate-700 mb-0.5">Output Center</p>
+                <p className={`text-xs ${
+                  isReady
+                    ? 'text-emerald-600 font-medium'
+                    : outputCount > 0 ? 'text-indigo-500' : 'text-slate-400'
+                }`}>
+                  {isReady
+                    ? '✓ Ready for review'
+                    : outputCount > 0
+                      ? `${outputCount} output${outputCount !== 1 ? 's' : ''} generated`
+                      : 'No outputs yet'}
+                </p>
+              </div>
+              <svg className="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+
+            {/* Playbooks / Templates */}
+            <Link
+              to="/templates"
+              className="bh-card bh-card-hover px-3.5 py-3 flex items-center gap-2.5"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-slate-700 mb-0.5">Playbooks</p>
+                <p className="text-xs text-slate-400">
+                  {svcKeys.length > 0
+                    ? svcKeys.map(k => SERVICES.find(s => s.key === k)?.label ?? k).join(', ')
+                    : 'Browse delivery playbooks'}
+                </p>
+              </div>
+              <svg className="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        );
+      })()}
+
       {/* ── Field grid ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-8">
         <ServiceTypeEditor

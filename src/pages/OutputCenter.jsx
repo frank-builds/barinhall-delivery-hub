@@ -7,6 +7,7 @@ import { makeFilename, makeFolderName } from '../lib/outputNaming.js';
 import { exportEngagementZip } from '../lib/zipExport.js';
 import { SERVICES } from '../data/services.js';
 import { renderMarkdownBlocks } from '../lib/markdownRenderer.jsx';
+import { Badge } from '../components/Badge.jsx';
 
 function formatDate(isoString) {
   if (!isoString) return '—';
@@ -25,14 +26,30 @@ function downloadFile(filename, content) {
   URL.revokeObjectURL(url);
 }
 
+function CheckCircle() {
+  return (
+    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+      <svg className="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+      </svg>
+    </div>
+  );
+}
+
+function EmptyCircle() {
+  return (
+    <div className="w-5 h-5 rounded-full border-2 border-slate-200 bg-white flex-shrink-0" />
+  );
+}
+
 export function OutputCenter() {
   const { id } = useParams();
   const { getEngagement, saveOutput, setDeliverablesReady } = useEngagements();
   const engagement = getEngagement(id);
 
-  const [generating, setGenerating]       = useState(null); // docTypeId currently generating
-  const [exporting, setExporting]         = useState(false);
-  const [exportError, setExportError]     = useState('');
+  const [generating, setGenerating]         = useState(null);
+  const [exporting, setExporting]           = useState(false);
+  const [exportError, setExportError]       = useState('');
   const [previewDocType, setPreviewDocType] = useState(null);
 
   if (!engagement) {
@@ -44,10 +61,10 @@ export function OutputCenter() {
     );
   }
 
-  const service     = SERVICES.find(s => s.key === engagement.serviceType);
-  const outputDefs  = getOutputDefs(engagement.serviceType);
-  const outputs     = engagement.outputs ?? [];
-  const serviceLabel = SERVICE_FILE_LABELS[engagement.serviceType] ?? engagement.serviceType;
+  const service        = SERVICES.find(s => s.key === engagement.serviceType);
+  const outputDefs     = getOutputDefs(engagement.serviceType);
+  const outputs        = engagement.outputs ?? [];
+  const serviceLabel   = SERVICE_FILE_LABELS[engagement.serviceType] ?? engagement.serviceType;
 
   function getExistingOutput(docTypeId) {
     return outputs.find(o => o.documentType === docTypeId) ?? null;
@@ -83,20 +100,21 @@ export function OutputCenter() {
     downloadFile(output.filename, content);
   }
 
-  const totalDefs     = outputDefs.length;
-  const generatedCount = outputs.filter(o => outputDefs.some(d => d.id === o.documentType)).length;
-  // "All deliverables ready" rule: every defined output type for this service
-  // has a corresponding generated output. We require totalDefs > 0 so empty
-  // service templates don't trigger the CTA.
+  const totalDefs              = outputDefs.length;
+  const relevantOutputs        = outputs.filter(o => outputDefs.some(d => d.id === o.documentType));
+  const generatedCount         = relevantOutputs.length;
   const allDeliverablesGenerated = totalDefs > 0 && generatedCount === totalDefs;
-  const isMarkedReady = !!engagement.deliverablesReady;
+  const isMarkedReady          = !!engagement.deliverablesReady;
+  const progressPct            = totalDefs > 0 ? Math.round(generatedCount / totalDefs * 100) : 0;
 
-  function handleMarkReady() {
-    setDeliverablesReady(engagement.id, true);
-  }
-  function handleUnmarkReady() {
-    setDeliverablesReady(engagement.id, false);
-  }
+  // Most-recent generation timestamp across all outputs
+  const lastGeneratedAt = relevantOutputs.length > 0
+    ? relevantOutputs.reduce((latest, o) =>
+        !latest || o.generatedAt > latest ? o.generatedAt : latest, null)
+    : null;
+
+  function handleMarkReady()   { setDeliverablesReady(engagement.id, true);  }
+  function handleUnmarkReady() { setDeliverablesReady(engagement.id, false); }
 
   return (
     <div className="max-w-3xl">
@@ -112,24 +130,82 @@ export function OutputCenter() {
       </div>
 
       {/* ── Header ── */}
-      <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
-        <div>
-          <h1>Output Center</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            {engagement.clientName} · {service?.label ?? engagement.serviceType}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400 font-medium">
-            {generatedCount}/{totalDefs} generated
-          </span>
-          <button
-            onClick={handleExportZip}
-            disabled={exporting || outputs.length === 0}
-            className="bh-btn-primary disabled:opacity-40"
-          >
-            {exporting ? 'Exporting…' : 'Export Zip'}
-          </button>
+      <div className="mb-6">
+        <h1>Output Center</h1>
+        <p className="text-slate-500 text-sm mt-1">
+          {engagement.clientName} · {service?.label ?? engagement.serviceType}
+        </p>
+      </div>
+
+      {/* ── Summary strip ── */}
+      <div className="bh-card px-4 py-4 mb-6">
+        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+
+          {/* Left: progress */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
+              <span className="text-sm font-semibold text-slate-800">
+                {generatedCount}/{totalDefs} deliverable{totalDefs !== 1 ? 's' : ''} generated
+              </span>
+              {isMarkedReady ? (
+                <Badge tone="success">✓ Ready for review</Badge>
+              ) : allDeliverablesGenerated ? (
+                <Badge tone="warning">Awaiting sign-off</Badge>
+              ) : null}
+            </div>
+            {lastGeneratedAt && (
+              <p className="text-xs text-slate-400 mb-2">
+                Last generated {formatDate(lastGeneratedAt)}
+              </p>
+            )}
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div
+                className={`h-1.5 rounded-full transition-all ${
+                  isMarkedReady
+                    ? 'bg-emerald-500'
+                    : allDeliverablesGenerated
+                      ? 'bg-indigo-500'
+                      : 'bg-indigo-400'
+                }`}
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Right: actions */}
+          <div className="flex items-center gap-2 flex-shrink-0 self-start flex-wrap justify-end">
+            {isMarkedReady ? (
+              <>
+                {engagement.deliverablesReadyAt && (
+                  <span className="text-xs text-slate-400">
+                    {formatDate(engagement.deliverablesReadyAt)}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={handleUnmarkReady}
+                  className="text-xs text-slate-400 hover:text-slate-600 underline transition-colors"
+                >
+                  Unmark
+                </button>
+              </>
+            ) : allDeliverablesGenerated ? (
+              <button
+                type="button"
+                onClick={handleMarkReady}
+                className="bh-btn-primary text-sm"
+              >
+                Mark Ready for Review
+              </button>
+            ) : null}
+            <button
+              onClick={handleExportZip}
+              disabled={exporting || outputs.length === 0}
+              className="bh-btn-primary disabled:opacity-40"
+            >
+              {exporting ? 'Exporting…' : 'Export Zip'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -139,48 +215,7 @@ export function OutputCenter() {
         </p>
       )}
 
-      {/* ── Deliverables-ready CTA (Sprint B) ── */}
-      {allDeliverablesGenerated && !isMarkedReady && (
-        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3.5 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-0.5">
-              All deliverables generated
-            </p>
-            <p className="text-sm text-emerald-900 leading-snug">
-              All {totalDefs} document{totalDefs !== 1 ? 's' : ''} for this service have been generated.
-              Mark this engagement as ready for client review?
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleMarkReady}
-            className="flex-shrink-0 bg-emerald-600 text-white text-sm font-medium rounded-lg px-3 py-1.5 hover:bg-emerald-700 transition-colors"
-          >
-            Mark Ready for Review
-          </button>
-        </div>
-      )}
-
-      {isMarkedReady && (
-        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <p className="text-sm text-emerald-900 leading-snug">
-            <span className="font-semibold">✓ Deliverables marked ready for client review</span>
-            {engagement.deliverablesReadyAt && (
-              <span className="text-emerald-700 ml-2">
-                · {formatDate(engagement.deliverablesReadyAt)}
-              </span>
-            )}
-          </p>
-          <button
-            type="button"
-            onClick={handleUnmarkReady}
-            className="flex-shrink-0 text-xs text-emerald-700 hover:text-emerald-900 underline transition-colors"
-          >
-            Unmark
-          </button>
-        </div>
-      )}
-
+      {/* ── Document list ── */}
       {outputDefs.length === 0 ? (
         <p className="text-sm text-slate-400 py-10 text-center">
           No document types defined for this service.
@@ -196,68 +231,77 @@ export function OutputCenter() {
             return (
               <div key={def.id} className="bh-card overflow-hidden">
                 {/* Row */}
-                <div className="px-4 py-3.5 flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800">{def.label}</p>
-                    {existing ? (
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Generated {formatDate(existing.generatedAt)}
-                        <span className="mx-1.5 opacity-40">·</span>
-                        <code className="font-mono">{existing.filename}</code>
-                      </p>
-                    ) : (
-                      <p className="text-xs text-slate-400 mt-0.5">Not yet generated</p>
-                    )}
-                    {!ready && (
-                      <p className="text-xs text-amber-600 mt-1">
-                        Missing: {missing.join(', ')}
-                      </p>
-                    )}
+                <div className="px-4 py-3.5 flex items-start gap-3">
+
+                  {/* Status icon */}
+                  <div className="mt-0.5">
+                    {existing ? <CheckCircle /> : <EmptyCircle />}
                   </div>
 
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    {existing && (
-                      <>
-                        <button
-                          onClick={() => setPreviewDocType(isPreviewing ? null : def.id)}
-                          className="bh-btn-ghost text-xs px-2.5 py-1"
-                        >
-                          {isPreviewing ? 'Hide' : 'Preview'}
-                        </button>
-                        <button
-                          onClick={() => handleDownloadSingle(existing)}
-                          className="bh-btn-ghost text-xs px-2.5 py-1"
-                        >
-                          Download
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => handleGenerate(def)}
-                      disabled={!ready || generating === def.id}
-                      title={!ready ? `Complete required fields first: ${missing.join(', ')}` : ''}
-                      className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
-                        ready
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                      }`}
-                    >
-                      {generating === def.id
-                        ? 'Generating…'
-                        : existing ? 'Regenerate' : 'Generate'}
-                    </button>
+                  {/* Content + actions */}
+                  <div className="flex-1 min-w-0 flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className={`text-sm font-medium ${existing ? 'text-slate-800' : 'text-slate-500'}`}>
+                        {def.label}
+                      </p>
+                      {existing ? (
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Generated {formatDate(existing.generatedAt)}
+                          <span className="mx-1.5 opacity-40">·</span>
+                          <code className="font-mono">{existing.filename}</code>
+                        </p>
+                      ) : (
+                        <p className="text-xs text-slate-400 mt-0.5">Not yet generated</p>
+                      )}
+                      {!ready && (
+                        <p className="text-xs text-amber-600 mt-1">
+                          Missing: {missing.join(', ')}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {existing && (
+                        <>
+                          <button
+                            onClick={() => setPreviewDocType(isPreviewing ? null : def.id)}
+                            className="bh-btn-ghost text-xs px-2.5 py-1"
+                          >
+                            {isPreviewing ? 'Hide' : 'Preview'}
+                          </button>
+                          <button
+                            onClick={() => handleDownloadSingle(existing)}
+                            className="bh-btn-ghost text-xs px-2.5 py-1"
+                          >
+                            Download
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => handleGenerate(def)}
+                        disabled={!ready || generating === def.id}
+                        title={!ready ? `Complete required fields first: ${missing.join(', ')}` : ''}
+                        className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
+                          ready
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                        }`}
+                      >
+                        {generating === def.id
+                          ? 'Generating…'
+                          : existing ? 'Regenerate' : 'Generate'}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 {/* Inline preview panel */}
                 {isPreviewing && existing && (
                   <div className="border-t border-slate-100">
-                    {/* Preview header */}
                     <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                       <span className="text-xs font-medium text-slate-500">{def.label} — Preview</span>
                       <span className="text-xs text-slate-400">{engagement.clientName}</span>
                     </div>
-                    {/* Rendered document */}
                     <div className="px-6 py-5 max-h-[500px] overflow-y-auto">
                       {renderMarkdownBlocks(generateDocument(def.id, engagement))}
                     </div>
@@ -270,18 +314,16 @@ export function OutputCenter() {
       )}
 
       {/* ── Manifest ── */}
-      {outputs.length > 0 && (
+      {relevantOutputs.length > 0 && (
         <section className="bh-card px-4 py-4 mb-4">
           <p className="bh-section-label mb-3">Output Manifest</p>
           <div className="space-y-2">
-            {outputs
-              .filter(o => outputDefs.some(d => d.id === o.documentType))
-              .map(o => (
-                <div key={o.id} className="flex items-center justify-between text-xs">
-                  <code className="text-slate-700 font-mono truncate mr-4">{o.filename}</code>
-                  <span className="text-slate-400 flex-shrink-0">{formatDate(o.generatedAt)}</span>
-                </div>
-              ))}
+            {relevantOutputs.map(o => (
+              <div key={o.id} className="flex items-center justify-between text-xs">
+                <code className="text-slate-700 font-mono truncate mr-4">{o.filename}</code>
+                <span className="text-slate-400 flex-shrink-0">{formatDate(o.generatedAt)}</span>
+              </div>
+            ))}
           </div>
           <p className="text-xs text-slate-400 mt-3">
             MANIFEST.json is included in the zip export.
@@ -290,13 +332,13 @@ export function OutputCenter() {
       )}
 
       {/* ── Zip structure note ── */}
-      {outputs.length > 0 && (
+      {relevantOutputs.length > 0 && (
         <div className="bh-card px-4 py-3.5">
           <p className="bh-section-label mb-2">Zip Folder Structure</p>
           <pre className="text-xs text-slate-500 font-mono leading-relaxed bg-slate-50 rounded-lg px-3 py-2.5 border border-slate-100">
 {`${makeFolderName(engagement.clientName, serviceLabel, new Date().toISOString().slice(0, 10))}/
   outputs/
-${outputs.filter(o => outputDefs.some(d => d.id === o.documentType)).map(o => `    ${o.filename}`).join('\n')}
+${relevantOutputs.map(o => `    ${o.filename}`).join('\n')}
   MANIFEST.json`}
           </pre>
         </div>

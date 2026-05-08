@@ -882,7 +882,7 @@ export function SowBuilder({ engagement, onSave, onClose }) {
         <button type="button"
           onClick={() => setTab(t => t === 'form' ? 'preview' : 'form')}
           className="bh-btn-secondary py-1.5 text-xs">
-          {tab === 'form' ? '👁 Preview' : '📝 Edit form'}
+          {tab === 'form' ? 'Preview' : 'Edit form'}
         </button>
         {pdfError && (
           <span className="text-xs text-red-600">{pdfError}</span>

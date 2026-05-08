@@ -654,7 +654,7 @@ export function EmailDraftEditor({ type, engagement, onSave, onClose }) {
           onClick={() => fullCopy.copy(`Subject: ${subject}\n\n${body}`)}
           className="bh-btn-secondary py-1.5 text-xs"
         >
-          {fullCopy.copied ? '✓ Copied!' : '📋 Copy full email'}
+          {fullCopy.copied ? '✓ Copied!' : 'Copy full email'}
         </button>
 
         <a

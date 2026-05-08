@@ -56,10 +56,10 @@ export function ServiceWorkflowCard({ service }) {
     : (DEFAULT_WORKFLOWS[service.key]?.length ?? 0);
 
   return (
-    <div className="border border-slate-200 rounded-lg bg-white">
+    <div className="bh-card overflow-hidden">
       {/* Service header */}
       <button
-        className="w-full flex justify-between items-center px-5 py-4 text-left hover:bg-slate-50 rounded-lg transition-colors"
+        className="w-full flex justify-between items-center px-5 py-4 text-left hover:bg-slate-50 transition-colors"
         onClick={() => setOpen(o => !o)}
       >
         <div className="flex items-center gap-2">
