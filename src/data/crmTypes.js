@@ -115,3 +115,53 @@ export function emptyOpportunity(overrides = {}) {
     ...overrides,
   };
 }
+
+// ── Lead (D4) ──────────────────────────────────────────────────────────────
+
+/**
+ * @typedef {Object} Lead
+ * @property {string}   id                       uuid
+ * @property {string}   name                     person's name (required)
+ * @property {string=}  email                    case-insensitive dedup key
+ * @property {string=}  company                  free-text company name
+ * @property {string=}  title                    job title at the company
+ * @property {string=}  phone
+ * @property {string}   source                   one of CRM_LEAD_SOURCES (default 'inbound')
+ * @property {string}   status                   one of CRM_LEAD_STATUSES (default 'new')
+ * @property {string=}  fitRating                'hot' | 'warm' | 'cold' | ''
+ * @property {string=}  industry                 free-text
+ * @property {string=}  companySize              '' | 'startup' | 'smb' | 'mid-market' | 'enterprise'
+ * @property {string[]=} tags                    free-text segmentation
+ * @property {string=}  notes                    short summary (separate from notesLog)
+ * @property {Array<{id:string, date:string, author:string, content:string}>=} notesLog
+ * @property {string|null=} promotedToOpportunityId  reserved for D5; D4 always null
+ * @property {string=}  createdBy                user.email at create time
+ * @property {string}   createdAt                ISO
+ * @property {string}   updatedAt                ISO
+ */
+
+/** @returns {Lead} */
+export function emptyLead(overrides = {}) {
+  const now = new Date().toISOString();
+  return {
+    id:                      overrides.id ?? (typeof crypto !== 'undefined' ? crypto.randomUUID() : ''),
+    name:                    '',
+    email:                   '',
+    company:                 '',
+    title:                   '',
+    phone:                   '',
+    source:                  'inbound',
+    status:                  'new',
+    fitRating:               '',
+    industry:                '',
+    companySize:             '',
+    tags:                    [],
+    notes:                   '',
+    notesLog:                [],
+    promotedToOpportunityId: null,
+    createdBy:               '',
+    createdAt:               now,
+    updatedAt:               now,
+    ...overrides,
+  };
+}

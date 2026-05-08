@@ -29,13 +29,17 @@ function NavCard({ to, title, description }) {
 }
 
 export function CRMOverview() {
-  const { accounts, contacts, opportunities, loading, schemaMissing } = useCRM();
+  const { accounts, contacts, opportunities, leads, loading, schemaMissing } = useCRM();
 
   if (loading) {
     return <p className="text-sm text-slate-400 py-10 text-center">Loading CRM data…</p>;
   }
 
-  const isEmpty = accounts.length === 0 && contacts.length === 0 && opportunities.length === 0;
+  const isEmpty =
+    accounts.length === 0 &&
+    contacts.length === 0 &&
+    opportunities.length === 0 &&
+    leads.length === 0;
 
   // ── Stage breakdown for opportunities ──
   // Render the stages defined in code so the layout is stable even when no
@@ -48,7 +52,8 @@ export function CRMOverview() {
   return (
     <div className="space-y-8">
       {/* ── Counts strip ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard count={leads.length}         label="Leads"         href="/crm/leads" />
         <StatCard count={accounts.length}      label="Accounts"      href="/crm/accounts" />
         <StatCard count={contacts.length}      label="Contacts"      href="/crm/contacts" />
         <StatCard count={opportunities.length} label="Opportunities" href="/crm/opportunities" />
@@ -59,10 +64,11 @@ export function CRMOverview() {
         <div className="bh-card px-5 py-6 text-center">
           <p className="text-sm text-slate-500 mb-2">No CRM records yet.</p>
           <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Apply the demo-seed snippet at the bottom of{' '}
-            <code className="font-mono text-xs bg-slate-100 px-1 rounded">supabase/migrations/0002_crm_lite.sql</code>{' '}
-            to populate sample accounts, contacts, and opportunities.
-            Create / edit flows arrive in Sprint D3.
+            Capture a lead via <strong>Leads → + New lead</strong>, or use{' '}
+            <strong>Import</strong> to load a CSV. Apply the demo-seed snippets
+            in <code className="font-mono text-xs bg-slate-100 px-1 rounded">0002_crm_lite.sql</code> /{' '}
+            <code className="font-mono text-xs bg-slate-100 px-1 rounded">0003_crm_leads.sql</code>{' '}
+            to populate sample data.
           </p>
         </div>
       )}
@@ -70,7 +76,12 @@ export function CRMOverview() {
       {/* ── Module sections ── */}
       <section>
         <h2 className="font-semibold text-slate-800 mb-4">Sections</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <NavCard
+            to="/crm/leads"
+            title="Leads"
+            description="Top-of-funnel intake and qualification."
+          />
           <NavCard
             to="/crm/accounts"
             title="Accounts"

@@ -27,10 +27,12 @@ import { useAuth } from './AuthContext.jsx';
 import { fetchAccounts,      saveAccount }      from '../lib/crmAccountsApi.js';
 import { fetchContacts,      saveContact }      from '../lib/crmContactsApi.js';
 import { fetchOpportunities, saveOpportunity }  from '../lib/crmOpportunitiesApi.js';
+import { fetchLeads,         saveLead, bulkSaveLeads } from '../lib/crmLeadsApi.js';
 import {
   emptyAccount,
   emptyContact,
   emptyOpportunity,
+  emptyLead,
 } from '../data/crmTypes.js';
 import { DEFAULT_STAGE } from '../data/crmStages.js';
 
@@ -42,6 +44,7 @@ const EMPTY_VALUE = {
   accounts:      [],
   contacts:      [],
   opportunities: [],
+  leads:         [],
   loading:       true,
   error:         null,
   schemaMissing: false,
@@ -51,11 +54,13 @@ const EMPTY_VALUE = {
   getAccount:      () => null,
   getContact:      () => null,
   getOpportunity:  () => null,
+  getLead:         () => null,
 
   // Lookups (relations)
   getContactsForAccount:      () => [],
   getOpportunitiesForAccount: () => [],
   getOpportunitiesForContact: () => [],
+  findLeadDuplicates:         () => ({ leads: [], contacts: [] }),
 
   // ── D3 mutators (no-op when context isn't initialised) ──
   addAccount:              () => null,
@@ -66,6 +71,13 @@ const EMPTY_VALUE = {
   updateOpportunity:       NOOP,
   addOpportunityNote:      NOOP,
   updateOpportunityNote:   NOOP,
+
+  // ── D4 mutators ──
+  addLead:           () => null,
+  updateLead:        NOOP,
+  bulkAddLeads:      async () => ({ created: 0, failed: 0, errors: [] }),
+  addLeadNote:       NOOP,
+  updateLeadNote:    NOOP,
 };
 
 const CRMContext = createContext(EMPTY_VALUE);
@@ -78,6 +90,7 @@ export function CRMProvider({ children }) {
   const [accounts,      setAccounts]      = useState([]);
   const [contacts,      setContacts]      = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [leads,         setLeads]         = useState([]);
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
   const [schemaMissing, setSchemaMissing] = useState(false);
@@ -87,6 +100,7 @@ export function CRMProvider({ children }) {
       setAccounts([]);
       setContacts([]);
       setOpportunities([]);
+      setLeads([]);
       setLoading(false);
       setError(null);
       setSchemaMissing(false);
@@ -98,15 +112,17 @@ export function CRMProvider({ children }) {
     setSchemaMissing(false);
 
     try {
-      // Fire all three in parallel — the three tables are independent.
-      const [a, c, o] = await Promise.all([
+      // Fire all four in parallel — the four tables are independent.
+      const [a, c, o, l] = await Promise.all([
         fetchAccounts(userId),
         fetchContacts(userId),
         fetchOpportunities(userId),
+        fetchLeads(userId),
       ]);
       setAccounts(a);
       setContacts(c);
       setOpportunities(o);
+      setLeads(l);
     } catch (err) {
       // Distinguish "tables don't exist yet" from other DB errors so the UI
       // can show a helpful "apply the migration" message vs a generic error.
@@ -132,6 +148,7 @@ export function CRMProvider({ children }) {
   const getAccount     = useCallback(id => accounts.find(a => a.id === id) ?? null, [accounts]);
   const getContact     = useCallback(id => contacts.find(c => c.id === id) ?? null, [contacts]);
   const getOpportunity = useCallback(id => opportunities.find(o => o.id === id) ?? null, [opportunities]);
+  const getLead        = useCallback(id => leads.find(l => l.id === id) ?? null, [leads]);
 
   const getContactsForAccount = useCallback(
     accountId => contacts.filter(c => c.accountId === accountId),
@@ -147,6 +164,28 @@ export function CRMProvider({ children }) {
     contactId => opportunities.filter(o => o.primaryContactId === contactId),
     [opportunities]
   );
+
+  /**
+   * D4 — find leads + contacts whose email matches the given email
+   * (case-insensitive exact match). Used by the duplicate banner on lead
+   * detail and by the import-preview dedup logic.
+   *
+   * @param {string} email
+   * @param {string=} excludeLeadId — exclude this lead id from the result
+   * @returns {{ leads: Lead[], contacts: Contact[] }}
+   */
+  const findLeadDuplicates = useCallback((email, excludeLeadId = null) => {
+    const norm = (email ?? '').trim().toLowerCase();
+    if (!norm) return { leads: [], contacts: [] };
+    return {
+      leads: leads.filter(l =>
+        (l.email ?? '').trim().toLowerCase() === norm && l.id !== excludeLeadId
+      ),
+      contacts: contacts.filter(c =>
+        (c.email ?? '').trim().toLowerCase() === norm
+      ),
+    };
+  }, [leads, contacts]);
 
   // ── D3 mutators ────────────────────────────────────────────────────────
   //
@@ -255,12 +294,96 @@ export function CRMProvider({ children }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // ── D4 — Leads ──
+
+  const addLead = useCallback((fields) => {
+    const lead = emptyLead({
+      createdBy: user?.email ?? '',
+      ...fields,
+    });
+    setLeads(prev => [lead, ...prev]);
+    if (user) saveLead(lead, user.id).catch(console.error);
+    return lead.id;
+  }, [user]);
+
+  const updateLead = useCallback((id, patch) => {
+    applyAndSave(setLeads, saveLead, id, prev => ({
+      ...prev,
+      ...patch,
+      id: prev.id,
+      updatedAt: new Date().toISOString(),
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  /**
+   * D4 — bulk insert from import flow. Materializes records via emptyLead
+   * (so each gets a fresh uuid + createdAt), then upserts them in parallel.
+   * On success, prepends to local state. Returns counts for the UI.
+   *
+   * @param {Partial<Lead>[]} fieldsArray
+   * @returns {Promise<{ created: number, failed: number, errors: string[] }>}
+   */
+  const bulkAddLeads = useCallback(async (fieldsArray) => {
+    if (!user || !Array.isArray(fieldsArray) || fieldsArray.length === 0) {
+      return { created: 0, failed: 0, errors: [] };
+    }
+    const newLeads = fieldsArray.map(fields => emptyLead({
+      createdBy: user.email ?? '',
+      ...fields,
+    }));
+    const result = await bulkSaveLeads(newLeads, user.id);
+    if (result.created > 0) {
+      // Prepend only the leads that didn't fail. We don't know exactly which
+      // failed here, so on partial failure we re-fetch to be safe.
+      if (result.failed === 0) {
+        setLeads(prev => [...newLeads, ...prev]);
+      } else {
+        // Partial failure — reload from DB to reconcile.
+        try {
+          const fresh = await fetchLeads(user.id);
+          setLeads(fresh);
+        } catch (err) {
+          console.error('Failed to reload leads after partial bulk import:', err);
+        }
+      }
+    }
+    return result;
+  }, [user]);
+
+  const addLeadNote = useCallback((leadId, fields) => {
+    const note = {
+      id:      crypto.randomUUID(),
+      date:    new Date().toISOString(),
+      author:  fields.author ?? '',
+      content: fields.content ?? '',
+    };
+    applyAndSave(setLeads, saveLead, leadId, prev => ({
+      ...prev,
+      notesLog:  [...(prev.notesLog ?? []), note],
+      updatedAt: new Date().toISOString(),
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const updateLeadNote = useCallback((leadId, noteId, fields) => {
+    applyAndSave(setLeads, saveLead, leadId, prev => ({
+      ...prev,
+      notesLog: (prev.notesLog ?? []).map(n =>
+        n.id === noteId ? { ...n, ...fields } : n
+      ),
+      updatedAt: new Date().toISOString(),
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   // ── Memoised value ─────────────────────────────────────────────────────
 
   const value = useMemo(() => ({
     accounts,
     contacts,
     opportunities,
+    leads,
     loading,
     error,
     schemaMissing,
@@ -269,9 +392,11 @@ export function CRMProvider({ children }) {
     getAccount,
     getContact,
     getOpportunity,
+    getLead,
     getContactsForAccount,
     getOpportunitiesForAccount,
     getOpportunitiesForContact,
+    findLeadDuplicates,
 
     addAccount,
     updateAccount,
@@ -281,15 +406,23 @@ export function CRMProvider({ children }) {
     updateOpportunity,
     addOpportunityNote,
     updateOpportunityNote,
+
+    addLead,
+    updateLead,
+    bulkAddLeads,
+    addLeadNote,
+    updateLeadNote,
   }), [
-    accounts, contacts, opportunities,
+    accounts, contacts, opportunities, leads,
     loading, error, schemaMissing, reload,
-    getAccount, getContact, getOpportunity,
+    getAccount, getContact, getOpportunity, getLead,
     getContactsForAccount, getOpportunitiesForAccount, getOpportunitiesForContact,
+    findLeadDuplicates,
     addAccount, updateAccount,
     addContact, updateContact,
     addOpportunity, updateOpportunity,
     addOpportunityNote, updateOpportunityNote,
+    addLead, updateLead, bulkAddLeads, addLeadNote, updateLeadNote,
   ]);
 
   return (
