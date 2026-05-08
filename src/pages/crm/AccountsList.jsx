@@ -1,8 +1,11 @@
 /**
- * Sprint D2 — /crm/accounts — read-only list view.
+ * Sprint D2 + D3 — /crm/accounts — list view with create entry-point.
  */
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCRM } from '../../hooks/useCRM.js';
+import { PermissionGate } from '../../components/PermissionGate.jsx';
+import { AccountFormModal } from '../../components/crm/AccountFormModal.jsx';
 
 function formatDate(iso) {
   if (!iso) return '—';
@@ -11,6 +14,7 @@ function formatDate(iso) {
 
 export function AccountsList() {
   const { accounts, loading, getContactsForAccount, getOpportunitiesForAccount } = useCRM();
+  const [showCreate, setShowCreate] = useState(false);
 
   if (loading) {
     return <p className="text-sm text-slate-400 py-10 text-center">Loading accounts…</p>;
@@ -18,13 +22,25 @@ export function AccountsList() {
 
   if (accounts.length === 0) {
     return (
-      <div className="bh-card px-5 py-10 text-center">
-        <p className="text-sm text-slate-400">No accounts yet.</p>
-        <p className="text-xs text-slate-400 mt-1">
-          Demo records can be loaded via the seed snippet in{' '}
-          <code className="font-mono text-xs">0002_crm_lite.sql</code>. Create / edit lands in D3.
-        </p>
-      </div>
+      <>
+        <div className="bh-card px-5 py-10 text-center">
+          <p className="text-sm text-slate-400 mb-2">No accounts yet.</p>
+          <PermissionGate
+            perm="crm.write"
+            fallback={
+              <p className="text-xs text-slate-400">
+                Demo records can be loaded via the seed snippet in{' '}
+                <code className="font-mono text-xs">0002_crm_lite.sql</code>.
+              </p>
+            }
+          >
+            <button onClick={() => setShowCreate(true)} className="bh-btn-primary text-sm">
+              + New account
+            </button>
+          </PermissionGate>
+        </div>
+        <AccountFormModal open={showCreate} onClose={() => setShowCreate(false)} />
+      </>
     );
   }
 
@@ -37,6 +53,11 @@ export function AccountsList() {
             {accounts.length}
           </span>
         </h2>
+        <PermissionGate perm="crm.write">
+          <button onClick={() => setShowCreate(true)} className="bh-btn-primary text-sm">
+            + New account
+          </button>
+        </PermissionGate>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200">
@@ -77,6 +98,8 @@ export function AccountsList() {
           </tbody>
         </table>
       </div>
+
+      <AccountFormModal open={showCreate} onClose={() => setShowCreate(false)} />
     </div>
   );
 }

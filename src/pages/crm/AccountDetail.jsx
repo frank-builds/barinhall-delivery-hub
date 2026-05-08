@@ -1,13 +1,19 @@
 /**
- * Sprint D2 — /crm/accounts/:id — read-only detail page.
+ * Sprint D2 + D3 — /crm/accounts/:id — detail page with Edit + create flows.
  *
  * Layout mirrors `EngagementDetail.jsx`: breadcrumb → header → field grid
- * → linked sections (contacts + opportunities). All read-only in D2.
+ * → linked sections (contacts + opportunities). D3 adds an Edit modal on the
+ * header and "+ New …" buttons in the linked sections (gated by crm.write).
  */
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCRM } from '../../hooks/useCRM.js';
 import { Badge } from '../../components/Badge.jsx';
 import { stageLabel, stageBadgeTone } from '../../data/crmStages.js';
+import { PermissionGate } from '../../components/PermissionGate.jsx';
+import { AccountFormModal } from '../../components/crm/AccountFormModal.jsx';
+import { ContactFormModal } from '../../components/crm/ContactFormModal.jsx';
+import { OpportunityFormModal } from '../../components/crm/OpportunityFormModal.jsx';
 
 function DetailRow({ label, value }) {
   return (
@@ -23,6 +29,9 @@ function DetailRow({ label, value }) {
 export function AccountDetail() {
   const { id } = useParams();
   const { getAccount, getContactsForAccount, getOpportunitiesForAccount, loading } = useCRM();
+  const [showEdit,             setShowEdit]             = useState(false);
+  const [showAddContact,       setShowAddContact]       = useState(false);
+  const [showAddOpportunity,   setShowAddOpportunity]   = useState(false);
 
   if (loading) {
     return <p className="text-sm text-slate-400 py-10 text-center">Loading…</p>;
@@ -58,9 +67,14 @@ export function AccountDetail() {
           <h1 className="break-words">{account.name || 'Unnamed account'}</h1>
           <p className="text-slate-500 text-sm">{account.industry || 'Industry not set'}</p>
         </div>
-        {account.sizeBand && (
-          <Badge tone="brand" className="flex-shrink-0">{account.sizeBand}</Badge>
-        )}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {account.sizeBand && <Badge tone="brand">{account.sizeBand}</Badge>}
+          <PermissionGate perm="crm.write">
+            <button onClick={() => setShowEdit(true)} className="bh-btn-secondary text-xs py-1 px-3">
+              Edit
+            </button>
+          </PermissionGate>
+        </div>
       </div>
 
       {/* ── Field grid ── */}
@@ -88,10 +102,20 @@ export function AccountDetail() {
 
       {/* ── Linked contacts ── */}
       <section className="mb-8">
-        <h2 className="font-semibold text-slate-800 mb-3">
-          Contacts
-          <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">{contacts.length}</span>
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-slate-800">
+            Contacts
+            <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">{contacts.length}</span>
+          </h2>
+          <PermissionGate perm="crm.write">
+            <button
+              onClick={() => setShowAddContact(true)}
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              + New contact
+            </button>
+          </PermissionGate>
+        </div>
         {contacts.length === 0 ? (
           <p className="text-sm text-slate-400 italic">No contacts linked to this account.</p>
         ) : (
@@ -119,10 +143,20 @@ export function AccountDetail() {
 
       {/* ── Linked opportunities ── */}
       <section>
-        <h2 className="font-semibold text-slate-800 mb-3">
-          Opportunities
-          <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">{opportunities.length}</span>
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-slate-800">
+            Opportunities
+            <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">{opportunities.length}</span>
+          </h2>
+          <PermissionGate perm="crm.write">
+            <button
+              onClick={() => setShowAddOpportunity(true)}
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              + New opportunity
+            </button>
+          </PermissionGate>
+        </div>
         {opportunities.length === 0 ? (
           <p className="text-sm text-slate-400 italic">No opportunities linked to this account.</p>
         ) : (
@@ -147,6 +181,23 @@ export function AccountDetail() {
           </div>
         )}
       </section>
+
+      {/* ── Modals ── */}
+      <AccountFormModal
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        account={account}
+      />
+      <ContactFormModal
+        open={showAddContact}
+        onClose={() => setShowAddContact(false)}
+        defaultAccountId={account.id}
+      />
+      <OpportunityFormModal
+        open={showAddOpportunity}
+        onClose={() => setShowAddOpportunity(false)}
+        defaultAccountId={account.id}
+      />
     </div>
   );
 }

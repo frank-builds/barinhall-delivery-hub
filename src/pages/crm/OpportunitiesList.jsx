@@ -1,12 +1,16 @@
 /**
- * Sprint D2 — /crm/opportunities — read-only list view.
+ * Sprint D2 + D3 — /crm/opportunities — list view with create entry-point.
  *
- * No board view in D2. The list shows stage as a badge and links to detail.
+ * The pipeline (kanban) view lives at /crm/pipeline. This page stays a tabular
+ * browser optimised for sorting/scanning across all stages at once.
  */
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCRM } from '../../hooks/useCRM.js';
 import { Badge } from '../../components/Badge.jsx';
 import { stageLabel, stageBadgeTone } from '../../data/crmStages.js';
+import { PermissionGate } from '../../components/PermissionGate.jsx';
+import { OpportunityFormModal } from '../../components/crm/OpportunityFormModal.jsx';
 
 function formatDate(iso) {
   if (!iso) return '—';
@@ -28,6 +32,7 @@ function formatUSD(n) {
 
 export function OpportunitiesList() {
   const { opportunities, loading, getAccount, getContact } = useCRM();
+  const [showCreate, setShowCreate] = useState(false);
 
   if (loading) {
     return <p className="text-sm text-slate-400 py-10 text-center">Loading opportunities…</p>;
@@ -35,24 +40,43 @@ export function OpportunitiesList() {
 
   if (opportunities.length === 0) {
     return (
-      <div className="bh-card px-5 py-10 text-center">
-        <p className="text-sm text-slate-400">No opportunities yet.</p>
-        <p className="text-xs text-slate-400 mt-1">
-          Demo records can be loaded via the seed snippet in{' '}
-          <code className="font-mono text-xs">0002_crm_lite.sql</code>. Create / edit and pipeline workflow land in D3.
-        </p>
-      </div>
+      <>
+        <div className="bh-card px-5 py-10 text-center">
+          <p className="text-sm text-slate-400 mb-2">No opportunities yet.</p>
+          <PermissionGate
+            perm="crm.write"
+            fallback={
+              <p className="text-xs text-slate-400">
+                Demo records can be loaded via the seed snippet in{' '}
+                <code className="font-mono text-xs">0002_crm_lite.sql</code>.
+              </p>
+            }
+          >
+            <button onClick={() => setShowCreate(true)} className="bh-btn-primary text-sm">
+              + New opportunity
+            </button>
+          </PermissionGate>
+        </div>
+        <OpportunityFormModal open={showCreate} onClose={() => setShowCreate(false)} />
+      </>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="font-semibold text-slate-800">
-        Opportunities
-        <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">
-          {opportunities.length}
-        </span>
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-slate-800">
+          Opportunities
+          <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">
+            {opportunities.length}
+          </span>
+        </h2>
+        <PermissionGate perm="crm.write">
+          <button onClick={() => setShowCreate(true)} className="bh-btn-primary text-sm">
+            + New opportunity
+          </button>
+        </PermissionGate>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-sm border-collapse">
@@ -113,6 +137,8 @@ export function OpportunitiesList() {
           </tbody>
         </table>
       </div>
+
+      <OpportunityFormModal open={showCreate} onClose={() => setShowCreate(false)} />
     </div>
   );
 }

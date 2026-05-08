@@ -1,13 +1,49 @@
 /**
- * Sprint D2 — /crm/opportunities/:id — read-only detail page.
+ * Sprint D2 + D3 — /crm/opportunities/:id — detail page.
  *
- * Stage is rendered as a Badge only. Stage transitions and edit forms
- * arrive in Sprint D3.
+ * D3 additions:
+ *   - Edit button (gated by crm.write) opens OpportunityFormModal in edit mode.
+ *   - StageControl: badge + (gated) <select> for changing stage in place.
+ *   - NotesLog: append-only opportunity activity, reusing the engagement
+ *     NotesLog component with `readOnly={!can('crm.write')}`.
  */
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext.jsx';
+import { useAuthz } from '../../hooks/useAuthz.js';
 import { useCRM } from '../../hooks/useCRM.js';
 import { Badge } from '../../components/Badge.jsx';
-import { stageLabel, stageBadgeTone } from '../../data/crmStages.js';
+import { CRM_STAGES, stageLabel, stageBadgeTone } from '../../data/crmStages.js';
+import { PermissionGate } from '../../components/PermissionGate.jsx';
+import { NotesLog } from '../../components/NotesLog.jsx';
+import { OpportunityFormModal } from '../../components/crm/OpportunityFormModal.jsx';
+
+/**
+ * Inline stage control: shows the current stage as a Badge, plus a <select>
+ * gated by crm.write so users without the permission see only the badge.
+ * Mirrors the StatusControl pattern on EngagementDetail.
+ */
+function StageControl({ opportunity, onChange }) {
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <Badge tone={stageBadgeTone(opportunity.stage)} className="flex-shrink-0">
+        {stageLabel(opportunity.stage)}
+      </Badge>
+      <PermissionGate perm="crm.write">
+        <select
+          value={opportunity.stage}
+          onChange={e => onChange(e.target.value)}
+          className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 cursor-pointer"
+          aria-label="Change stage"
+        >
+          {CRM_STAGES.map(s => (
+            <option key={s.key} value={s.key}>{s.label}</option>
+          ))}
+        </select>
+      </PermissionGate>
+    </div>
+  );
+}
 
 function DetailRow({ label, value }) {
   return (
@@ -46,7 +82,14 @@ function formatDate(iso) {
 
 export function OpportunityDetail() {
   const { id } = useParams();
-  const { getOpportunity, getAccount, getContact, loading } = useCRM();
+  const {
+    getOpportunity, getAccount, getContact,
+    updateOpportunity, addOpportunityNote, updateOpportunityNote,
+    loading,
+  } = useCRM();
+  const { user } = useAuth();
+  const { can } = useAuthz();
+  const [showEdit, setShowEdit] = useState(false);
 
   if (loading) {
     return <p className="text-sm text-slate-400 py-10 text-center">Loading…</p>;
@@ -92,9 +135,17 @@ export function OpportunityDetail() {
             <p className="text-slate-400 text-sm italic">No account linked</p>
           )}
         </div>
-        <Badge tone={stageBadgeTone(opportunity.stage)} className="flex-shrink-0">
-          {stageLabel(opportunity.stage)}
-        </Badge>
+        <div className="flex items-start gap-3 flex-shrink-0">
+          <StageControl
+            opportunity={opportunity}
+            onChange={newStage => updateOpportunity(opportunity.id, { stage: newStage })}
+          />
+          <PermissionGate perm="crm.write">
+            <button onClick={() => setShowEdit(true)} className="bh-btn-secondary text-xs py-1 px-3">
+              Edit
+            </button>
+          </PermissionGate>
+        </div>
       </div>
 
       {/* ── Field grid ── */}
@@ -125,17 +176,29 @@ export function OpportunityDetail() {
         </div>
       </div>
 
-      {/* ── Notes ── */}
+      {/* ── Summary notes (from the form) ── */}
       {opportunity.notes && (
         <section className="mb-4">
-          <p className="bh-section-label mb-2">Notes</p>
+          <p className="bh-section-label mb-2">Summary</p>
           <p className="text-sm text-slate-700 whitespace-pre-wrap">{opportunity.notes}</p>
         </section>
       )}
 
-      <p className="text-xs text-slate-400 mt-8">
-        Stage transitions, notes/activity, and edit flows arrive in Sprint D3.
-      </p>
+      {/* ── Activity notes log ── */}
+      <NotesLog
+        entries={opportunity.notesLog ?? []}
+        defaultOwner={user?.email ?? ''}
+        onAdd={fields => addOpportunityNote(opportunity.id, fields)}
+        onUpdate={(noteId, fields) => updateOpportunityNote(opportunity.id, noteId, fields)}
+        readOnly={!can('crm.write')}
+      />
+
+      {/* ── Edit modal ── */}
+      <OpportunityFormModal
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        opportunity={opportunity}
+      />
     </div>
   );
 }

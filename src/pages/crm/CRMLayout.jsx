@@ -16,6 +16,7 @@ import { useCRM }   from '../../hooks/useCRM.js';
 
 const CRM_NAV = [
   { to: '/crm',                label: 'Overview',      end: true },
+  { to: '/crm/pipeline',       label: 'Pipeline'                 },
   { to: '/crm/accounts',       label: 'Accounts'                 },
   { to: '/crm/contacts',       label: 'Contacts'                 },
   { to: '/crm/opportunities',  label: 'Opportunities'            },

@@ -6,7 +6,7 @@ function fmt(iso) {
 
 const INPUT = 'w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
 
-export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
+export function NotesLog({ entries, defaultOwner, onAdd, onUpdate, readOnly = false }) {
   const [showAdd, setShowAdd]   = useState(false);
   const [addDraft, setAddDraft] = useState({ author: defaultOwner, content: '' });
   const [editingId, setEditingId] = useState(null);
@@ -42,7 +42,7 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
     <section className="mt-8">
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-slate-800">Notes {entries.length > 0 && <span className="text-slate-400 font-normal text-sm">({entries.length})</span>}</h2>
-        {!showAdd && (
+        {!showAdd && !readOnly && (
           <button
             onClick={openAdd}
             className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
@@ -118,12 +118,14 @@ export function NotesLog({ entries, defaultOwner, onAdd, onUpdate }) {
               <div className="p-4">
                 <div className="flex justify-between items-start gap-2">
                   <p className="text-sm text-slate-700 whitespace-pre-wrap flex-1">{entry.content}</p>
-                  <button
-                    onClick={() => openEdit(entry)}
-                    className="text-xs text-slate-400 hover:text-indigo-600 flex-shrink-0 mt-0.5"
-                  >
-                    Edit
-                  </button>
+                  {!readOnly && (
+                    <button
+                      onClick={() => openEdit(entry)}
+                      className="text-xs text-slate-400 hover:text-indigo-600 flex-shrink-0 mt-0.5"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-slate-400 mt-2">{fmt(entry.date)} · {entry.author}</p>
               </div>

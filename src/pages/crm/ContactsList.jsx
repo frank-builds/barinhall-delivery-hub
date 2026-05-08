@@ -1,11 +1,15 @@
 /**
- * Sprint D2 — /crm/contacts — read-only list view.
+ * Sprint D2 + D3 — /crm/contacts — list view with create entry-point.
  */
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCRM } from '../../hooks/useCRM.js';
+import { PermissionGate } from '../../components/PermissionGate.jsx';
+import { ContactFormModal } from '../../components/crm/ContactFormModal.jsx';
 
 export function ContactsList() {
   const { contacts, loading, getAccount } = useCRM();
+  const [showCreate, setShowCreate] = useState(false);
 
   if (loading) {
     return <p className="text-sm text-slate-400 py-10 text-center">Loading contacts…</p>;
@@ -13,24 +17,43 @@ export function ContactsList() {
 
   if (contacts.length === 0) {
     return (
-      <div className="bh-card px-5 py-10 text-center">
-        <p className="text-sm text-slate-400">No contacts yet.</p>
-        <p className="text-xs text-slate-400 mt-1">
-          Demo records can be loaded via the seed snippet in{' '}
-          <code className="font-mono text-xs">0002_crm_lite.sql</code>. Create / edit lands in D3.
-        </p>
-      </div>
+      <>
+        <div className="bh-card px-5 py-10 text-center">
+          <p className="text-sm text-slate-400 mb-2">No contacts yet.</p>
+          <PermissionGate
+            perm="crm.write"
+            fallback={
+              <p className="text-xs text-slate-400">
+                Demo records can be loaded via the seed snippet in{' '}
+                <code className="font-mono text-xs">0002_crm_lite.sql</code>.
+              </p>
+            }
+          >
+            <button onClick={() => setShowCreate(true)} className="bh-btn-primary text-sm">
+              + New contact
+            </button>
+          </PermissionGate>
+        </div>
+        <ContactFormModal open={showCreate} onClose={() => setShowCreate(false)} />
+      </>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="font-semibold text-slate-800">
-        Contacts
-        <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">
-          {contacts.length}
-        </span>
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-slate-800">
+          Contacts
+          <span className="ml-2 text-sm font-normal text-slate-400 tabular-nums">
+            {contacts.length}
+          </span>
+        </h2>
+        <PermissionGate perm="crm.write">
+          <button onClick={() => setShowCreate(true)} className="bh-btn-primary text-sm">
+            + New contact
+          </button>
+        </PermissionGate>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-sm border-collapse">
@@ -81,6 +104,8 @@ export function ContactsList() {
           </tbody>
         </table>
       </div>
+
+      <ContactFormModal open={showCreate} onClose={() => setShowCreate(false)} />
     </div>
   );
 }

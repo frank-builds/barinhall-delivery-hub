@@ -1,10 +1,13 @@
 /**
- * Sprint D2 — /crm/contacts/:id — read-only detail page.
+ * Sprint D2 + D3 — /crm/contacts/:id — detail page with Edit modal.
  */
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCRM } from '../../hooks/useCRM.js';
 import { Badge } from '../../components/Badge.jsx';
 import { stageLabel, stageBadgeTone } from '../../data/crmStages.js';
+import { PermissionGate } from '../../components/PermissionGate.jsx';
+import { ContactFormModal } from '../../components/crm/ContactFormModal.jsx';
 
 function DetailRow({ label, value }) {
   return (
@@ -20,6 +23,7 @@ function DetailRow({ label, value }) {
 export function ContactDetail() {
   const { id } = useParams();
   const { getContact, getAccount, getOpportunitiesForContact, loading } = useCRM();
+  const [showEdit, setShowEdit] = useState(false);
 
   if (loading) {
     return <p className="text-sm text-slate-400 py-10 text-center">Loading…</p>;
@@ -50,9 +54,16 @@ export function ContactDetail() {
       </div>
 
       {/* ── Header ── */}
-      <div className="mb-6">
-        <h1 className="break-words">{contact.name || 'Unnamed contact'}</h1>
-        <p className="text-slate-500 text-sm">{contact.title || 'Title not set'}</p>
+      <div className="flex justify-between items-start mb-6 gap-4">
+        <div className="min-w-0">
+          <h1 className="break-words">{contact.name || 'Unnamed contact'}</h1>
+          <p className="text-slate-500 text-sm">{contact.title || 'Title not set'}</p>
+        </div>
+        <PermissionGate perm="crm.write">
+          <button onClick={() => setShowEdit(true)} className="bh-btn-secondary text-xs py-1 px-3 flex-shrink-0">
+            Edit
+          </button>
+        </PermissionGate>
       </div>
 
       {/* ── Field grid ── */}
@@ -119,6 +130,13 @@ export function ContactDetail() {
           </div>
         )}
       </section>
+
+      {/* ── Edit modal ── */}
+      <ContactFormModal
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        contact={contact}
+      />
     </div>
   );
 }

@@ -28,6 +28,7 @@ import { ContactsList } from './pages/crm/ContactsList.jsx';
 import { ContactDetail } from './pages/crm/ContactDetail.jsx';
 import { OpportunitiesList } from './pages/crm/OpportunitiesList.jsx';
 import { OpportunityDetail } from './pages/crm/OpportunityDetail.jsx';
+import { Pipeline } from './pages/crm/Pipeline.jsx';
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -61,6 +62,7 @@ function AppShell() {
               {/* ── CRM-lite routes (guarded inside CRMLayout) ── */}
               <Route path="/crm" element={<CRMLayout />}>
                 <Route index                       element={<CRMOverview />} />
+                <Route path="pipeline"             element={<Pipeline />} />
                 <Route path="accounts"             element={<AccountsList />} />
                 <Route path="accounts/:id"         element={<AccountDetail />} />
                 <Route path="contacts"             element={<ContactsList />} />
