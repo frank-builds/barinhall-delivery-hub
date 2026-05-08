@@ -19,6 +19,15 @@ import { AdminLayout } from './pages/admin/AdminLayout.jsx';
 import { AdminAccessOverview } from './pages/admin/AdminAccessOverview.jsx';
 import { AdminUsers } from './pages/admin/AdminUsers.jsx';
 import { AdminRoles } from './pages/admin/AdminRoles.jsx';
+import { CRMProvider } from './contexts/CRMContext.jsx';
+import { CRMLayout } from './pages/crm/CRMLayout.jsx';
+import { CRMOverview } from './pages/crm/CRMOverview.jsx';
+import { AccountsList } from './pages/crm/AccountsList.jsx';
+import { AccountDetail } from './pages/crm/AccountDetail.jsx';
+import { ContactsList } from './pages/crm/ContactsList.jsx';
+import { ContactDetail } from './pages/crm/ContactDetail.jsx';
+import { OpportunitiesList } from './pages/crm/OpportunitiesList.jsx';
+import { OpportunityDetail } from './pages/crm/OpportunityDetail.jsx';
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -36,28 +45,41 @@ function AppShell() {
   return (
     <AuthzProvider>
       <EngagementsProvider>
-        <Layout>
-          <Routes>
-            <Route path="/"                                      element={<Dashboard />} />
-            <Route path="/engagements/new"                       element={<NewEngagement />} />
-            <Route path="/engagements/:id"                       element={<EngagementDetail />} />
-            <Route path="/engagements/:id/outputs"               element={<OutputCenter />} />
-            <Route path="/engagements/:id/forms/:formKey"        element={<FormPage />} />
-            <Route path="/engagements/:id/preview/:formKey"      element={<PreviewPage />} />
-            <Route path="/templates"                             element={<Templates />} />
-            <Route path="/digest"                                element={<DigestPage />} />
-            <Route path="/library"                               element={<UseCaseLibrary />} />
+        <CRMProvider>
+          <Layout>
+            <Routes>
+              <Route path="/"                                      element={<Dashboard />} />
+              <Route path="/engagements/new"                       element={<NewEngagement />} />
+              <Route path="/engagements/:id"                       element={<EngagementDetail />} />
+              <Route path="/engagements/:id/outputs"               element={<OutputCenter />} />
+              <Route path="/engagements/:id/forms/:formKey"        element={<FormPage />} />
+              <Route path="/engagements/:id/preview/:formKey"      element={<PreviewPage />} />
+              <Route path="/templates"                             element={<Templates />} />
+              <Route path="/digest"                                element={<DigestPage />} />
+              <Route path="/library"                               element={<UseCaseLibrary />} />
 
-            {/* ── Admin routes (guarded inside AdminLayout) ── */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index                element={<AdminAccessOverview />} />
-              <Route path="users"         element={<AdminUsers />} />
-              <Route path="roles"         element={<AdminRoles />} />
-            </Route>
+              {/* ── CRM-lite routes (guarded inside CRMLayout) ── */}
+              <Route path="/crm" element={<CRMLayout />}>
+                <Route index                       element={<CRMOverview />} />
+                <Route path="accounts"             element={<AccountsList />} />
+                <Route path="accounts/:id"         element={<AccountDetail />} />
+                <Route path="contacts"             element={<ContactsList />} />
+                <Route path="contacts/:id"         element={<ContactDetail />} />
+                <Route path="opportunities"        element={<OpportunitiesList />} />
+                <Route path="opportunities/:id"    element={<OpportunityDetail />} />
+              </Route>
 
-            <Route path="*"                                      element={<NotFound />} />
-          </Routes>
-        </Layout>
+              {/* ── Admin routes (guarded inside AdminLayout) ── */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index                element={<AdminAccessOverview />} />
+                <Route path="users"         element={<AdminUsers />} />
+                <Route path="roles"         element={<AdminRoles />} />
+              </Route>
+
+              <Route path="*"                                      element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </CRMProvider>
       </EngagementsProvider>
     </AuthzProvider>
   );

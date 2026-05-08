@@ -13,6 +13,7 @@ const BASE_NAV_LINKS = [
 
 // Links shown only when the user holds the required permission
 const GATED_NAV_LINKS = [
+  { to: '/crm',   label: 'CRM',   perm: 'crm.read'          },
   { to: '/admin', label: 'Admin', perm: 'admin.access.read' },
 ];
 

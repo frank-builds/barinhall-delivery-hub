@@ -29,9 +29,11 @@ export const PERMISSIONS = [
   { key: 'library.read',        label: 'View use-case library',     group: 'Reference' },
   { key: 'digest.read',         label: 'View weekly digest',        group: 'Reference' },
 
-  // ── Future (D2+) — never actively gated in D1 UI ─────────────────────────
-  { key: 'crm.read',            label: 'Read CRM records',          group: 'CRM',       future: true },
-  { key: 'crm.write',           label: 'Edit CRM records',          group: 'CRM',       future: true },
+  // ── CRM (active as of Sprint D2) ─────────────────────────────────────────
+  { key: 'crm.read',            label: 'Read CRM records',          group: 'CRM' },
+  { key: 'crm.write',           label: 'Edit CRM records',          group: 'CRM' },
+
+  // ── Future (D3+) — never actively gated in current UI ────────────────────
   { key: 'workflows.read',      label: 'View workflows',            group: 'Workflows', future: true },
   { key: 'workflows.execute',   label: 'Execute workflows',         group: 'Workflows', future: true },
   { key: 'client_files.upload', label: 'Upload client files',       group: 'Files',     future: true },
