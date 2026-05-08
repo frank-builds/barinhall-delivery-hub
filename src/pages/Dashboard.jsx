@@ -85,7 +85,9 @@ export function Dashboard() {
   const [serviceFilter, setServiceFilter] = useState('All');
 
   // ── View preference (grid | kanban), persisted ──
-  const [view, setView] = useState(() => localStorage.getItem(VIEW_KEY) ?? 'grid');
+  // Kanban is the intended primary experience; fall back to it when no
+  // preference has been stored yet (first load, cleared storage, new device).
+  const [view, setView] = useState(() => localStorage.getItem(VIEW_KEY) ?? 'kanban');
 
   function handleViewChange(v) {
     setView(v);
